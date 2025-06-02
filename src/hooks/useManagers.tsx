@@ -1,105 +1,131 @@
-// src/hooks/useManagers.ts
+"use client"
 
-import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import Urls from '../networking/app_urls';
-import { useSelector } from 'react-redux';
-import { Manager } from '../types/manager';
+import { useEffect, useRef, useCallback } from "react"
+import axios from "axios"
+import Urls from "../networking/app_urls"
+import { useSelector, useDispatch } from "react-redux"
+import type { Manager } from "../types/manager"
+import {
+  fetchManagersStart,
+  fetchManagersSuccess,
+  fetchManagersFailure,
+  setPage,
+  resetReload,
+} from "../redux/manager/managerSlice"
 
 export const useManagers = () => {
-  const currentUser = useSelector((state: any) => state.user.currentUser?.data);
-  const [managers, setManagers] = useState<Manager[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
-  const abortController = useRef(new AbortController());
+  const dispatch = useDispatch()
+  const currentUser = useSelector((state: any) => state.user.currentUser?.data)
+  const { managers, loading, error, page, hasMore, totalPages, shouldReload } = useSelector(
+    (state: any) => state.manager,
+  )
 
-  const limit = 10;
+  const abortController = useRef<AbortController | null>(null)
+  const limit = 10
 
   const formatRoleName = (str: string) =>
     str
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .split(' ')
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      .join(" ")
 
-  const fetchManagers = async (currentPage: number) => {
-    if (!currentUser?.token || !hasMore) return;
+  const fetchManagers = useCallback(
+    async (currentPage: number, isNewFetch = false) => {
+      if (!currentUser?.token || (loading && !isNewFetch)) return
 
-    try {
-      setLoading(true);
-      setError(null);
-      abortController.current.abort(); // Cancel previous request
-      abortController.current = new AbortController();
+      try {
+        dispatch(fetchManagersStart())
 
-      const response = await axios.get(
-        `${Urls.getManagers}?page=${currentPage}&limit=${limit}`,
-        {
+        // Cancel previous request if it exists
+        if (abortController.current) {
+          abortController.current.abort()
+        }
+
+        // Create new abort controller
+        abortController.current = new AbortController()
+
+        const response = await axios.get(`${Urls.getManagers}?page=${currentPage}&limit=${limit}`, {
           headers: {
             Authorization: `Bearer ${currentUser.token}`,
           },
           signal: abortController.current.signal,
-        },
-      );
+        })
 
-      const userList = response.data?.data?.userList;
-      const pagination = response.data?.data?.pagination;
+        const userList = response.data?.data?.userList
+        const pagination = response.data?.data?.pagination
 
-      if (response.data.status && Array.isArray(userList)) {
-        const processedManagers: Manager[] = userList.map((manager: any) => ({
-          _id: manager._id,
-          name: manager.name || '',
-          email: manager.email || '',
-          phoneNumber: manager.phoneNumber || '',
-          profileImage: `${Urls.Image_url}${manager.profileImage || ''}`,
-          role: formatRoleName(manager.role || ''),
-          address: manager.address || '',
-          state: manager.state || '',
-          city: manager.city || '',
-          password: manager.password || '',
-          active: manager.active ? 'Active' : 'Inactive',
-          createdAt: new Date(manager.createdAt),
-        }));
+        if (response.data.status && Array.isArray(userList)) {
+          const processedManagers: Manager[] = userList.map((manager: any) => ({
+            ...manager,
+            profileImage: manager.profileImage ? `${Urls.Image_url}${manager.profileImage}` : "",
+            role: formatRoleName(manager.role || ""),
+          }))
 
-        setManagers((prev) =>
-          currentPage === 1
-            ? processedManagers
-            : [...prev, ...processedManagers],
-        );
-        setTotalPages(pagination.totalPages || 1);
-        setHasMore(currentPage < pagination.totalPages);
-      } else {
-        setError('Invalid response from server');
-        setHasMore(false);
+          dispatch(
+            fetchManagersSuccess({
+              managers: processedManagers,
+              page: currentPage,
+              totalPages: pagination.totalPages || 1,
+              hasMore: currentPage < pagination.totalPages,
+              isNewFetch,
+            }),
+          )
+        } else {
+          dispatch(fetchManagersFailure("Invalid response from server"))
+        }
+      } catch (err: any) {
+        // Only handle non-canceled errors
+        if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+          console.error("Fetch Managers Error:", err)
+          dispatch(fetchManagersFailure("Failed to fetch managers"))
+        }
+        // Silently ignore canceled requests as they are expected
       }
-    } catch (err) {
-      console.error('Fetch Managers Error:', err);
-      setError('Failed to fetch managers');
-      setHasMore(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [currentUser?.token, dispatch, loading],
+  )
 
+  // Handle reload when shouldReload is true
   useEffect(() => {
-    const controller = abortController.current;
-    return () => controller.abort();
-  }, []);
+    if (shouldReload && currentUser?.token) {
+      fetchManagers(1, true)
+      dispatch(resetReload())
+    }
+  }, [shouldReload, currentUser?.token, fetchManagers, dispatch])
 
-
+  // Initial fetch
   useEffect(() => {
-    if (currentUser?.token) {
-      fetchManagers(page);
+    if (currentUser?.token && managers.length === 0 && !loading) {
+      fetchManagers(1, true)
     }
-  }, [page, currentUser]);
+  }, [currentUser?.token, managers.length, fetchManagers, loading])
 
-  const loadMore = () => {
-    if (!loading && hasMore) {
-      setPage((prev) => prev + 1);
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortController.current) {
+        abortController.current.abort()
+      }
     }
-  };
+  }, [])
 
-  return { managers, loading, error, loadMore, hasMore, setManagers };
-};
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore && page < totalPages) {
+      const nextPage = page + 1
+      dispatch(setPage(nextPage))
+      fetchManagers(nextPage)
+    }
+  }, [loading, hasMore, page, totalPages, fetchManagers, dispatch])
+
+  return {
+    managers,
+    loading,
+    error,
+    loadMore,
+    hasMore,
+    fetchManagers,
+    page,
+    totalPages,
+  }
+}

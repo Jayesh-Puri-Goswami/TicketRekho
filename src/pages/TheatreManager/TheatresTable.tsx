@@ -175,11 +175,11 @@ const TheatresTable: React.FC = () => {
           className="w-full p-2 border border-gray-300 rounded dark:bg-boxdark"
           onChange={handleSearch}
         />
-        {roleName !== 'admin' && (
+        {/* {roleName === 'admin' && (
           <AddTheatreModal
             onSubmitSuccess={() => fetchSellers(currentPage, itemsPerPage)}
           />
-        )}
+        )} */}
       </div>
 
       <div className="overflow-x-auto">

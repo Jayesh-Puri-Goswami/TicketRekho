@@ -567,7 +567,7 @@ const EventsTable: React.FC = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-5 text-center">{event.city}</td>
+                      <td className="px-6 py-5 text-center font-bold">{event.city}</td>
                       <td className="px-6 py-5 text-center">{event.eventType}</td>
                       <td className="px-6 py-5 text-center">
                         {new Date(event.eventDate).toLocaleString(undefined, {

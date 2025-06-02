@@ -21,6 +21,7 @@ import withReactContent from 'sweetalert2-react-content';
 interface Venue {
   _id: string;
   name: string;
+   address: string;
   seatType: string;
   isActive: boolean;
 }
@@ -301,6 +302,13 @@ const filteredManagers = venues.filter((manager) => {
               >
                  Type {renderSortIcon('seatType')}
               </th>
+
+                 <th
+                className="min-w-[150px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center"
+                onClick={() => handleSort('address')}
+              >
+                 Address {renderSortIcon('address')}
+              </th>
              
               <th
                 className="min-w-[150px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center"
@@ -374,6 +382,12 @@ const filteredManagers = venues.filter((manager) => {
                       </p>
                     </td>
                    
+                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
+                      <p className="text-black dark:text-white">
+                        {venue.address}
+                      </p>
+                    </td>
+
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
                       <button
                         onClick={(e) => {

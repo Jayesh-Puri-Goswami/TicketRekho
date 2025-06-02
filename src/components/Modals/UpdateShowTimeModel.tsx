@@ -288,14 +288,14 @@ const UpdateShowTimeModel: React.FC<{ showtimeId: string; onClose: () => void; o
       return;
     }
 
-    if (!selectedStateId) {
-      setError('Please select state.');
-      return;
-    }
-    if (!selectedCityId) {
-      setError('Please select city.');
-      return;
-    }
+    // if (!selectedStateId) {
+    //   setError('Please select state.');
+    //   return;
+    // }
+    // if (!selectedCityId) {
+    //   setError('Please select city.');
+    //   return;
+    // }
 
  
 
@@ -319,8 +319,8 @@ const UpdateShowTimeModel: React.FC<{ showtimeId: string; onClose: () => void; o
       movie:selectedMovieId,
       theatre:selectedTheatreId,
       screen:selectedScreenId,
-      state:selectedStateId,
-      city:selectedCityId,
+      // state:selectedStateId,
+      // city:selectedCityId,
       startTime:startTime,
       endTime:endTime,
       isDeleted:false,
@@ -454,9 +454,10 @@ const UpdateShowTimeModel: React.FC<{ showtimeId: string; onClose: () => void; o
       </select>
     </div>
     </div>
+  {/* State Selection */}
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-    {/* State Selection */}
+    {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+  
     <div className="mb-4.5">
       <label className="mb-2.5 block text-black dark:text-white">Select State</label>
       <select
@@ -470,10 +471,10 @@ const UpdateShowTimeModel: React.FC<{ showtimeId: string; onClose: () => void; o
           <option key={state._id} value={state._id} className="capitalize">{state.name}</option>
         ))}
       </select>
-    </div>
+    </div> */}
 
     {/* City Selection */}
-    <div className="mb-4.5">
+    {/* <div className="mb-4.5">
       <label className="mb-2.5 block text-black dark:text-white">Select City</label>
       <select
         id="city"
@@ -487,7 +488,7 @@ const UpdateShowTimeModel: React.FC<{ showtimeId: string; onClose: () => void; o
         ))}
       </select>
     </div>
-  </div>
+  </div> */}
 
 
 

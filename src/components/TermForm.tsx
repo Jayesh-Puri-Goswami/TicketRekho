@@ -124,10 +124,15 @@ const TermForm: React.FC<ModalformProps> = ({
 
   return (
     <>
-  
+      {/* <button
+        onClick={() => setOpen(true)}
+        className="bg-[#865BFF] hover:bg-[#6a48c9] text-white px-7 rounded hover:bg-opacity-90 mb-4"
+      >
+        Add
+      </button> */}
 
-    
-        <div className="fixed inset-0 bg-gray-800 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
+      {/* {open && ( */}
+        <div className="fixed inset-0 bg-gray-800 flex items-center justify-center bg-black bg-opacity-50 z-999">
           <div
             onClick={(e) => e.stopPropagation()}
             className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6 w-full max-w-3xl space-y-4 max-h-[85vh] overflow-y-scroll transform translate-x-30 translate-y-10"
@@ -211,7 +216,7 @@ const TermForm: React.FC<ModalformProps> = ({
             </form>
           </div>
         </div>
-
+      {/* )} */}
     </>
   );
 };

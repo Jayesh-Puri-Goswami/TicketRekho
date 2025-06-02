@@ -221,20 +221,20 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
       return;
     }
 
-    if (!address) {
-      toast.error('Please enter the address.');
-      return;
-    }
+    // if (!address) {
+    //   toast.error('Please enter the address.');
+    //   return;
+    // }
 
-    if (!selectedStateId) {
-      toast.error('Please select the state.');
-      return;
-    }
+    // if (!selectedStateId) {
+    //   toast.error('Please select the state.');
+    //   return;
+    // }
 
-    if (!selectedCityId) {
-      toast.error('Please select the city.');
-      return;
-    }
+    // if (!selectedCityId) {
+    //   toast.error('Please select the city.');
+    //   return;
+    // }
 
     if (!eventCategory) {
       toast.error('Please enter the event category.');
@@ -256,9 +256,9 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
     formData.append('eventImage', eventImage as Blob);
     formData.append('bannerImage', bannerImage as Blob);
     formData.append('advImage', advImage as Blob);
-    formData.append('address', address);
-    formData.append('state', selectedStateId);
-    formData.append('city', selectedCityId);
+    // formData.append('address', address);
+    // formData.append('state', selectedStateId);
+    // formData.append('city', selectedCityId);
     formData.append('venue', selectedVenueId);
     genres.forEach((genre) => formData.append('genre[]', genre));
     languages.forEach((language) => formData.append('language[]', language));
@@ -564,7 +564,7 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="block font-semibold mb-1">Address</label>
               <input
                 type="text"
@@ -574,7 +574,7 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                 className="w-full border rounded p-2 border-stroke bg-transparent py-3 px-5 outline-none transition dark:border-form-strokedark dark:bg-form-input"
               />
 
-              {/* State Details */}
+            
               <div className="mb-4.5">
                 <label className="block font-semibold mb-1">Select State</label>
                 <select
@@ -600,12 +600,10 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                     </option>
                   ))}
                 </select>
-                {/* {error && (
-                    <span className="text-red-500">{error}</span>
-                  )} */}
+             
               </div>
 
-              {/* Cities Details */}
+          
               <div className="mb-4.5">
                 <label className="block font-semibold mb-1">Select City</label>
                 <select
@@ -631,11 +629,9 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                     </option>
                   ))}
                 </select>
-                {/* {error && (
-                    <span className="text-red-500">{error}</span>
-                  )} */}
+              
               </div>
-            </div>
+            </div> */}
 
             <div>
               <label className="block font-semibold mb-1">Event Category</label>

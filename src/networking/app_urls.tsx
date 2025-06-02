@@ -91,9 +91,16 @@ const getSubUserProfileDetails = `${Bash_url}/admin/getSubUserProfileDetails`;
 // theatre managers
 const getTheatreManager = `${Bash_url}/admin/getTheatreManagerList`;
 const CreateTManager = `${Bash_url}/admin/theatreManagerSignup`;
+const createTheatreManager = `${Bash_url}/admin/createTheatreManager`
+
 
 // event managers
 const getEventManager = `${Bash_url}/admin/getEventManagerList`;
+const createEventManager = `${Bash_url}/admin/createEventManager` 
+
+const updateProfile = `${Bash_url}/subUser/updateProfile`;
+const editTheatreMangerProfile = `${Bash_url}/admin/editTheatreMangerProfile`;
+const editEventMangerProfile = `${Bash_url}/admin/editEventMangerProfile`;
 
 // roles and permission
 const updatePermission = `${Bash_url}/admin/updatePermission`;
@@ -211,6 +218,13 @@ const eventManagerDashboard = `${Bash_url}/subUser/eventManagerDashboard`;
 const theatreManagerDashboard = `${Bash_url}/subUser/theatreManagerDashboard`;
 const editMangerProfile = `${Bash_url}/admin/editMangerProfile`;
 
+const createEmployee = `${Bash_url}/subUser/createEmployee`;
+const updateEmployee = `${Bash_url}/subUser/updateEmployee`;
+const getEmployeeListBymanagerId = `${Bash_url}/subUser/getEmployeeListBymanagerId`;
+const deleteEmployee = `${Bash_url}/subUser/deleteEmployee`;
+const getEmployeeDetails = `${Bash_url}/subUser/getEmployeeDetails`;
+const changeEmployeeStatus = `${Bash_url}/subUser/changeEmployeeStatus`;
+
 export default {
   Bash_url,
   loginUrl,
@@ -288,6 +302,11 @@ export default {
 
   getManagers,
   createManager,
+  createTheatreManager,
+  createEventManager,
+  updateProfile,
+  editEventMangerProfile,
+  editTheatreMangerProfile,
   getSubUserProfileDetails,
   getTheatres,
   getActiveTheatres,
@@ -373,4 +392,11 @@ export default {
   eventManagerDashboard,
   theatreManagerDashboard,
   editMangerProfile,
+
+    createEmployee,
+  updateEmployee,
+  getEmployeeListBymanagerId,
+  deleteEmployee,
+  getEmployeeDetails,
+  changeEmployeeStatus,
 };

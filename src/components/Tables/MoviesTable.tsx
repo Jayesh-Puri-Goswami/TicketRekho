@@ -587,7 +587,7 @@ const MoviesTable: React.FC = () => {
                             alt={movie.name}
                             className="w-30 h-12 object-cover rounded-md mb-1"
                           />
-                          <span className="font-semibold text-sm truncate w-[8rem]">
+                          <span className="font-semibold truncate w-[8rem]">
                             {movie.name}
                           </span>
                         </div>

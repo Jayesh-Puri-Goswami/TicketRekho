@@ -1,212 +1,551 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import axios from 'axios';
-import urls from '../../networking/app_urls';
-import { useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
+"use client"
 
-interface TheatreFormData {
-  name: string;
-  location: string;
-  isOperational: boolean;
-  isGrabABite: boolean;
+import type React from "react"
+import { useEffect, useState } from "react"
+import { useForm, Controller } from "react-hook-form"
+import axios from "axios"
+import { motion, AnimatePresence } from "framer-motion"
+import { Upload, X } from "lucide-react"
+import toast from "react-hot-toast"
+import { useSelector } from "react-redux"
+import Urls from "../../networking/app_urls"
+
+const app_urls = {
+  getStates: `${Urls.getStates}`,
+  getCitiesByState: `${Urls.getCitiesByState}`,
 }
 
-interface ModalformProps {
-  onSubmitSuccess?: (data: any) => void;
+interface StateType {
+  _id: string
+  name: string
 }
 
-const AddTheatreModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
-  const [open, setOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
+interface CityType {
+  _id: string
+  name: string
+}
 
-  const currentUser = useSelector((state: any) => state.user.currentUser?.data);
+interface TheatreManagerFormData {
+  email: string
+  password: string
+  name: string
+  phoneNumber: string
+  role: "theatreManager"
+  profileImage: File | null
+  stateId: string
+  cityId: string
+  address: string
+  active: boolean
+  bankAccountNumber: string
+  ifscCode: string
+  theatreName: string
+  location: string
+  isActive: boolean
+  isGrabABite: boolean
+}
 
-  const handleOpen = () => {
-    setOpen((cur) => !cur);
+const AddTheatreModal = () => {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [states, setStates] = useState<StateType[]>([])
+  const [cities, setCities] = useState<CityType[]>([])
+  const [selectedState, setSelectedState] = useState<string>("")
 
-    if (open) {
-      reset();
-      setError(null); // Clear error message
-      setSuccess(false); // Clear success message
-      setLoading(false); // Reset loading state
-    }
-  };
-
-  const stopPropagation = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
+  const currentUser = useSelector((state: any) => state.user.currentUser.data)
 
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
-  } = useForm<TheatreFormData>();
+    setValue,
+  } = useForm<TheatreManagerFormData>({
+    defaultValues: {
+      role: "theatreManager",
+      active: true,
+      isActive: true,
+      isGrabABite: false,
+      stateId: "",
+      cityId: "",
+    },
+  })
 
-  const onSubmit = async (data: TheatreFormData) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-
+  const fetchStates = async () => {
     try {
-      const response = await axios.post(urls.addTheatre, data, {
+      const response = await axios.get(app_urls.getStates, {
         headers: {
           Authorization: `Bearer ${currentUser.token}`,
         },
-      });
-      setSuccess(true);
-      setOpen(false); // Close modal after successful submission
-      reset();
-      toast.success(
-        'Theatre added successfully! Your new theatre is now available.',
-      );
-      setTimeout(() => setSuccess(false), 5000);
-      if (onSubmitSuccess) {
-        onSubmitSuccess(response.data);
+      })
+      if (response.data.status && Array.isArray(response.data.data)) {
+        setStates(response.data.data)
+      } else {
+        console.error("Invalid states response:", response.data)
       }
-    } catch (err: any) {
-      console.error('API Error:', err.response?.data || err.message);
-      toast.error(
-        'Oops! Something went wrong while adding the theatre. Please try again later.',
-      );
-      setError(err.response?.data?.message || 'An error occurred.');
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching states:", error)
+      toast.error("Failed to fetch states")
     }
-  };
+  }
+
+  const fetchCities = async (stateId: string) => {
+    if (!stateId) {
+      setCities([])
+      return
+    }
+
+    try {
+      const response = await axios.post(
+        app_urls.getCitiesByState,
+        { state: stateId },
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
+        },
+      )
+      if (response.data.status && Array.isArray(response.data.data)) {
+        setCities(response.data.data)
+      } else {
+        setCities([])
+        console.error("Invalid cities response:", response.data)
+      }
+    } catch (error) {
+      console.error("Error fetching cities:", error)
+      setCities([])
+      toast.error("Failed to fetch cities")
+    }
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setValue("profileImage", file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const onSubmit = async (data: TheatreManagerFormData) => {
+    setLoading(true)
+    const formData = new FormData()
+
+    Object.entries(data).forEach(([key, value]) => {
+      const fieldName = key === "isGrabABite" ? "isGrabABite" : key
+      formData.append(fieldName, value as any)
+      console.log(`FormData ${fieldName} Value ${value}`)
+    })
+
+    try {
+      await axios.post(`${Urls.createTheatreManager}`, formData, {
+        headers: {
+          Authorization: `Bearer ${currentUser.token}`,
+          "Content-Type": "multipart/form-data; boundary=<calculated when request is sent>",
+        },
+      })
+      toast.success("Theatre Manager created successfully!")
+      closeModal()
+    } catch (error) {
+      toast.error("Failed to create Theatre Manager. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openModal = () => setOpen(true)
+
+  const closeModal = () => {
+    setOpen(false)
+    reset()
+    setPreviewImage(null)
+    setSelectedState("")
+    setCities([])
+  }
+
+  useEffect(() => {
+    if (open) {
+      fetchStates()
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (selectedState) {
+      fetchCities(selectedState)
+    } else {
+      setCities([])
+    }
+  }, [selectedState])
 
   return (
     <>
       <button
-        onClick={handleOpen}
-        className="bg-[#865BFF] hover:bg-[#6a48c9] text-white px-7 rounded mb-4"
+        onClick={openModal}
+        className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium hover:opacity-90 transition-opacity"
       >
-        Add
+        Add Theatre Manager
       </button>
 
-      {open && (
-        <div className="fixed inset-0 bg-gray-800 flex items-center justify-center bg-black bg-opacity-50 z-999">
-          <div
-            onClick={stopPropagation}
-            className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark w-full max-w-md lg:max-w-3xl overflow-y-auto transform translate-x-30 translate-y-10"
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]"
+            onClick={closeModal}
           >
-            <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-              <h3 className="font-medium text-black dark:text-white">
-                Add Theatre
-              </h3>
-            </div>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="p-6.5 grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                {/* Name */}
-                <div className="mb-4.5">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Name
-                  </label>
-                  <input
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    type="text"
-                    placeholder="Theatre name"
-                    {...register('name', { required: true })}
-                  />
-                  {errors.name && (
-                    <span className="text-red-500">Name is required</span>
-                  )}
-                </div>
-
-                {/* Location */}
-                <div className="mb-4.5">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Location
-                  </label>
-                  <input
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    type="text"
-                    placeholder="Theatre location"
-                    {...register('location', { required: true })}
-                  />
-                  {errors.location && (
-                    <span className="text-red-500">Location is required</span>
-                  )}
-                </div>
-
-                {/* Is Operational */}
-                <div className="mb-4.5">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                  Status
-                  </label>
-                  <select
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    {...register('isOperational', { required: true })}
-                  >
-                    <option value="" disabled>
-                      Select status
-                    </option>
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </select>
-                  {errors.isOperational && (
-                    <span className="text-red-500">
-                      Status is required
-                    </span>
-                  )}
-                </div>
-
-                {/* Is Grab A Bite */}
-                <div className="mb-4.5">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Is Grab A Bite
-                  </label>
-                  <select
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    {...register('isGrabABite', { required: true })}
-                  >
-                    <option value="" disabled>
-                      Select status
-                    </option>
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </select>
-                  {errors.isGrabABite && (
-                    <span className="text-red-500">
-                      Grab-a-bite status is required
-                    </span>
-                  )}
-                </div>
-
-                {/* Cancel Button */}
-                <button
-                  type="button"
-                  className="flex w-full justify-center rounded bg-slate-300 p-3 font-medium text-black hover:bg-opacity-90 mb-2"
-                  onClick={handleOpen}
-                >
-                  Cancel
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 border-b flex justify-between items-center">
+                <h2 className="text-2xl font-semibold bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent">
+                  Add New Theatre Manager
+                </h2>
+                <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <X className="w-6 h-6" />
                 </button>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  className="flex w-full justify-center rounded bg-[#865BFF] hover:bg-[#6a48c9] p-3 font-medium text-gray hover:bg-opacity-90 mb-2"
-                  disabled={loading} // Disable button while loading
-                >
-                  {loading ? 'Creating...' : 'Create'}
-                </button>
-
-                {error && <p className="text-red-500">{error}</p>}
-                {success && (
-                  <p className="text-green-500">
-                    Theatre created successfully!
-                  </p>
-                )}
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
-export default AddTheatreModal;
+              <form onSubmit={handleSubmit(onSubmit)} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Profile Image Upload */}
+                  <div className="md:col-span-2 flex justify-center">
+                    <div className="relative">
+                      <div className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                        {previewImage ? (
+                          <img
+                            src={previewImage || '/placeholder.svg'}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Upload className="w-8 h-8 text-gray-400" />
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Personal Information */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        {...register('name', { required: 'Name is required' })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      />
+                      {errors.name && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.name.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        {...register('email', {
+                          required: 'Email is required',
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: 'Invalid email address',
+                          },
+                        })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      />
+                      {errors.email && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.email.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Password
+                      </label>
+                      <input
+                        type="password"
+                        {...register('password', {
+                          required: 'Password is required',
+                          minLength: {
+                            value: 6,
+                            message: 'Password must be at least 6 characters',
+                          },
+                        })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      />
+                      {errors.password && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.password.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        {...register('phoneNumber', {
+                          required: 'Phone number is required',
+                        })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      />
+                      {errors.phoneNumber && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.phoneNumber.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Theatre Information */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Theatre Name
+                      </label>
+                      <input
+                        type="text"
+                        {...register('theatreName', {
+                          required: 'Theatre name is required',
+                        })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      />
+                      {errors.theatreName && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.theatreName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Location
+                      </label>
+                      <input
+                        type="text"
+                        {...register('location', {
+                          required: 'Location is required',
+                        })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      />
+                      {errors.location && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.location.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* State Dropdown with Controller */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        State
+                      </label>
+                      <Controller
+                        name="stateId"
+                        control={control}
+                        rules={{ required: 'State is required' }}
+                        render={({ field }) => (
+                          <select
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              setSelectedState(e.target.value);
+                            }}
+                            className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                          >
+                            <option value="">Select State</option>
+                            {states.map((state) => (
+                              <option key={state._id} value={state._id}>
+                                {state.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                      {errors.stateId && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.stateId.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* City Dropdown with Controller */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        City
+                      </label>
+                      <Controller
+                        name="cityId"
+                        control={control}
+                        rules={{ required: 'City is required' }}
+                        render={({ field }) => (
+                          <select
+                            {...field}
+                            className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                            disabled={!selectedState || cities.length === 0}
+                          >
+                            <option value="">
+                              {cities.length === 0 && selectedState
+                                ? 'No cities available'
+                                : 'Select City'}
+                            </option>
+                            {cities.map((city) => (
+                              <option key={city._id} value={city._id}>
+                                {city.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                      {errors.cityId && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.cityId.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bank Details */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Bank Account Number
+                      </label>
+                      <input
+                        type="text"
+                        {...register('bankAccountNumber', {
+                          required: 'Bank account number is required',
+                        })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      />
+                      {errors.bankAccountNumber && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.bankAccountNumber.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        IFSC Code
+                      </label>
+                      <input
+                        type="text"
+                        {...register('ifscCode', {
+                          required: 'IFSC code is required',
+                        })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      />
+                      {errors.ifscCode && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.ifscCode.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Address
+                      </label>
+                      <textarea
+                        {...register('address', {
+                          required: 'Address is required',
+                        })}
+                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                        rows={3}
+                      />
+                      {errors.address && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.address.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status Toggles */}
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        {...register('active')}
+                        className="w-5 h-5 rounded text-[#6366F1] focus:ring-[#6366F1]"
+                      />
+                      <label className="text-sm font-medium text-gray-700">
+                        Active Status
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        {...register('isActive')}
+                        className="w-5 h-5 rounded text-[#6366F1] focus:ring-[#6366F1]"
+                      />
+                      <label className="text-sm font-medium text-gray-700">
+                        Theatre Active
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        {...register('isGrabABite')}
+                        className="w-5 h-5 rounded text-[#6366F1] focus:ring-[#6366F1]"
+                      />
+                      <label className="text-sm font-medium text-gray-700">
+                        Grab A Bite
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 flex justify-end space-x-4">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                  >
+                    {loading ? 'Creating...' : 'Create Theatre Manager'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
+export default AddTheatreModal

@@ -244,14 +244,14 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
       return;
     }
 
-    if (!selectedStateId) {
-      setError('Please select state.');
-      return;
-    }
-    if (!selectedCityId) {
-      setError('Please select city.');
-      return;
-    }
+    // if (!selectedStateId) {
+    //   setError('Please select state.');
+    //   return;
+    // }
+    // if (!selectedCityId) {
+    //   setError('Please select city.');
+    //   return;
+    // }
 
     const invalidSeats = seatTypes.filter((seat) => seat.price <= 0);
 
@@ -268,8 +268,8 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
       movie: selectedMovieId,
       theatre: selectedTheatreId,
       screen: selectedScreenId,
-      state: selectedStateId,
-      city: selectedCityId,
+      // state: selectedStateId,
+      // city: selectedCityId,
       startTime: startTime,
       endTime: endTime,
       price: seatTypes,
@@ -423,8 +423,10 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              {/* State Selection */}
+
+
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+             
               <div className="mb-4.5">
                 <label className="mb-2.5 block text-black dark:text-white">
                   Select State
@@ -448,10 +450,10 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
 
               {/* City Selection */}
-              <div className="mb-4.5">
+              {/* <div className="mb-4.5">
                 <label className="mb-2.5 block text-black dark:text-white">
                   Select City
                 </label>
@@ -475,7 +477,7 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
                   ))}
                 </select>
               </div>
-            </div>
+            </div> */}
 
             {/* Start & End Date Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react"
-import { NavLink, useLocation } from "react-router-dom"
-import { useSelector } from "react-redux"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { motion, AnimatePresence } from "framer-motion"
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   faUserTie,
   faGamepad,
@@ -22,149 +22,160 @@ import {
   faClipboardList,
   faQuestionCircle,
   faTimes,
-} from "@fortawesome/free-solid-svg-icons"
+} from '@fortawesome/free-solid-svg-icons';
 
 interface MenuItem {
-  path: string
-  icon: any
-  label: string
-  permission?: string
+  path: string;
+  icon: any;
+  label: string;
+  permission?: string;
 }
 
 interface SidebarProps {
-  sidebarOpen: boolean
-  setSidebarOpen: (arg: boolean) => void
+  sidebarOpen: boolean;
+  setSidebarOpen: (arg: boolean) => void;
 }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const currentUser = useSelector((state: any) => state.user.currentUser?.data)
-  const permissions = currentUser?.permissions?.permissions || []
+  const currentUser = useSelector((state: any) => state.user.currentUser?.data);
+  const permissions = currentUser?.permissions?.permissions || [];
 
   const hasPermission = (permissionName?: string) => {
     return permissionName
-      ? permissions.some((p: { name: string; status: boolean }) => p.name === permissionName && p.status)
-      : true
-  }
+      ? permissions.some(
+          (p: { name: string; status: boolean }) =>
+            p.name === permissionName && p.status,
+        )
+      : true;
+  };
 
   const UserMenuList: MenuItem[] = [
-    ...(currentUser.role === "admin"
+    ...(currentUser.role === 'admin'
       ? [
-          { path: "/dashboard", icon: faGamepad, label: "Dashboard" },
+          { path: '/dashboard', icon: faGamepad, label: 'Dashboard' },
           {
-            path: "/roles-permission",
+            path: '/roles-permission',
             icon: faKey,
-            label: "Roles & Permissions",
+            label: 'Roles & Permissions',
           },
         ]
       : []),
-    ...(currentUser.role === "theatreManager"
-      ? [{ path: "/theatre-dashboard", icon: faGamepad, label: "Dashboard" }]
+    ...(['theatreManager', 'theatreEmployee'].includes(currentUser.role)
+      ? [{ path: '/theatre-dashboard', icon: faGamepad, label: 'Dashboard' }]
       : []),
-    ...(currentUser.role === "eventManager" ? [{ path: "/event-dashboard", icon: faGamepad, label: "Dashboard" }] : []),
-    { path: "/state", icon: faMap, label: "States", permission: "states" },
+    ...(['eventManager', 'eventEmployee'].includes(currentUser.role)
+      ? [{ path: '/event-dashboard', icon: faGamepad, label: 'Dashboard' }]
+      : []),
+    { path: '/state', icon: faMap, label: 'States', permission: 'states' },
     {
-      path: "/managers",
+      path: '/managers',
       icon: faUserTie,
-      label: "Managers",
-      permission: "managers",
+      label: 'Managers',
+      permission: 'managers',
     },
-    { path: "/users", icon: faUser, label: "Users", permission: "users" },
+    { path: '/users', icon: faUser, label: 'Users', permission: 'users' },
     {
-      path: "/movies",
+      path: '/movies',
       icon: faTheaterMasks,
-      label: "Movie Management",
-      permission: "movie management",
+      label: 'Movie Management',
+      permission: 'movie management',
     },
     {
-      path: "/theatres",
+      path: '/theatres',
       icon: faTheaterMasks,
-      label: "Manage Theatres",
-      permission: "manage theatres",
+      label: 'Manage Theatres',
+      permission: 'manage theatres',
     },
     {
-      path: "/showtime",
+      path: '/showtime',
       icon: faClock,
-      label: "Showtimes",
-      permission: "showtimes",
+      label: 'Showtimes',
+      permission: 'showtimes',
     },
     {
-      path: "/movie-qr-code",
+      path: '/movie-qr-code',
       icon: faQrcode,
-      label: "Movie QR Management",
-      permission: "movie qr management",
+      label: 'Movie QR Management',
+      permission: 'movie qr management',
     },
     {
-      path: "/theatre-report",
+      path: '/theatre-report',
       icon: faFileAlt,
-      label: "Manage Theatre Reports",
-      permission: "manage theatre reports",
+      label: 'Manage Theatre Reports',
+      permission: 'manage theatre reports',
     },
     {
-      path: "/events",
+      path: '/employees',
       icon: faClipboardList,
-      label: "Event Management",
-      permission: "event management",
+      label: 'Employee Management',
+      permission: 'employee management',
     },
     {
-      path: "/venues",
+      path: '/events',
+      icon: faClipboardList,
+      label: 'Event Management',
+      permission: 'event management',
+    },
+    {
+      path: '/venues',
       icon: faMapMarkerAlt,
-      label: "Manage Venues",
-      permission: "manage venues",
+      label: 'Manage Venues',
+      permission: 'manage venues',
     },
     {
-      path: "/event-qr-code",
+      path: '/event-qr-code',
       icon: faQrcode,
-      label: "Event QR Management",
-      permission: "event qr management",
+      label: 'Event QR Management',
+      permission: 'event qr management',
     },
     {
-      path: "/event-report",
+      path: '/event-report',
       icon: faFileInvoice,
-      label: "Manage Event Reports",
-      permission: "manage event reports",
+      label: 'Manage Event Reports',
+      permission: 'manage event reports',
     },
     {
-      path: "/coupon",
+      path: '/coupon',
       icon: faTicketAlt,
-      label: "Coupon Codes",
-      permission: "coupon codes",
+      label: 'Coupon Codes',
+      permission: 'coupon codes',
     },
     {
-      path: "/notification",
+      path: '/notification',
       icon: faBell,
-      label: "Notifications",
-      permission: "notifications",
+      label: 'Notifications',
+      permission: 'notifications',
     },
     {
-      path: "/enquiry",
+      path: '/enquiry',
       icon: faQuestionCircle,
-      label: "Enquiries",
-      permission: "enquiries",
+      label: 'Enquiries',
+      permission: 'enquiries',
     },
     {
-      path: "/support",
+      path: '/support',
       icon: faComments,
-      label: "Support & Feedback",
-      permission: "support & feedback",
+      label: 'Support & Feedback',
+      permission: 'support & feedback',
     },
     {
-      path: "/terms",
+      path: '/terms',
       icon: faFileContract,
-      label: "Terms & Conditions",
-      permission: "terms & conditions",
+      label: 'Terms & Conditions',
+      permission: 'terms & conditions',
     },
-  ]
+  ];
 
-  const location = useLocation()
-  const { pathname } = location
+  const location = useLocation();
+  const { pathname } = location;
 
-  const trigger = useRef<any>(null)
-  const sidebar = useRef<any>(null)
+  const trigger = useRef<any>(null);
+  const sidebar = useRef<any>(null);
 
-  const storedSidebarExpanded = localStorage.getItem("sidebar-expanded")
+  const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
   const [sidebarExpanded, setSidebarExpanded] = useState(
-    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true",
-  )
+    storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true',
+  );
 
   // useEffect(() => {
   //   const clickHandler = ({ target }: MouseEvent) => {
@@ -178,26 +189,28 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   useEffect(() => {
     const keyHandler = ({ keyCode }: KeyboardEvent) => {
-      if (!sidebarOpen || keyCode !== 27) return
-      setSidebarOpen(false)
-    }
-    document.addEventListener("keydown", keyHandler)
-    return () => document.removeEventListener("keydown", keyHandler)
-  }, [sidebarOpen])
+      if (!sidebarOpen || keyCode !== 27) return;
+      setSidebarOpen(false);
+    };
+    document.addEventListener('keydown', keyHandler);
+    return () => document.removeEventListener('keydown', keyHandler);
+  }, [sidebarOpen]);
 
   useEffect(() => {
-    localStorage.setItem("sidebar-expanded", sidebarExpanded.toString())
+    localStorage.setItem('sidebar-expanded', sidebarExpanded.toString());
     if (sidebarExpanded) {
-      document.body.classList.add("sidebar-expanded")
+      document.body.classList.add('sidebar-expanded');
     } else {
-      document.body.classList.remove("sidebar-expanded")
+      document.body.classList.remove('sidebar-expanded');
     }
-  }, [sidebarExpanded])
+  }, [sidebarExpanded]);
 
-  let redirectTo = "/"
-  if (currentUser?.role === "admin") redirectTo = "/dashboard"
-  else if (currentUser?.role === "eventManager") redirectTo = "/event-dashboard"
-  else if (currentUser?.role === "theatreManager") redirectTo = "/theatre-dashboard"
+  let redirectTo = '/';
+  if (currentUser?.role === 'admin') redirectTo = '/dashboard';
+  else if (currentUser?.role === 'eventManager')
+    redirectTo = '/event-dashboard';
+  else if (currentUser?.role === 'theatreManager')
+    redirectTo = '/theatre-dashboard';
 
   return (
     <>
@@ -217,10 +230,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
       <motion.aside
         ref={sidebar}
-        initial={{ x: "-100%" }}
-        animate={{ x: sidebarOpen ? 0 : "-100%" }}
-        exit={{ x: "-100%" }}
-        transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
+        initial={{ x: '-100%' }}
+        animate={{ x: sidebarOpen ? 0 : '-100%' }}
+        exit={{ x: '-100%' }}
+        transition={{ type: 'tween', ease: 'easeInOut', duration: 0.3 }}
         className={`fixed left-0 top-0 z-[9999] flex h-screen w-72 flex-col overflow-hidden bg-gradient-to-t from-indigo-500/90 to-purple-500/90 backdrop-blur-lg dark:from-indigo-600/90 dark:to-purple-600/90 lg:static lg:translate-x-0 lg:z-auto`}
       >
         {/* Header */}
@@ -233,8 +246,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               alt="TicketRekho Logo"
               className="h-16 w-[120px] drop-shadow-lg"
               onError={(e: any) => {
-                e.target.onerror = null
-                e.target.src = "../../../public/Image/Fallback Image/fallback-1.jpg"
+                e.target.onerror = null;
+                e.target.src =
+                  '../../../public/Image/Fallback Image/fallback-1.jpg';
               }}
             />
           </NavLink>
@@ -253,62 +267,73 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
           <ul className="space-y-2">
-            {UserMenuList.filter((item) => hasPermission(item.permission)).map((item) => (
-              <motion.li 
-                key={item.path}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) => {
-                    const baseClasses =
-                      "group relative flex items-center gap-4 px-4 py-3 text-white rounded-xl transition-all duration-200 overflow-hidden"
-
-                    if (isActive) {
-                      return `${baseClasses} bg-white/25 backdrop-blur-sm  shadow-lg`
-                    }
-
-                    return `${baseClasses} hover:bg-white/15  `
-                  }}
+            {UserMenuList.filter((item) => hasPermission(item.permission)).map(
+              (item) => (
+                <motion.li
+                  key={item.path}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  {({ isActive }) => (
-                    <>
-                      {/* Icon */}
-                      <div
-                        className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
-                          isActive
-                            ? "bg-white/30 text-white"
-                            : "text-white/90 group-hover:bg-white/20 group-hover:text-white"
-                        }`}
-                      >
-                        <FontAwesomeIcon icon={item.icon} className="text-sm" />
-                      </div>
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) => {
+                      const baseClasses =
+                        'group relative flex items-center gap-4 px-4 py-3 text-white rounded-xl transition-all duration-200 overflow-hidden';
 
-                      {/* Label */}
-                      <span
-                        className={`relative z-10 font-medium transition-all duration-200 ${
-                          isActive ? "text-white" : "text-white/90 group-hover:text-white"
-                        }`}
-                      >
-                        {item.label}
-                      </span>
+                      if (isActive) {
+                        return `${baseClasses} bg-white/25 backdrop-blur-sm  shadow-lg`;
+                      }
 
-                      {/* Active indicator */}
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeIndicator"
-                          className="absolute right-2 w-2 h-2 bg-white rounded-full shadow-lg"
-                          initial={false}
-                          transition={{ type: "spring", stiffness: 700, damping: 30 }}
-                        />
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              </motion.li>
-            ))}
+                      return `${baseClasses} hover:bg-white/15  `;
+                    }}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {/* Icon */}
+                        <div
+                          className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+                            isActive
+                              ? 'bg-white/30 text-white'
+                              : 'text-white/90 group-hover:bg-white/20 group-hover:text-white'
+                          }`}
+                        >
+                          <FontAwesomeIcon
+                            icon={item.icon}
+                            className="text-sm"
+                          />
+                        </div>
+
+                        {/* Label */}
+                        <span
+                          className={`relative z-10 font-medium transition-all duration-200 ${
+                            isActive
+                              ? 'text-white'
+                              : 'text-white/90 group-hover:text-white'
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+
+                        {/* Active indicator */}
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeIndicator"
+                            className="absolute right-2 w-2 h-2 bg-white rounded-full shadow-lg"
+                            initial={false}
+                            transition={{
+                              type: 'spring',
+                              stiffness: 700,
+                              damping: 30,
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                </motion.li>
+              ),
+            )}
           </ul>
         </nav>
 
@@ -322,14 +347,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <FontAwesomeIcon icon={faUser} className="text-white text-sm" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white font-medium text-sm truncate">{currentUser?.name || "User"}</p>
-              <p className="text-white/70 text-xs capitalize">{currentUser?.role || "Role"}</p>
+              <p className="text-white font-medium text-sm truncate">
+                {currentUser?.name || 'User'}
+              </p>
+              <p className="text-white/70 text-xs capitalize">
+                {currentUser?.role || 'Role'}
+              </p>
             </div>
           </motion.div>
         </div>
       </motion.aside>
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

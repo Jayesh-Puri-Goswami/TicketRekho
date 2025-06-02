@@ -41,7 +41,7 @@ const UpdateEvent: React.FC<{
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [address, setAddress] = useState('');
+  // const [address, setAddress] = useState('');
   const [eventType, setEventType] = useState('');
   const [artist, setArtist] = useState('');
   const [eventDate, setEventDate] = useState('');
@@ -55,10 +55,10 @@ const UpdateEvent: React.FC<{
   const [existingEventImage, setExistingEventImage] = useState('');
   const [existingBannerImage, setExistingBannerImage] = useState('');
   const [existingAdvImage, setExistingAdvImage] = useState('');
-  const [states, setStates] = useState<{ _id: string; name: string }[]>([]);
-  const [selectedStateId, setSelectedStateId] = useState<string>('');
-  const [cities, setCities] = useState<{ _id: string; name: string }[]>([]);
-  const [selectedCityId, setSelectedCityId] = useState<string>('');
+  // const [states, setStates] = useState<{ _id: string; name: string }[]>([]);
+  // const [selectedStateId, setSelectedStateId] = useState<string>('');
+  // const [cities, setCities] = useState<{ _id: string; name: string }[]>([]);
+  // const [selectedCityId, setSelectedCityId] = useState<string>('');
   const [venues, setVenues] = useState<{ _id: string; name: string }[]>([]);
   const [selectedVenueId, setSelectedVenueId] = useState<string>('');
   const [isBanner, setIsBanner] = useState(false);
@@ -94,14 +94,14 @@ const UpdateEvent: React.FC<{
 
         setName(data.name);
         setDescription(data.description);
-        setAddress(data.address);
+       // setAddress(data.address);
         setEventType(data.eventType);
         setArtist(data.artist);
         setEventDate(formatUTCDate(data.eventDate));
         setEventCategory(data.eventCategory);
-        setSelectedStateId(data.state._id);
-        setSelectedCityId(data.city._id);
-        setSelectedVenueId(data.venue);
+        // setSelectedStateId(data.state._id);
+        // setSelectedCityId(data.city._id);
+        setSelectedVenueId(data.venue._id);
         setGenres(data.genre);
         setLanguages(data.language);
         setExistingEventImage(data.eventImage || '');
@@ -109,34 +109,37 @@ const UpdateEvent: React.FC<{
         setExistingAdvImage(data.advImage || '');
         setIsBanner(data.isBanner);
         setIsAds(data.isAds);
+
+         console.log("data.venue",data.venue._id);
+        console.log("Selected Venue",selectedVenueId);
       } catch (error) {
         console.error('Error fetching event data:', error);
         toast.error('Failed to load event data.');
       }
     };
 
-    const fetchStates = async () => {
-      try {
-        const response = await axios.get(`${Urls.getStatesList}`, {
-          headers: {
-            Authorization: `Bearer ${currentUser.token}`,
-          },
-        });
-        setStates(response.data.data);
-      } catch (error) {
-        console.error('Error fetching states:', error);
-      }
-    };
+    // const fetchStates = async () => {
+    //   try {
+    //     const response = await axios.get(`${Urls.getStatesList}`, {
+    //       headers: {
+    //         Authorization: `Bearer ${currentUser.token}`,
+    //       },
+    //     });
+    //     setStates(response.data.data);
+    //   } catch (error) {
+    //     console.error('Error fetching states:', error);
+    //   }
+    // };
 
     fetchEventData();
-    fetchStates();
+   // fetchStates();
   }, [eventId, currentUser.token]);
 
-  useEffect(() => {
-    if (selectedStateId) {
-      fetchCities(selectedStateId);
-    }
-  }, [selectedStateId]);
+  // useEffect(() => {
+  //   if (selectedStateId) {
+  //     fetchCities(selectedStateId);
+  //   }
+  // }, [selectedStateId]);
 
   useEffect(() => {
     if (eventType) {
@@ -144,22 +147,22 @@ const UpdateEvent: React.FC<{
     }
   }, [eventType]);
 
-  const fetchCities = async (stateId: string) => {
-    try {
-      const response = await axios.post(
-        `${Urls.getCitiesListByState}`,
-        { state: stateId },
-        {
-          headers: {
-            Authorization: `Bearer ${currentUser.token}`,
-          },
-        },
-      );
-      setCities(response.data.data);
-    } catch (error) {
-      console.error('Error fetching cities:', error);
-    }
-  };
+  // const fetchCities = async (stateId: string) => {
+  //   try {
+  //     const response = await axios.post(
+  //       `${Urls.getCitiesListByState}`,
+  //       { state: stateId },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${currentUser.token}`,
+  //         },
+  //       },
+  //     );
+  //     setCities(response.data.data);
+  //   } catch (error) {
+  //     console.error('Error fetching cities:', error);
+  //   }
+  // };
 
   const fetchVenues = async (eventType: string) => {
     try {
@@ -186,15 +189,15 @@ const UpdateEvent: React.FC<{
     fetchVenues(eventType);
   };
 
-  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const stateId = e.target.value;
-    setSelectedStateId(stateId);
-    fetchCities(stateId);
-  };
+  // const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const stateId = e.target.value;
+  //   setSelectedStateId(stateId);
+  //   fetchCities(stateId);
+  // };
 
-  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCityId(e.target.value);
-  };
+  // const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   setSelectedCityId(e.target.value);
+  // };
 
   const handleVenueChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedVenueId(e.target.value);
@@ -247,18 +250,18 @@ const UpdateEvent: React.FC<{
       toast.error('Please enter at least one language.');
       return;
     }
-    if (!address) {
-      toast.error('Please enter the address.');
-      return;
-    }
-    if (!selectedStateId) {
-      toast.error('Please select the state.');
-      return;
-    }
-    if (!selectedCityId) {
-      toast.error('Please select the city.');
-      return;
-    }
+    // if (!address) {
+    //   toast.error('Please enter the address.');
+    //   return;
+    // }
+    // if (!selectedStateId) {
+    //   toast.error('Please select the state.');
+    //   return;
+    // }
+    // if (!selectedCityId) {
+    //   toast.error('Please select the city.');
+    //   return;
+    // }
     if (!eventCategory) {
       toast.error('Please enter the event category.');
       return;
@@ -277,9 +280,9 @@ const UpdateEvent: React.FC<{
     formData.append('eventType', eventType);
     formData.append('artist', artist);
     formData.append('eventDate', eventDate);
-    formData.append('address', address);
-    formData.append('state', selectedStateId);
-    formData.append('city', selectedCityId);
+    // formData.append('address', address);
+    // formData.append('state', selectedStateId);
+    // formData.append('city', selectedCityId);
     formData.append('venue', selectedVenueId);
     genres.forEach((genre) => formData.append('genre[]', genre));
     languages.forEach((language) => formData.append('language[]', language));
@@ -455,7 +458,7 @@ const UpdateEvent: React.FC<{
                       </div>
                     </FormField>
 
-                    <FormField label="Address" name="address">
+                    {/* <FormField label="Address" name="address">
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <MapPin className="h-4 w-4 text-slate-400" />
@@ -468,12 +471,12 @@ const UpdateEvent: React.FC<{
                           placeholder="Enter address"
                         />
                       </div>
-                    </FormField>
+                    </FormField> */}
                   </div>
 
                   {/* Right Column */}
                   <div className="space-y-6">
-                    <FormField label="State" name="state">
+                    {/* <FormField label="State" name="state">
                       <select
                         value={selectedStateId}
                         onChange={handleStateChange}
@@ -488,9 +491,9 @@ const UpdateEvent: React.FC<{
                           </option>
                         ))}
                       </select>
-                    </FormField>
+                    </FormField> */}
 
-                    <FormField label="City" name="city">
+                    {/* <FormField label="City" name="city">
                       <select
                         value={selectedCityId}
                         onChange={handleCityChange}
@@ -505,7 +508,7 @@ const UpdateEvent: React.FC<{
                           </option>
                         ))}
                       </select>
-                    </FormField>
+                    </FormField> */}
 
                     <FormField label="Venue" name="venue">
                       <select

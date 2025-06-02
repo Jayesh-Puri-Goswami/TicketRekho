@@ -185,11 +185,11 @@ const RolePermission = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
             {permissions.map((perm, index) => (
               <motion.label
                 key={perm.name}
-                className="flex items-center space-x-3 cursor-pointer bg-gray-100 rounded-lg px-4 py-3 relative group"
+                className="flex items-center space-x-3 cursor-pointer bg-gray-100 rounded-lg px-4 py-3 relative group "
                 whileHover={{ scale: 1.01 }}
               >
                 <input
@@ -217,7 +217,7 @@ const RolePermission = () => {
                     initial={{ opacity: 0, y: -10 }}
                     whileHover={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute left-full ml-2 top-0 bg-indigo-purple text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 whitespace-nowrap z-10"
+                    className="absolute left-full ml-2 top-0 bg-indigo-purple text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 whitespace-nowrap z-[90]"
                   >
                     {tooltipMap[perm.name]}
                   </motion.span>
@@ -227,12 +227,12 @@ const RolePermission = () => {
           </div>
 
           <div className="flex justify-end gap-3 mt-6">
-            <button
+            {/* <button
               onClick={handleCancel}
               className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded"
             >
               Cancel
-            </button>
+            </button> */}
             <button
               onClick={handleUpdate}
               className="px-6 py-2 bg-indigo-purple text-white hover:bg-indigo-purple-dark rounded"

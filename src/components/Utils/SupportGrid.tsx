@@ -1,3 +1,4 @@
+// <DOCUMENT filename="SupportGrid.tsx">
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
@@ -9,6 +10,7 @@ import SupportCard from '../Cards/SupportCard';
 import ViewTicketModal from '../Modals/ViewTicketModal';
 import ReplyTicketModal from '../Modals/ReplyModal';
 import SkeletonCard from '../Skeleton/SkeletonCard';
+import SupportFilterOptions, { SupportStatus } from '../Utils/SupportFilterOptions';
 
 export interface SupportTicket {
   _id: string;
@@ -32,6 +34,7 @@ const SupportGrid: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [isReply, setIsReply] = useState(true);
+  const [selectedStatuses, setSelectedStatuses] = useState<SupportStatus[]>([]); // New state for status filters
 
   // Modal states
   const [viewTicket, setViewTicket] = useState<SupportTicket | null>(null);
@@ -158,16 +161,29 @@ const SupportGrid: React.FC = () => {
     }
   };
 
-  const filteredTickets = tickets.filter((ticket) => {
-    const search = searchTerm.toLowerCase();
+  // Filter and sort tickets
+  const filteredTickets = tickets
+    .filter((ticket) => {
+      const search = searchTerm.toLowerCase();
+      const matchesSearch =
+        ticket.appUserId?.name?.toLowerCase().includes(search) ||
+        ticket.appUserId?.email?.toLowerCase().includes(search) ||
+        ticket.title?.toLowerCase().includes(search) ||
+        ticket.message?.toLowerCase().includes(search);
 
-    return (
-      ticket.appUserId?.name?.toLowerCase().includes(search) ||
-      ticket.appUserId?.email?.toLowerCase().includes(search) ||
-      ticket.title?.toLowerCase().includes(search) ||
-      ticket.message?.toLowerCase().includes(search)
-    );
-  });
+      const matchesStatus =
+        selectedStatuses.length === 0 ||
+        (selectedStatuses.includes('Active') && ticket.status === 'open') ||
+        (selectedStatuses.includes('Inactive') && ticket.status === 'closed');
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      // Sort active (open) tickets first
+      if (a.status === 'open' && b.status === 'closed') return -1;
+      if (a.status === 'closed' && b.status === 'open') return 1;
+      return 0;
+    });
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -218,6 +234,12 @@ const SupportGrid: React.FC = () => {
           </div>
         </div>
 
+        {/* Status Filter */}
+        <SupportFilterOptions
+          selectedStatuses={selectedStatuses}
+          setSelectedStatuses={setSelectedStatuses}
+        />
+
         {/* Grid layout for support tickets */}
         {loading ? (
           <motion.div
@@ -256,8 +278,8 @@ const SupportGrid: React.FC = () => {
                 No tickets found
               </h3>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {searchTerm
-                  ? 'Try adjusting your search terms.'
+                {searchTerm || selectedStatuses.length > 0
+                  ? 'Try adjusting your search or filter terms.'
                   : 'There are no support tickets to display.'}
               </p>
             </div>
@@ -324,3 +346,4 @@ const SupportGrid: React.FC = () => {
 };
 
 export default SupportGrid;
+// </DOCUMENT>

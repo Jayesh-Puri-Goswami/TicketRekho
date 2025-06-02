@@ -68,9 +68,15 @@ const SignIn: React.FC = () => {
 
           if (userRole === 'admin') {
             navigate('/dashboard');
-          } else if (userRole === 'theatreManager') {
+          } else if (
+            userRole === 'theatreManager' ||
+            userRole === 'theatreEmployee'
+          ) {
             navigate('/theatre-dashboard');
-          } else if (userRole === 'eventManager') {
+          } else if (
+            userRole === 'eventManager' ||
+            userRole === 'eventEmployee'
+          ) {
             navigate('/event-dashboard');
           }
         } else {
@@ -312,10 +318,7 @@ const SignIn: React.FC = () => {
             variants={itemVariants}
           >
             {/* Email Field */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-            >
+            <motion.div transition={{ type: 'spring', stiffness: 300 }}>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 Email Address
               </label>
@@ -327,11 +330,11 @@ const SignIn: React.FC = () => {
                   className="w-full px-4 py-4 pl-12 bg-gray-50/50 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all duration-300 group-hover:border-gray-300"
                   placeholder="Enter your email"
                   required
-                  whileFocus={{ scale: 1.02 }}
+                  whileFocus={{ scale: 1 }}
                 />
                 <motion.div
                   className="absolute left-4 top-1/2 transform -translate-y-1/2"
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ scale: 1 }}
                 >
                   <Mail className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
                 </motion.div>
@@ -340,7 +343,7 @@ const SignIn: React.FC = () => {
 
             {/* Password Field */}
             <motion.div
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
               <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -354,30 +357,23 @@ const SignIn: React.FC = () => {
                   className="w-full px-4 py-4 pl-12 pr-12 bg-gray-50/50 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all duration-300 group-hover:border-gray-300"
                   placeholder="Enter your password"
                   required
-                  whileFocus={{ scale: 1.02 }}
                 />
-                <motion.div
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2"
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <Lock className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                <motion.div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                  <Lock className="w-5 h-5 text-gray-400" />
                 </motion.div>
-                <motion.button
+                <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
                   ) : (
                     <Eye className="w-5 h-5" />
                   )}
-                </motion.button>
+                </button>
               </div>
             </motion.div>
-
             {/* Submit Button */}
             <motion.button
               type="submit"

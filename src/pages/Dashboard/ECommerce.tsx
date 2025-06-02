@@ -94,7 +94,7 @@ const advertisements: Advertisement[] = [
 ];
 
 const managerChartData = {
-  active: 28,
+  active: 0,
   inactive: 12,
 };
 
@@ -193,7 +193,17 @@ const ECommerce: React.FC = () => {
   const [couponsClicked, setCouponClicked] = useState(false);
   const [couponRefreshClicked, setCouponsRefreshClicked] = useState(false);
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
+  const [totalManager, setTotalManager] = useState(0);
 
+  const [latestEvents, setLatestEvents] = useState<Movie[]>([
+    {
+      _id: 0,
+      name: '',
+      movieImage: '',
+      releaseDate: '',
+      description: '',
+    },
+  ]);
   const [coupons, setCoupons] = useState<Coupon[]>([
     {
       _id: 'NAN',
@@ -219,6 +229,7 @@ const ECommerce: React.FC = () => {
         setLoading(true);
         setData(response.data.data);
         setLatestMovies(response.data.data?.movieList);
+        setLatestEvents(response.data.data?.eventList);
 
         const activeManagers = response.data.data?.totalActiveManager || 0;
         const inactiveManagers =
@@ -305,7 +316,7 @@ const ECommerce: React.FC = () => {
               show: true,
               label: 'Total Managers',
               formatter: () =>
-                managerChartData.active + managerChartData.inactive,
+                managerData.active + managerData.inactive,
             },
           },
         },
@@ -412,7 +423,10 @@ const ECommerce: React.FC = () => {
               >
                 {latestMovies.map((movie) => (
                   <SwiperSlide key={movie._id}>
-                    <div className="bg-gray-100 cursor-pointer rounded-lg overflow-hidden" onClick={() => Navigate('/movies')} >
+                    <div
+                      className="bg-gray-100 cursor-pointer rounded-lg overflow-hidden"
+                      onClick={() => Navigate('/movies')}
+                    >
                       <img
                         src={`${Urls.Image_url}${movie.movieImage}`}
                         alt={movie.name}
@@ -438,17 +452,6 @@ const ECommerce: React.FC = () => {
                             },
                           )}
                         </p>
-                        {/* <motion.button
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.95 }}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
-                          onClick={() => Navigate('/movies')}
-                          className="mt-3 w-full text-white font-medium py-2 px-4 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600 hover:opacity-90 shadow-md"
-                        >
-                          View Details
-                        </motion.button> */}
                       </div>
                     </div>
                   </SwiperSlide>
@@ -461,7 +464,7 @@ const ECommerce: React.FC = () => {
           <div className="bg-white rounded-xl shadow-md p-5 flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-indigo-purple">
-                Theater Managers Status
+                All Managers Status
               </h2>
             </div>
             <div className="flex-grow flex items-center justify-center">
@@ -473,117 +476,13 @@ const ECommerce: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Advertisements Component */}
-          {/* <div className="bg-white rounded-xl shadow-md p-5">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-[#9264c9]">
-                Advertisements
-              </h2>
-              <div className="flex space-x-2">
-                
-                <button
-                  onClick={handleAddClick}
-                  className={`p-2 bg-[#9264c9] text-white rounded-md hover:bg-[#3a2587] transition-transform ${
-                    advClicked ? 'scale-90' : 'scale-100'
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={24}
-                    height={24}
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="#ffffff"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15"
-                      stroke="#ffffff"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
-
-                
-                <button
-                  onClick={handleRefreshClick}
-                  className={`p-2 bg-slate-200 text-gray-700 rounded-md hover:bg-gray-300  `}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={24}
-                    height={24}
-                    className={` transition-transform ${
-                      advRefreshClicked ? 'animate-spin' : 'rotate-360'
-                    }`}
-                  >
-                    <path
-                      d="M12.0789 2.25C7.2854 2.25 3.34478 5.913 2.96055 10.5833H2.00002C1.69614 10.5833 1.42229 10.7667 1.30655 11.0477C1.19081 11.3287 1.25606 11.6517 1.47178 11.8657L3.15159 13.5324C3.444 13.8225 3.91567 13.8225 4.20808 13.5324L5.88789 11.8657C6.10361 11.6517 6.16886 11.3287 6.05312 11.0477C5.93738 10.7667 5.66353 10.5833 5.35965 10.5833H4.4668C4.84652 6.75167 8.10479 3.75 12.0789 3.75C14.8484 3.75 17.2727 5.20845 18.6156 7.39279C18.8325 7.74565 19.2944 7.85585 19.6473 7.63892C20.0002 7.42199 20.1104 6.96007 19.8934 6.60721C18.2871 3.99427 15.3873 2.25 12.0789 2.25Z"
-                      fill="#1C274C"
-                    />
-                    <path
-                      opacity="0.5"
-                      d="M20.8412 10.4666C20.5491 10.1778 20.0789 10.1778 19.7868 10.4666L18.1005 12.1333C17.8842 12.3471 17.8185 12.6703 17.934 12.9517C18.0496 13.233 18.3236 13.4167 18.6278 13.4167H19.5269C19.1456 17.2462 15.876 20.25 11.8828 20.25C9.10034 20.25 6.66595 18.7903 5.31804 16.6061C5.10051 16.2536 4.63841 16.1442 4.28591 16.3618C3.93342 16.5793 3.82401 17.0414 4.04154 17.3939C5.65416 20.007 8.56414 21.75 11.8828 21.75C16.6907 21.75 20.6476 18.0892 21.0332 13.4167H22.0002C22.3044 13.4167 22.5784 13.233 22.694 12.9517C22.8096 12.6703 22.7438 12.3471 22.5275 12.1333L20.8412 10.4666Z"
-                      fill="#1C274C"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="h-[350px] overflow-y-auto pr-2 scrollbar-thin">
-              {loadingAds
-                ? Array(5)
-                    .fill(0)
-                    .map((_, index) => <AdvertisementSkeleton key={index} />)
-                : advertisements.map((ad) => (
-                    <div
-                      key={ad.id}
-                      className="flex items-center p-3 mb-3 bg-gray-50 rounded-lg"
-                    >
-                      <img
-                        src={ad.image}
-                        alt={ad.name}
-                        className="w-16 h-16 object-cover rounded-md mr-3"
-                        onError={(e: any) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            '../../../public/Image/Fallback Image/default-fallback-image.png';
-                        }}
-                      />
-                      <div>
-                        <h3 className="font-medium text-gray-800">{ad.name}</h3>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            ad.type === 'Movie'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}
-                        >
-                          {ad.type}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-            </div>
-          </div> */}
-
           {/* Active Coupons Component */}
-          {/* <div className="bg-white rounded-xl shadow-md p-5">
+          <div className="bg-white rounded-xl shadow-md p-5">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-indigo-purple">
                 Active Coupons
               </h2>
               <div className="flex space-x-2">
-               
                 <button
                   onClick={handleAddCouponsClick}
                   className={`p-2 bg-indigo-purple text-white rounded-md hover:bg-[#3a2587] transition-transform ${
@@ -613,7 +512,6 @@ const ECommerce: React.FC = () => {
                   </svg>
                 </button>
 
-               
                 <button
                   onClick={handleCouponsRefreshClick}
                   className={`p-2 bg-slate-200 text-gray-700 rounded-md hover:bg-gray-300  `}
@@ -641,7 +539,7 @@ const ECommerce: React.FC = () => {
                 </button>
               </div>
             </div>
-            <div className="h-[350px] overflow-y-auto pr-2 scrollbar-thin">
+            <div className="h-[250px] overflow-y-auto pr-2 scrollbar-thin">
               {loadingCoupons
                 ? Array(5)
                     .fill(0)
@@ -682,7 +580,70 @@ const ECommerce: React.FC = () => {
                     </div>
                   ))}
             </div>
-          </div> */}
+          </div>
+
+          {/* Events  */}
+          <div className="bg-white rounded-xl shadow-md p-5 md:col-span-2 overflow-hidden">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-indigo-purple">
+                Latest Events Released
+              </h2>
+            </div>
+            <div className="relative">
+              <Swiper
+                modules={[Autoplay]}
+                spaceBetween={20}
+                slidesPerView={1}
+                loop={true}
+                autoplay={{ delay: 3000 }}
+                breakpoints={{
+                  640: {
+                    slidesPerView: 2,
+                  },
+                  1024: {
+                    slidesPerView: 2,
+                  },
+                }}
+                className="movie-swiper"
+              >
+                {latestEvents.map((movie) => (
+                  <SwiperSlide key={movie._id}>
+                    <div
+                      className="bg-gray-100 cursor-pointer rounded-lg overflow-hidden"
+                      onClick={() => Navigate('/movies')}
+                    >
+                      <img
+                        src={`${Urls.Image_url}${movie?.eventImage}`}
+                        alt={movie.name}
+                        className="w-full h-48 lg:object-cover md:object-cover object-center"
+                        onError={(e: any) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            '/Image/Fallback Image/default-fallback-image.png';
+                        }}
+                      />
+                      <div className="p-3">
+                        <h3 className="font-medium text-gray-800">
+                          {movie.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          Released:{' '}
+                          {new Date(movie.eventDate).toLocaleDateString(
+                            'en-US',
+                            {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            },
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          </div>
         </div>
       </div>
     </>
