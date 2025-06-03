@@ -266,7 +266,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-          <ul className="space-y-2">
+          <ul className="space-y-1">
             {UserMenuList.filter((item) => hasPermission(item.permission)).map(
               (item) => (
                 <motion.li
@@ -279,7 +279,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     to={item.path}
                     className={({ isActive }) => {
                       const baseClasses =
-                        'group relative flex items-center gap-4 px-4 py-3 text-white rounded-xl transition-all duration-200 overflow-hidden';
+                        'group relative flex items-center gap-4 px-4 py-2 text-white rounded-xl transition-all duration-200 overflow-hidden ';
 
                       if (isActive) {
                         return `${baseClasses} bg-white/25 backdrop-blur-sm  shadow-lg`;

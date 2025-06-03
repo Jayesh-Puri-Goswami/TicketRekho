@@ -254,6 +254,7 @@ const Seatx: React.FC = () => {
       <label >Seats Per Row:</label>
         <input
           type="number"
+          min={0}
           value={newRowSeats}
           onChange={(e) => setNewRowSeats(parseInt(e.target.value, 10))}
           className="px-3 py-2 border rounded w-20"

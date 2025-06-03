@@ -78,7 +78,6 @@ const TermForm: React.FC<ModalformProps> = ({
       let formData = {
         type:data.type,
         content:data.content,
-      
       }
      
       const requestUrl = term ? urls.createOrUpdateTermPolicy : urls.createOrUpdateTermPolicy;
@@ -98,7 +97,9 @@ const TermForm: React.FC<ModalformProps> = ({
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
         toast.success(
-         'Updated terms & conditions.',
+         'Updated terms & conditions.',{
+        className : 'z-[99999]'
+      }
         );
       }
     } catch (err) {

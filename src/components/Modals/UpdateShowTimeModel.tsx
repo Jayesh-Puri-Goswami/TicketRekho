@@ -305,7 +305,9 @@ const UpdateShowTimeModel: React.FC<{ showtimeId: string; onClose: () => void; o
      // console.log("Validation failed. The following seat types have invalid prices:");
       invalidSeats.forEach(seat => {
         toast.error(
-         `- ${seat.seatType} should have a price greater than 0`,
+         `- ${seat.seatType} should have a price greater than 0`,{
+        className : 'z-[99999]'
+      }
         );
       });
       setError('Price should be greater than 0.');
@@ -337,14 +339,18 @@ const UpdateShowTimeModel: React.FC<{ showtimeId: string; onClose: () => void; o
          'Content-Type': 'application/json',
         },
       });
-      toast.success('ShowTime data updated successfully!');
+      toast.success('ShowTime data updated successfully!',{
+        className : 'z-[99999]'
+      });
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
       }
       onClose();
     } catch (error) {
       console.error('Error updating showtime data:', error);
-      toast.error('Error updating showtime data.');
+      toast.error('Error updating showtime data.',{
+        className : 'z-[99999]'
+      });
     } finally {
       setIsLoading(false); // Set loading to false after the request is completed
     }

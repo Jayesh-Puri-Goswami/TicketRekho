@@ -1,62 +1,84 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, User, Mail, Phone, MapPin, Building, Home, Check, ImageIcon, Banknote, Map } from "lucide-react"
-import type { Manager } from "../../types/manager"
-import FormField from "../Utils/FormField"
-import PasswordInput from "../Utils/PasswordInput"
-import clsx from "clsx"
-import axios from "axios"
-import app_urls from "../../networking/app_urls"
-import { useSelector, useDispatch } from "react-redux"
-import { editManagerStart, editManagerSuccess, editManagerFailure } from "../../redux/manager/managerSlice"
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  X,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Building,
+  Home,
+  Check,
+  ImageIcon,
+  Banknote,
+  Map,
+} from 'lucide-react';
+import type { Manager } from '../../types/manager';
+import FormField from '../Utils/FormField';
+// import PasswordInput from "../Utils/PasswordInput"
+import clsx from 'clsx';
+import axios from 'axios';
+import app_urls from '../../networking/app_urls';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  editManagerStart,
+  editManagerSuccess,
+  editManagerFailure,
+} from '../../redux/manager/managerSlice';
+
+import AnimatedCheckbox from '../Checkboxes/AnimatedCheckbox';
 
 interface State {
-  _id: string
-  name: string
+  _id: string;
+  name: string;
 }
 
 interface City {
-  _id: string
-  name: string
+  _id: string;
+  name: string;
 }
 
 interface EditManagerFormData {
-  name: string
-  email: string
-  password: string
-  phoneNumber: string
-  cityId: string
-  stateId: string
-  address: string
-  bankAccountNumber: string
-  ifscCode: string
-  profileImage?: FileList
-  active: boolean
-  theatreName?: string
-  location?: string
-  isActive?: boolean
-  isGrabABite?: boolean
-  role: string
+  name: string;
+  email: string;
+  password: string;
+  phoneNumber: string;
+  cityId: string;
+  stateId: string;
+  address: string;
+  bankAccountNumber: string;
+  ifscCode: string;
+  // profileImage?: FileList
+  active: boolean;
+  theatreName?: string;
+  location?: string;
+  isActive?: boolean;
+  isGrabABite?: boolean;
+  role: string;
 }
 
 interface EditManagerModalProps {
-  isOpen: boolean
-  manager: Manager | null
-  onClose: () => void
+  isOpen: boolean;
+  manager: Manager | null;
+  onClose: () => void;
 }
 
-const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, onClose }) => {
-  const dispatch = useDispatch()
-  const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [states, setStates] = useState<State[]>([])
-  const [cities, setCities] = useState<City[]>([])
-  const [selectedState, setSelectedState] = useState<string>("")
-  const currentUser = useSelector((state: any) => state.user.currentUser?.data)
+const EditManagerModal: React.FC<EditManagerModalProps> = ({
+  isOpen,
+  manager,
+  onClose,
+}) => {
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [states, setStates] = useState<State[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [selectedState, setSelectedState] = useState<string>('');
+  const currentUser = useSelector((state: any) => state.user.currentUser?.data);
 
   const {
     register,
@@ -67,25 +89,25 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
     watch,
   } = useForm<EditManagerFormData>({
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      phoneNumber: "",
-      cityId: "",
-      stateId: "",
-      address: "",
-      bankAccountNumber: "",
-      ifscCode: "",
+      name: '',
+      email: '',
+      // password: "",
+      phoneNumber: '',
+      cityId: '',
+      stateId: '',
+      address: '',
+      bankAccountNumber: '',
+      ifscCode: '',
       active: true,
-      theatreName: "",
-      location: "",
+      theatreName: '',
+      location: '',
       isActive: true,
       isGrabABite: true,
-      role: "",
+      role: '',
     },
-  })
+  });
 
-  const selectedRole = watch("role")
+  const selectedRole = watch('role');
 
   const fetchStates = async () => {
     try {
@@ -93,16 +115,16 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
         headers: {
           Authorization: `Bearer ${currentUser.token}`,
         },
-      })
+      });
       if (response.data.status && Array.isArray(response.data.data)) {
-        setStates(response.data.data)
+        setStates(response.data.data);
       } else {
-        console.error("Invalid states response:", response.data)
+        console.error('Invalid states response:', response.data);
       }
     } catch (error) {
-      console.error("Error fetching states:", error)
+      console.error('Error fetching states:', error);
     }
-  }
+  };
 
   const fetchCities = async (stateId: string) => {
     try {
@@ -114,130 +136,138 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
             Authorization: `Bearer ${currentUser.token}`,
           },
         },
-      )
+      );
       if (response.data.status && Array.isArray(response.data.data)) {
-        setCities(response.data.data)
+        setCities(response.data.data);
       } else {
-        setCities([])
-        console.error("Invalid cities response:", response.data)
+        setCities([]);
+        console.error('Invalid cities response:', response.data);
       }
     } catch (error) {
-      console.error("Error fetching cities:", error)
-      setCities([])
+      console.error('Error fetching cities:', error);
+      setCities([]);
     }
-  }
+  };
 
   useEffect(() => {
     if (isOpen) {
-      fetchStates()
+      fetchStates();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   useEffect(() => {
     if (selectedState) {
-      fetchCities(selectedState)
+      fetchCities(selectedState);
     } else {
-      setCities([])
+      setCities([]);
     }
-  }, [selectedState])
+  }, [selectedState]);
 
   // Populate form when manager data is available
   useEffect(() => {
     if (manager && isOpen) {
-      setValue("name", manager.name || "")
-      setValue("email", manager.email || "")
-      setValue("password", manager.password || "")
-      setValue("phoneNumber", manager.phoneNumber || "")
+      setValue('name', manager.name || '');
+      setValue('email', manager.email || '');
+      // setValue("password", manager.password || "")
+      setValue('phoneNumber', manager.phoneNumber || '');
 
       // Handle stateId - extract ID if it's an object
-      const stateId = typeof manager.stateId === "object" ? manager.stateId._id : manager.stateId
-      setValue("stateId", stateId || "")
-      setSelectedState(stateId || "")
+      const stateId =
+        typeof manager.stateId === 'object'
+          ? manager.stateId._id
+          : manager.stateId;
+      setValue('stateId', stateId || '');
+      setSelectedState(stateId || '');
 
       // Handle cityId - extract ID if it's an object
-      const cityId = typeof manager.cityId === "object" ? manager.cityId._id : manager.cityId
-      setValue("cityId", cityId || "")
+      const cityId =
+        typeof manager.cityId === 'object'
+          ? manager.cityId._id
+          : manager.cityId;
+      setValue('cityId', cityId || '');
 
-      setValue("address", manager.address || "")
-      setValue("bankAccountNumber", manager.bankAccountNumber || "")
-      setValue("ifscCode", manager.ifscCode || "")
-      setValue("active", manager.active || false)
-      setValue("role", manager.role || "")
+      setValue('address', manager.address || '');
+      setValue('bankAccountNumber', manager.bankAccountNumber || '');
+      setValue('ifscCode', manager.ifscCode || '');
+      setValue('active', manager.active || false);
+      setValue('role', manager.role || '');
 
       // Set theatre-specific fields only for theatre managers
-      if (manager.role === "Theatre Manager") {
-        setValue("theatreName", manager.theatreName || "")
-        setValue("location", manager.location || "")
-        setValue("isActive", manager.isActive || true)
-        setValue("isGrabABite", manager.isGrabABite || true)
+      if (manager.role === 'Theatre Manager') {
+        setValue('theatreName', manager.theatreName || '');
+        setValue('location', manager.location || '');
+        setValue('isActive', manager.isActive || true);
+        setValue('isGrabABite', manager.isGrabABite || true);
       }
 
-      setErrorMessage(null)
+      setErrorMessage(null);
     }
-  }, [manager, isOpen, setValue])
+  }, [manager, isOpen, setValue]);
 
   const closeModal = () => {
-    onClose()
-    reset()
-    setErrorMessage(null)
-    setSelectedState("")
-    setCities([])
-  }
+    onClose();
+    reset();
+    setErrorMessage(null);
+    setSelectedState('');
+    setCities([]);
+  };
 
   const onSubmit = async (data: EditManagerFormData) => {
-    if (!manager) return
+    if (!manager) return;
 
-    setLoading(true)
-    setErrorMessage(null)
-    dispatch(editManagerStart())
+    setLoading(true);
+    setErrorMessage(null);
+    dispatch(editManagerStart());
 
     try {
-      const formData = new FormData()
+      const formData = new FormData();
 
       // Common fields for both manager types
-      formData.append("id", manager._id)
-      formData.append("name", data.name)
-      formData.append("email", data.email)
-      formData.append("password", data.password)
-      formData.append("phoneNumber", data.phoneNumber)
-      formData.append("role", data.role)
-      formData.append("stateId", data.stateId)
-      formData.append("cityId", data.cityId)
-      formData.append("address", data.address)
-      formData.append("active", String(data.active))
-      formData.append("bankAccountNumber", data.bankAccountNumber)
-      formData.append("ifscCode", data.ifscCode)
+      formData.append('id', manager._id);
+      formData.append('name', data.name);
+      formData.append('email', data.email);
+      // formData.append("password", data.password)
+      formData.append('phoneNumber', data.phoneNumber);
+      formData.append('role', data.role);
+      formData.append('stateId', data.stateId);
+      formData.append('cityId', data.cityId);
+      formData.append('address', data.address);
+      formData.append('active', String(data.active));
+      formData.append('bankAccountNumber', data.bankAccountNumber);
+      formData.append('ifscCode', data.ifscCode);
 
       // Add profile image if provided
-      if (data.profileImage && data.profileImage[0]) {
-        formData.append("profileImage", data.profileImage[0])
-      }
+      // if (data.profileImage && data.profileImage[0]) {
+      //   formData.append("profileImage", data.profileImage[0])
+      // }
 
       // Add theatre-specific fields only for theatre managers
-      if (manager.role === "Theatre Manager") {
-        formData.append("theatreName", data.theatreName || "")
-        formData.append("location", data.location || "")
-        formData.append("isActive", String(data.isActive))
-        formData.append("isGrabABite", String(data.isGrabABite))
+      if (manager.role === 'Theatre Manager') {
+        formData.append('theatreName', data.theatreName || '');
+        formData.append('location', data.location || '');
+        formData.append('isActive', String(data.isActive));
+        formData.append('isGrabABite', String(data.isGrabABite));
       }
 
       // Determine API endpoint based on manager role
       const url =
-        manager.role === "Theatre Manager" ? app_urls.editTheatreMangerProfile : app_urls.editEventMangerProfile
+        manager.role === 'Theatre Manager'
+          ? app_urls.editTheatreMangerProfile
+          : app_urls.editEventMangerProfile;
 
       const response = await axios.post(url, formData, {
         headers: {
           Authorization: `Bearer ${currentUser.token}`,
-          "Content-Type": "multipart/form-data",
+          'Content-Type': 'multipart/form-data',
         },
-      })
+      });
 
       if (response.data.status) {
         const updatedManager: Manager = {
           ...manager,
           name: data.name,
           email: data.email,
-          password: data.password,
+          // password: data.password,
           phoneNumber: data.phoneNumber,
           cityId: data.cityId,
           stateId: data.stateId,
@@ -246,39 +276,42 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
           ifscCode: data.ifscCode,
           active: data.active,
           role: data.role,
-          ...(manager.role === "Theatre Manager" && {
+          ...(manager.role === 'Theatre Manager' && {
             theatreName: data.theatreName,
             location: data.location,
             isActive: data.isActive,
             isGrabABite: data.isGrabABite,
           }),
-        }
+        };
 
-        dispatch(editManagerSuccess(updatedManager))
-        closeModal()
+        dispatch(editManagerSuccess(updatedManager));
+        closeModal();
       } else {
-        const errorMsg = response.data.message || "Failed to update manager profile"
-        setErrorMessage(errorMsg)
-        dispatch(editManagerFailure(errorMsg))
+        const errorMsg =
+          response.data.message || 'Failed to update manager profile';
+        setErrorMessage(errorMsg);
+        dispatch(editManagerFailure(errorMsg));
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || "An error occurred while updating the manager profile"
-      setErrorMessage(message)
-      dispatch(editManagerFailure(message))
-      console.error("Error updating manager:", error)
+      const message =
+        error.response?.data?.message ||
+        'An error occurred while updating the manager profile';
+      setErrorMessage(message);
+      dispatch(editManagerFailure(message));
+      console.error('Error updating manager:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const stopPropagation = (e: React.MouseEvent) => {
-    e.stopPropagation()
-  }
+    e.stopPropagation();
+  };
 
   const backdropVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
-  }
+  };
 
   const modalVariants = {
     hidden: {
@@ -291,7 +324,7 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
       y: 0,
       scale: 1,
       transition: {
-        type: "spring",
+        type: 'spring',
         damping: 25,
         stiffness: 300,
       },
@@ -304,11 +337,11 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
         duration: 0.2,
       },
     },
-  }
+  };
 
-  if (!manager) return null
+  if (!manager) return null;
 
-  const isTheatreManager = manager.role === "Theatre Manager"
+  const isTheatreManager = manager.role === 'Theatre Manager';
 
   return (
     <AnimatePresence>
@@ -328,7 +361,7 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
           >
             <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-slate-100">
-                Edit {isTheatreManager ? "Theatre" : "Event"} Manager Profile
+                View {isTheatreManager ? 'Theatre' : 'Event'} Manager Profile
               </h3>
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -365,22 +398,23 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                         <input
                           type="text"
                           id="name"
+                          disabled
                           className={clsx(
-                            "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors",
+                            'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors disabled:opacity-70',
                             errors.name
-                              ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                              : "border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white",
+                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                              : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
                           )}
                           placeholder="John Doe"
-                          {...register("name", {
-                            required: "Name is required",
+                          {...register('name', {
+                            required: 'Name is required',
                             minLength: {
                               value: 2,
-                              message: "Name must be at least 2 characters",
+                              message: 'Name must be at least 2 characters',
                             },
                             maxLength: {
                               value: 50,
-                              message: "Name must be less than 50 characters",
+                              message: 'Name must be less than 50 characters',
                             },
                           })}
                         />
@@ -395,25 +429,26 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                         <input
                           type="email"
                           id="email"
+                          disabled
                           className={clsx(
-                            "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors",
+                            'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors disabled:opacity-70',
                             errors.email
-                              ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                              : "border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white",
+                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                              : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
                           )}
                           placeholder="john.doe@example.com"
-                          {...register("email", {
-                            required: "Email is required",
+                          {...register('email', {
+                            required: 'Email is required',
                             pattern: {
                               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                              message: "Invalid email address",
+                              message: 'Invalid email address',
                             },
                           })}
                         />
                       </div>
                     </FormField>
 
-                    <FormField label="Password" name="password" error={errors.password}>
+                    {/* <FormField label="Password" name="password" error={errors.password}>
                       <PasswordInput
                         id="password"
                         placeholder="Enter password"
@@ -427,9 +462,13 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                           },
                         }}
                       />
-                    </FormField>
+                    </FormField> */}
 
-                    <FormField label="Phone Number" name="phoneNumber" error={errors.phoneNumber}>
+                    <FormField
+                      label="Phone Number"
+                      name="phoneNumber"
+                      error={errors.phoneNumber}
+                    >
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <Phone className="h-4 w-4 text-slate-400" />
@@ -437,44 +476,50 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                         <input
                           type="tel"
                           id="phoneNumber"
+                          disabled
                           className={clsx(
-                            "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors",
+                            'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors disabled:opacity-70',
                             errors.phoneNumber
-                              ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                              : "border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white",
+                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                              : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
                           )}
                           placeholder="(123) 456-7890"
-                          {...register("phoneNumber", {
-                            required: "Phone number is required",
+                          {...register('phoneNumber', {
+                            required: 'Phone number is required',
                             pattern: {
                               value: /^[0-9+\-\s()]*$/,
-                              message: "Invalid phone number format",
+                              message: 'Invalid phone number format',
                             },
                           })}
                         />
                       </div>
                     </FormField>
 
-                    <FormField label="State" name="stateId" error={errors.stateId}>
+                    <FormField
+                      label="State"
+                      name="stateId"
+                      error={errors.stateId}
+                    >
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <MapPin className="h-4 w-4 text-slate-400" />
                         </div>
                         <select
                           id="stateId"
+                          disabled
                           className={clsx(
-                            "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors appearance-none bg-white dark:bg-slate-700",
+                            'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors appearance-none bg-white dark:bg-slate-700',
                             errors.stateId
-                              ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                              : "border-slate-300 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:text-white",
+                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                              : 'border-slate-300 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:text-white',
                           )}
-                          {...register("stateId", {
-                            required: "State is required",
+                          {...register('stateId', {
+                            required: 'State is required',
                           })}
                           onChange={(e) => {
-                            setValue("stateId", e.target.value)
-                            setSelectedState(e.target.value)
-                            setValue("cityId", "") // Reset city when state changes
+                            setValue('stateId', e.target.value);
+                            setSelectedState(e.target.value);
+                            setValue('cityId', ''); // Reset city when state changes
                           }}
                         >
                           <option value="" disabled>
@@ -496,19 +541,22 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                         </div>
                         <select
                           id="cityId"
+                          disabled
                           className={clsx(
-                            "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors appearance-none bg-white dark:bg-slate-700",
+                            'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors appearance-none bg-white dark:bg-slate-700',
                             errors.cityId
-                              ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                              : "border-slate-300 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:text-white",
+                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                              : 'border-slate-300 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:text-white',
                           )}
-                          {...register("cityId", {
-                            required: "City is required",
+                          {...register('cityId', {
+                            required: 'City is required',
                           })}
-                          disabled={!selectedState || cities.length === 0}
+                          // disabled={!selectedState || cities.length === 0}
                         >
                           <option value="" disabled>
-                            {cities.length === 0 && selectedState ? "No cities available" : "Select a city"}
+                            {cities.length === 0 && selectedState
+                              ? 'No cities available'
+                              : 'Select a city'}
                           </option>
                           {cities.map((city) => (
                             <option key={city._id} value={city._id}>
@@ -519,7 +567,11 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                       </div>
                     </FormField>
 
-                    <FormField label="Address" name="address" error={errors.address}>
+                    <FormField
+                      label="Address"
+                      name="address"
+                      error={errors.address}
+                    >
                       <div className="relative">
                         <div className="absolute top-3 left-3 pointer-events-none">
                           <Home className="h-4 w-4 text-slate-400" />
@@ -527,30 +579,44 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                         <textarea
                           id="address"
                           rows={3}
+                          disabled
                           className={clsx(
-                            "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors",
+                            'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors disabled:opacity-70',
                             errors.address
-                              ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                              : "border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white",
+                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                              : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
                           )}
                           placeholder="123 Main St, Apt 4B"
-                          {...register("address", {
-                            required: "Address is required",
+                          {...register('address', {
+                            required: 'Address is required',
                           })}
                         />
                       </div>
                     </FormField>
 
-                    <FormField label="Active Status" name="active" error={errors.active}>
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          id="active"
-                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
-                          {...register("active")}
-                        />
-                        <label htmlFor="active" className="ml-2 text-sm text-slate-700 dark:text-slate-200">
-                          Active
+                    <FormField
+                      label="Active Status"
+                      name="active"
+                      error={errors.active}
+                    >
+                      <div className="flex items-center gap-3">
+                        <label
+                          htmlFor="active"
+                          className="flex items-center cursor-pointer"
+                        >
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              id="active"
+                              className="sr-only peer"
+                              {...register('active')}
+                            />
+                            <div className="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors duration-300"></div>
+                            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 peer-checked:translate-x-5"></div>
+                          </div>
+                          <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                            Active
+                          </span>
                         </label>
                       </div>
                     </FormField>
@@ -561,7 +627,7 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                       Additional Information
                     </h4>
 
-                    <FormField label="Profile Image" name="profileImage" error={errors.profileImage}>
+                    {/* <FormField label="Profile Image" name="profileImage" error={errors.profileImage}>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <ImageIcon className="h-4 w-4 text-slate-400" />
@@ -579,9 +645,13 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                           {...register("profileImage")}
                         />
                       </div>
-                    </FormField>
+                    </FormField> */}
 
-                    <FormField label="Bank Account Number" name="bankAccountNumber" error={errors.bankAccountNumber}>
+                    <FormField
+                      label="Bank Account Number"
+                      name="bankAccountNumber"
+                      error={errors.bankAccountNumber}
+                    >
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <Banknote className="h-4 w-4 text-slate-400" />
@@ -589,21 +659,26 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                         <input
                           type="text"
                           id="bankAccountNumber"
+                          disabled
                           className={clsx(
-                            "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors",
+                            'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors disabled:opacity-70',
                             errors.bankAccountNumber
-                              ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                              : "border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white",
+                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                              : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
                           )}
                           placeholder="Bank Account Number"
-                          {...register("bankAccountNumber", {
-                            required: "Bank account number is required",
+                          {...register('bankAccountNumber', {
+                            required: 'Bank account number is required',
                           })}
                         />
                       </div>
                     </FormField>
 
-                    <FormField label="IFSC Code" name="ifscCode" error={errors.ifscCode}>
+                    <FormField
+                      label="IFSC Code"
+                      name="ifscCode"
+                      error={errors.ifscCode}
+                    >
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <Banknote className="h-4 w-4 text-slate-400" />
@@ -611,15 +686,16 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                         <input
                           type="text"
                           id="ifscCode"
+                          disabled
                           className={clsx(
-                            "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors",
+                            'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors disabled:opacity-70',
                             errors.ifscCode
-                              ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                              : "border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white",
+                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                              : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
                           )}
                           placeholder="IFSC Code"
-                          {...register("ifscCode", {
-                            required: "IFSC code is required",
+                          {...register('ifscCode', {
+                            required: 'IFSC code is required',
                           })}
                         />
                       </div>
@@ -628,7 +704,11 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                     {/* Theatre Manager Specific Fields */}
                     {isTheatreManager && (
                       <>
-                        <FormField label="Theatre Name" name="theatreName" error={errors.theatreName}>
+                        <FormField
+                          label="Theatre Name"
+                          name="theatreName"
+                          error={errors.theatreName}
+                        >
                           <div className="relative">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                               <Building className="h-4 w-4 text-slate-400" />
@@ -637,20 +717,26 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                               type="text"
                               id="theatreName"
                               className={clsx(
-                                "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors",
+                                'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors',
                                 errors.theatreName
-                                  ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                                  : "border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white",
+                                  ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                                  : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
                               )}
                               placeholder="Theatre Name"
-                              {...register("theatreName", {
-                                required: isTheatreManager ? "Theatre name is required" : false,
+                              {...register('theatreName', {
+                                required: isTheatreManager
+                                  ? 'Theatre name is required'
+                                  : false,
                               })}
                             />
                           </div>
                         </FormField>
 
-                        <FormField label="Location" name="location" error={errors.location}>
+                        <FormField
+                          label="Location"
+                          name="location"
+                          error={errors.location}
+                        >
                           <div className="relative">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                               <Map className="h-4 w-4 text-slate-400" />
@@ -659,43 +745,71 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                               type="text"
                               id="location"
                               className={clsx(
-                                "w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors",
+                                'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors',
                                 errors.location
-                                  ? "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20"
-                                  : "border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white",
+                                  ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
+                                  : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
                               )}
                               placeholder="Location"
-                              {...register("location", {
-                                required: isTheatreManager ? "Location is required" : false,
+                              {...register('location', {
+                                required: isTheatreManager
+                                  ? 'Location is required'
+                                  : false,
                               })}
                             />
                           </div>
                         </FormField>
 
-                        <FormField label="Theatre Active" name="isActive" error={errors.isActive}>
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              id="isActive"
-                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
-                              {...register("isActive")}
-                            />
-                            <label htmlFor="isActive" className="ml-2 text-sm text-slate-700 dark:text-slate-200">
-                              Theatre Active
+                        <FormField
+                          label="Theatre Active"
+                          name="isActive"
+                          error={errors.isActive}
+                        >
+                          <div className="flex items-center gap-3">
+                            <label
+                              htmlFor="isActive"
+                              className="flex items-center cursor-pointer"
+                            >
+                              <div className="relative">
+                                <input
+                                  type="checkbox"
+                                  id="isActive"
+                                  className="sr-only peer"
+                                  {...register('isActive')}
+                                />
+                                <div className="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors duration-300"></div>
+                                <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 peer-checked:translate-x-5"></div>
+                              </div>
+                              <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                                Theatre Active
+                              </span>
                             </label>
                           </div>
                         </FormField>
 
-                        <FormField label="Grab A Bite" name="isGrabABite" error={errors.isGrabABite}>
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              id="isGrabABite"
-                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
-                              {...register("isGrabABite")}
-                            />
-                            <label htmlFor="isGrabABite" className="ml-2 text-sm text-slate-700 dark:text-slate-200">
-                              Grab A Bite
+                        <FormField
+                          label="Grab A Bite"
+                          name="isGrabABite"
+                          error={errors.isGrabABite}
+                        >
+                          <div className="flex items-center gap-3 opacity-60 cursor-not-allowed">
+                            <label
+                              htmlFor="isGrabABite"
+                              className="flex items-center"
+                            >
+                              <div className="relative">
+                                <input
+                                  type="checkbox"
+                                  id="isGrabABite"
+                                  className="sr-only peer"
+                                  {...register('isGrabABite')}
+                                />
+                                <div className="w-11 h-6 bg-slate-300 rounded-full transition-colors duration-300"></div>
+                                <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300"></div>
+                              </div>
+                              <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                                Grab A Bite
+                              </span>
                             </label>
                           </div>
                         </FormField>
@@ -708,22 +822,26 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                       </h5>
                       <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
                         <p>
-                          <span className="font-medium">Role:</span> {manager.role}
+                          <span className="font-medium">Role:</span>{' '}
+                          {manager.role}
                         </p>
                         <p>
-                          <span className="font-medium">Status:</span> {manager.active ? "Active" : "Inactive"}
+                          <span className="font-medium">Status:</span>{' '}
+                          {manager.active ? 'Active' : 'Inactive'}
                         </p>
                         <p>
-                          <span className="font-medium">Joined:</span>{" "}
+                          <span className="font-medium">Joined:</span>{' '}
                           {new Date(manager.createdAt).toLocaleDateString()}
                         </p>
                         {isTheatreManager && (
                           <>
                             <p>
-                              <span className="font-medium">Theatre:</span> {manager.theatreName || "N/A"}
+                              <span className="font-medium">Theatre:</span>{' '}
+                              {manager.theatreName || 'N/A'}
                             </p>
                             <p>
-                              <span className="font-medium">Location:</span> {manager.location || "N/A"}
+                              <span className="font-medium">Location:</span>{' '}
+                              {manager.location || 'N/A'}
                             </p>
                           </>
                         )}
@@ -749,7 +867,7 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
                     disabled={loading}
                     className="w-full sm:w-auto relative overflow-hidden rounded-md py-2.5 px-6 font-medium text-white disabled:opacity-70"
                     style={{
-                      background: "linear-gradient(to right, #6366F1, #8B5CF6)",
+                      background: 'linear-gradient(to right, #6366F1, #8B5CF6)',
                     }}
                   >
                     {loading ? (
@@ -790,7 +908,7 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({ isOpen, manager, on
         </motion.div>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};
 
-export default EditManagerModal
+export default EditManagerModal;

@@ -9,6 +9,7 @@ interface EnquiryCardProps {
   onReply: () => void;
   onDelete: () => void;
   onToggleStatus: () => void;
+  
 }
 
 const EnquiryCard: React.FC<EnquiryCardProps> = ({ 
@@ -85,6 +86,20 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({
             {truncateText(ticket.description, 120)}
           </p>
         </div>
+
+        {ticket.adminReply && (
+          <div className="mb-5">
+            <div className="flex items-center mb-2">
+              <MessageSquareMore size={16} className="mr-2 text-indigo-600 dark:text-indigo-400" />
+              <h4 className="font-semibold text-gray-800 dark:text-gray-200">
+                Admin Reply
+              </h4>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-sm bg-indigo-50 dark:bg-gray-700 p-3 rounded-lg">
+              {truncateText(ticket.adminReply, 120)}
+            </p>
+          </div>
+        )}
         
         <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
           <div className="flex space-x-2">
@@ -106,14 +121,14 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({
               <MessageSquareMore size={18} />
             </motion.button>
 
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
               onClick={onDelete}
             >
               <Trash2 size={18} />
-            </motion.button>
+            </motion.button> */}
           </div>
           
           <motion.button

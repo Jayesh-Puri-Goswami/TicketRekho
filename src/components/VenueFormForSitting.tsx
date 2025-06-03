@@ -170,6 +170,7 @@ const VenueFormForSitting: React.FC<ModalformProps> = ({
                   </label>
                   <input
                     type="number"
+                    min={0}
                     placeholder="Seat Number"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     {...register('seatsPerRow', { required: true })}
@@ -215,6 +216,7 @@ const VenueFormForSitting: React.FC<ModalformProps> = ({
                   </label>
                   <input
                     type="number"
+                    min={0}
                     placeholder="Price"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     {...register('price', { required: true })}

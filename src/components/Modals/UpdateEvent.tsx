@@ -5,7 +5,16 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Tag, Languages, Image as ImageIcon, MapPin, User, Calendar, LayoutList } from 'lucide-react';
+import {
+  X,
+  Tag,
+  Languages,
+  Image as ImageIcon,
+  MapPin,
+  User,
+  Calendar,
+  LayoutList,
+} from 'lucide-react';
 import ImageUploader from '../Utils/ImageUploader';
 import FormField from '../Utils/FormField';
 
@@ -68,7 +77,9 @@ const UpdateEvent: React.FC<{
   const formatUTCDate = (date: string | Date) => {
     try {
       const utcDate = new Date(date);
-      const localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
+      const localDate = new Date(
+        utcDate.getTime() + utcDate.getTimezoneOffset() * 60000,
+      );
       return format(localDate, 'yyyy-MM-dd HH:mm');
     } catch (error) {
       console.error('Error formatting time:', error);
@@ -94,7 +105,7 @@ const UpdateEvent: React.FC<{
 
         setName(data.name);
         setDescription(data.description);
-       // setAddress(data.address);
+        // setAddress(data.address);
         setEventType(data.eventType);
         setArtist(data.artist);
         setEventDate(formatUTCDate(data.eventDate));
@@ -110,11 +121,13 @@ const UpdateEvent: React.FC<{
         setIsBanner(data.isBanner);
         setIsAds(data.isAds);
 
-         console.log("data.venue",data.venue._id);
-        console.log("Selected Venue",selectedVenueId);
+        console.log('data.venue', data.venue._id);
+        console.log('Selected Venue', selectedVenueId);
       } catch (error) {
         console.error('Error fetching event data:', error);
-        toast.error('Failed to load event data.');
+        toast.error('Failed to load event data.',{
+        className : 'z-[99999]'
+      });
       }
     };
 
@@ -132,7 +145,7 @@ const UpdateEvent: React.FC<{
     // };
 
     fetchEventData();
-   // fetchStates();
+    // fetchStates();
   }, [eventId, currentUser.token]);
 
   // useEffect(() => {
@@ -223,31 +236,45 @@ const UpdateEvent: React.FC<{
     e.preventDefault();
 
     if (!name) {
-      toast.error('Please enter the event name.');
+      toast.error('Please enter the event name.',{
+        className : 'z-[99999]'
+      });
       return;
     }
     if (!description) {
-      toast.error('Please enter the event description.');
+      toast.error('Please enter the event description.',{
+        className : 'z-[99999]'
+      });
       return;
     }
     if (!eventType) {
-      toast.error('Please select the event type.');
+      toast.error('Please select the event type.',{
+        className : 'z-[99999]'
+      });
       return;
     }
     if (!artist) {
-      toast.error('Please enter the artist name.');
+      toast.error('Please enter the artist name.',{
+        className : 'z-[99999]'
+      });
       return;
     }
     if (!eventDate) {
-      toast.error('Please select the event date.');
+      toast.error('Please select the event date.',{
+        className : 'z-[99999]'
+      });
       return;
     }
     if (genres.length === 0) {
-      toast.error('Please enter at least one genre.');
+      toast.error('Please enter at least one genre.',{
+        className : 'z-[99999]'
+      });
       return;
     }
     if (languages.length === 0) {
-      toast.error('Please enter at least one language.');
+      toast.error('Please enter at least one language.',{
+        className : 'z-[99999]'
+      });
       return;
     }
     // if (!address) {
@@ -263,11 +290,15 @@ const UpdateEvent: React.FC<{
     //   return;
     // }
     if (!eventCategory) {
-      toast.error('Please enter the event category.');
+      toast.error('Please enter the event category.',{
+        className : 'z-[99999]'
+      });
       return;
     }
     if (!selectedVenueId) {
-      toast.error('Please select the venue.');
+      toast.error('Please select the venue.',{
+        className : 'z-[99999]'
+      });
       return;
     }
 
@@ -300,7 +331,9 @@ const UpdateEvent: React.FC<{
           'Content-Type': 'multipart/form-data',
         },
       });
-      toast.success('Event data updated successfully!');
+      toast.success('Event data updated successfully!',{
+        className : 'z-[99999]'
+      });
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
       }
@@ -311,7 +344,9 @@ const UpdateEvent: React.FC<{
       const errorMessage =
         error?.response?.data?.message ||
         'Oops! Something went wrong while updating the event. Please try again later.';
-      toast.error(errorMessage);
+      toast.error(errorMessage,{
+        className : 'z-[99999]'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -520,7 +555,11 @@ const UpdateEvent: React.FC<{
                           Select Venue
                         </option>
                         {venues.map((venue) => (
-                          <option key={venue._id} value={venue._id} className="capitalize">
+                          <option
+                            key={venue._id}
+                            value={venue._id}
+                            className="capitalize"
+                          >
                             {venue.name}
                           </option>
                         ))}
@@ -584,7 +623,9 @@ const UpdateEvent: React.FC<{
                                 value={genre}
                                 onChange={(e) =>
                                   setGenres(
-                                    genres.map((g, i) => (i === index ? e.target.value : g)),
+                                    genres.map((g, i) =>
+                                      i === index ? e.target.value : g,
+                                    ),
                                   )
                                 }
                                 className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -595,7 +636,9 @@ const UpdateEvent: React.FC<{
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               type="button"
-                              onClick={() => setGenres(genres.filter((_, i) => i !== index))}
+                              onClick={() =>
+                                setGenres(genres.filter((_, i) => i !== index))
+                              }
                               className="px-3 py-2 bg-red-500 text-white rounded-md"
                             >
                               <X size={16} />
@@ -627,7 +670,9 @@ const UpdateEvent: React.FC<{
                                 value={language}
                                 onChange={(e) =>
                                   setLanguages(
-                                    languages.map((l, i) => (i === index ? e.target.value : l)),
+                                    languages.map((l, i) =>
+                                      i === index ? e.target.value : l,
+                                    ),
                                   )
                                 }
                                 className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -638,7 +683,11 @@ const UpdateEvent: React.FC<{
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               type="button"
-                              onClick={() => setLanguages(languages.filter((_, i) => i !== index))}
+                              onClick={() =>
+                                setLanguages(
+                                  languages.filter((_, i) => i !== index),
+                                )
+                              }
                               className="px-3 py-2 bg-red-500 text-white rounded-md"
                             >
                               <X size={16} />
@@ -661,50 +710,82 @@ const UpdateEvent: React.FC<{
 
                 {/* Image Uploads */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField label="Event Image (104 × 123 px)" name="eventImage">
+                  <FormField
+                    label="Event Image (104 × 123 px)"
+                    name="eventImage"
+                  >
                     <ImageUploader
                       onImageChange={(file: any) => setEventImage(file)}
                       selectedImage={eventImage}
-                      existingImage={existingEventImage}
+                      existingImage={Urls.Image_url + existingEventImage}
                     />
                   </FormField>
 
-                  <FormField label="Banner Image (345 × 153 px)" name="bannerImage">
+                  <FormField
+                    label="Banner Image (345 × 153 px)"
+                    name="bannerImage"
+                  >
                     <ImageUploader
                       onImageChange={(file: any) => setBannerImage(file)}
                       selectedImage={bannerImage}
-                      existingImage={existingBannerImage}
+                      existingImage={Urls.Image_url + existingBannerImage}
                     />
                   </FormField>
 
-                  <FormField label="Advertisement Image (306 × 485 px)" name="advImage">
+                  <FormField
+                    label="Advertisement Image (306 × 485 px)"
+                    name="advImage"
+                  >
                     <ImageUploader
                       onImageChange={(file: any) => setAdvImage(file)}
                       selectedImage={advImage}
-                      existingImage={existingAdvImage}
+                      existingImage={Urls.Image_url + existingAdvImage}
                     />
                   </FormField>
                 </div>
 
                 {/* Checkboxes */}
-                <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={isBanner}
-                      onChange={(e) => setIsBanner(e.target.checked)}
-                      className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                    />
-                    <span className="text-sm text-slate-700">Banner</span>
+                <div className="flex flex-wrap gap-6">
+                  {/* Banner Toggle */}
+                  <label
+                    htmlFor="banner"
+                    className="flex items-center cursor-pointer"
+                  >
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        id="banner"
+                        className="sr-only peer"
+                        checked={isBanner}
+                        onChange={(e) => setIsBanner(e.target.checked)}
+                      />
+                      <div className="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors duration-300"></div>
+                      <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 peer-checked:translate-x-5"></div>
+                    </div>
+                    <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                      Banner
+                    </span>
                   </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={isAds}
-                      onChange={(e) => setIsAds(e.target.checked)}
-                      className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                    />
-                    <span className="text-sm text-slate-700">Ads</span>
+
+                  {/* Ads Toggle */}
+                  <label
+                    htmlFor="ads"
+                    className="flex items-center cursor-pointer"
+                  >
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        id="ads"
+                        className="sr-only peer"
+                        checked={isAds}
+                        onChange={(e) => setIsAds(e.target.checked)}
+                      />
+                      <div className="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors duration-300"></div>
+                      <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 peer-checked:translate-x-5"></div>
+                    </div>
+                    <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                      Ads
+                    </span>
                   </label>
                 </div>
 

@@ -95,7 +95,7 @@ const ManagerPage: React.FC = () => {
                   </h1>
                   <p className="text-gray-600 mt-1">Browse, search and filter managers by category and status</p>
                 </div>
-                <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                <SearchBar placeholder={`Search Managers...`} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
               </motion.div>
 
               <motion.div

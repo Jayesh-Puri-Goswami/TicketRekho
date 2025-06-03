@@ -70,12 +70,17 @@ const SignIn: React.FC = () => {
             navigate('/dashboard');
           } else if (
             userRole === 'theatreManager' ||
-            userRole === 'theatreEmployee'
+            userRole === 'theatreEmployee' ||
+            userRole === "Theatre Manager" ||
+            userRole === "Theatre Employee"
           ) {
+            console.log(userRole);
             navigate('/theatre-dashboard');
           } else if (
             userRole === 'eventManager' ||
-            userRole === 'eventEmployee'
+            userRole === 'eventEmployee' ||
+            userRole === 'Event Manager' ||
+            userRole === 'Event Employee'
           ) {
             navigate('/event-dashboard');
           }

@@ -123,7 +123,9 @@ const AdvertisementTable: React.FC = () => {
       )
       .then((response) => {
         if (response.data.status) {
-          toast.success('Advertisement deleted successfully.');
+          toast.success('Advertisement deleted successfully.',{
+        className : 'z-[99999]'
+      });
           setadvertisementy((prevAdvertisements) =>
             prevAdvertisements.filter(
               (advertisement) => advertisement._id !== id,

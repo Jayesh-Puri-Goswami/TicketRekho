@@ -60,6 +60,7 @@ import EventRealTimeNonSittingSeatStatus from './pages/TheatreManager/EventRealT
 import ViewManagerProfile from './components/Modals/ViewManagerProfile';
 import Employee from './pages/Employee';
 import EmployeeDetails from './pages/EmployeeDetails';
+import MovieDetail from './pages/MovieDetail';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -141,7 +142,9 @@ function App() {
         <Route
           element={
             <DefaultLayout>
-              <PrivateRoute allowedRoles={['admin', 'theatreManager', 'eventManager','eventEmployee','theatreEmployee']} />
+              <PrivateRoute allowedRoles={['admin', 'theatreManager', "Theatre Manager", 'eventManager','eventEmployee','theatreEmployee',
+                "Event Manager","Event Employee"
+              ]} />
             </DefaultLayout>
           }
         >
@@ -158,6 +161,8 @@ function App() {
           {/* Common Entities */}
           <Route path="/roles-permission" element={<><PageTitle title="Permissions" /><RolesPermission /></>} />
           <Route path="/movies" element={<><PageTitle title="Movies" /><Movies /></>} />
+          <Route path="/movies/detail/:movieId" element={<><PageTitle title="Movies Detail" /><MovieDetail /></>} />
+
           <Route path="/tickets" element={<><PageTitle title="Movie Tickets" /><Tickets /></>} />
           <Route path="/showtime" element={<><PageTitle title="ShowTime" /><ShowTime /></>} />
           <Route path="/theatres" element={<><PageTitle title="Theatres" /><Theatres /></>} />

@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import type { Manager } from "../../types/manager"
 import StatusBadge from "../Utils/StatusBadge"
 import CategoryBadge from "../Utils/CategoryBadge"
-import { Mail, Phone, MapPin, Calendar, BookOpen } from "lucide-react"
+import { Mail, Phone, MapPin, Calendar, BookOpen, User } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
 interface ManagerCardProps {
@@ -125,8 +125,8 @@ const ManagerCard: React.FC<ManagerCardProps> = ({ manager, index, onViewProfile
           className="mt-6 w-full py-2 bg-indigo-purple text-white rounded-lg font-medium flex items-center justify-center"
           onClick={() => onEditProfile(manager)}
         >
-          <BookOpen size={16} className="mr-2" />
-          Edit Profile
+          <User size={16} className="mr-2" />
+          View Profile
         </motion.button>
       </div>
     </motion.div>

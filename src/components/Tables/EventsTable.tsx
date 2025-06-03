@@ -8,7 +8,6 @@ import {
   faEdit,
   faTrashAlt,
   faHamburger,
-  faImage,
 } from '@fortawesome/free-solid-svg-icons';
 import Urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
@@ -18,6 +17,7 @@ import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { Loader } from 'lucide-react';
 
 interface Events {
   _id: string;
@@ -39,21 +39,6 @@ interface Events {
   bannerImage?: string;
   advertisementImage?: string;
 }
-
-interface Banner {
-  id: string;
-  title: string;
-  image: string;
-  isActive: boolean;
-}
-
-interface Advertisement {
-  id: string;
-  title: string;
-  image: string;
-  isActive: boolean;
-}
-
 type TabType = 'events' | 'banners' | 'advertisements';
 
 const EventsTable: React.FC = () => {
@@ -71,6 +56,7 @@ const EventsTable: React.FC = () => {
     direction: 'ascending',
   });
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(true);
   const [previewImage, setPreviewImage] = useState<{
     title: string;
     url: string;
@@ -130,7 +116,7 @@ const EventsTable: React.FC = () => {
 
   const fetchEvents = async (page: number, limit: number, search: string) => {
     try {
-      setLoading(true);
+      setTableLoading(true);
       let searchQuery = search;
       if (search.toLowerCase() === 'released') {
         searchQuery = 'true';
@@ -139,7 +125,9 @@ const EventsTable: React.FC = () => {
       }
 
       const response = await axios.get(
-        `${Urls.getAllEventsByManagerId}?page=${page}&limit=${limit}&search=${encodeURIComponent(
+        `${
+          Urls.getAllEventsByManagerId
+        }?page=${page}&limit=${limit}&search=${encodeURIComponent(
           searchQuery,
         )}`,
         {
@@ -183,6 +171,7 @@ const EventsTable: React.FC = () => {
       console.error('Error fetching events:', error);
     } finally {
       setLoading(false);
+      setTableLoading(false);
     }
   };
 
@@ -234,7 +223,6 @@ const EventsTable: React.FC = () => {
 
   const toggleStatus = (id: string, currentStatus: boolean) => {
     const updatedStatus = !currentStatus;
-
     axios
       .post(
         `${Urls.changeEventStatus}`,
@@ -275,14 +263,38 @@ const EventsTable: React.FC = () => {
       reverseButtons: true,
       position: 'center',
       customClass: {
-        confirmButton: 'swal2-confirm-custom',
-        cancelButton: 'swal2-cancel-custom',
+        confirmButton:
+          'bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition',
+        cancelButton:
+          'bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition',
       },
     }).then((result) => {
       if (result.isConfirmed) {
         deleteEvent(eventId);
       }
     });
+  };
+
+  const handleAddDelete = (id: string) => {
+    axios
+      .post(
+        `${Urls.deleteAdvertisementUrl}`,
+        { id },
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
+        },
+      )
+      .then((response) => {
+        if (response.data.status) {
+          toast.success('Advertisement deleted successfully.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting advertisement:', error);
+        toast.error('Error deleting advertisement.');
+      });
   };
 
   const deleteEvent = (id: string) => {
@@ -359,9 +371,9 @@ const EventsTable: React.FC = () => {
   const renderSortIcon = (key: keyof Events) => {
     if (sortConfig.key === key) {
       return sortConfig.direction === 'ascending' ? (
-        <FontAwesomeIcon icon={faArrowUp} className="ml-2" />
+        <FontAwesomeIcon icon={faArrowUp} className="ml-2 text-gray-500" />
       ) : (
-        <FontAwesomeIcon icon={faArrowDown} className="ml-2" />
+        <FontAwesomeIcon icon={faArrowDown} className="ml-2 text-gray-500" />
       );
     }
     return null;
@@ -383,50 +395,60 @@ const EventsTable: React.FC = () => {
     navigate(`/event-realtime-nonsitting-seat-status/${id}`);
   };
 
-  return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      {/* Tabs */}
-      <div className="flex border-b border-stroke mb-4">
-        <button
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'events'
-              ? 'text-transparent bg-clip-text bg-indigo-purple border-b-2 border-primary'
-              : 'text-black dark:text-white'
-          }`}
-          onClick={() => handleTabChange('events')}
-        >
-          Events
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'banners'
-              ? 'text-transparent bg-clip-text bg-indigo-purple border-b-2 border-primary'
-              : 'text-black dark:text-white'
-          }`}
-          onClick={() => handleTabChange('banners')}
-        >
-          Banners
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'advertisements'
-              ? 'text-transparent bg-clip-text bg-indigo-purple border-b-2 border-primary'
-              : 'text-black dark:text-white'
-          }`}
-          onClick={() => handleTabChange('advertisements')}
-        >
-          Advertisements
-        </button>
-      </div>
 
-      <div className="flex gap-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="mb-4 w-full p-2 border border-gray-300 rounded dark:bg-boxdark"
-          onChange={handleSearch}
-          value={searchTerm}
-        />
+    if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader size={48} className="text-indigo-600 animate-spin mb-4" />
+        <h2 className="text-xl font-medium text-gray-700">Loading Events...</h2>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+      {/* Tabs */}
+      {/* <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 mb-6">
+        {['events', 'banners', 'advertisements'].map((tab) => (
+          <button
+            key={tab}
+            className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+              activeTab === tab
+                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
+            onClick={() => handleTabChange(tab as TabType)}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div> */}
+
+      {/* Search and Add Event */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Search by name, city, type, date, or status..."
+            className="w-full p-3 pl-10 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-500 transition"
+            onChange={handleSearch}
+            value={searchTerm}
+          />
+          <svg
+            className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
         {activeTab === 'events' && roleName !== 'admin' && (
           <EventModalForm onSubmitSuccess={handleModalFormSubmit} />
         )}
@@ -434,106 +456,108 @@ const EventsTable: React.FC = () => {
 
       {/* Image Preview Modal */}
       {previewImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-          <div className="bg-white dark:bg-boxdark rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-black dark:text-white">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                 {previewImage.title}
               </h3>
               <button
                 onClick={closeImagePreview}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
-                <span className="text-2xl">&times;</span>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
               </button>
             </div>
-            <div className="flex justify-center">
-              <img
-                src={previewImage.url || '/placeholder.svg'}
-                alt={previewImage.title}
-                className="max-w-full max-h-[70vh] object-contain"
-                onError={(e) => {
-                  e.currentTarget.src =
-                    '../../../public/Image/Fallback Image/default-fallback-image.png';
-                }}
-              />
-            </div>
+            <img
+              src={previewImage.url || '/placeholder.svg'}
+              alt={previewImage.title}
+              className="w-full max-h-[70vh] object-contain rounded-md"
+              onError={(e) => {
+                e.currentTarget.src =
+                  '/Image/Fallback Image/default-fallback-image.png';
+              }}
+            />
           </div>
         </div>
       )}
 
-      <div className="max-w-full overflow-x-auto">
+      <div className="overflow-x-auto">
         {activeTab === 'events' && (
-          <table className="w-full bg-slate-100 text-sm text-left text-gray-700 dark:text-gray-200">
-            <thead className="text-xs text-white uppercase bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600">
+          <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
+            <thead className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800">
               <tr>
                 <th
-                  scope="col"
-                  className="px-6 py-4 text-center rounded-tl-lg cursor-pointer"
+                  className="px-6 py-4 rounded-tl-lg cursor-pointer"
                   onClick={() => handleSort('name')}
                 >
                   Event {renderSortIcon('name')}
                 </th>
                 <th
-                  scope="col"
-                  className="px-6 py-4 text-center cursor-pointer"
+                  className="px-6 py-4 cursor-pointer"
                   onClick={() => handleSort('city')}
                 >
                   City {renderSortIcon('city')}
                 </th>
                 <th
-                  scope="col"
-                  className="px-6 py-4 text-center cursor-pointer"
+                  className="px-6 py-4 cursor-pointer"
                   onClick={() => handleSort('eventType')}
                 >
                   Type {renderSortIcon('eventType')}
                 </th>
                 <th
-                  scope="col"
-                  className="px-6 py-4 text-center cursor-pointer"
+                  className="px-6 py-4 cursor-pointer"
                   onClick={() => handleSort('eventDate')}
                 >
                   Date {renderSortIcon('eventDate')}
                 </th>
                 <th
-                  scope="col"
-                  className="px-6 py-4 text-center cursor-pointer"
+                  className="px-6 py-4 cursor-pointer"
                   onClick={() => handleSort('totalEarnings')}
                 >
                   Earnings {renderSortIcon('totalEarnings')}
                 </th>
                 <th
-                  scope="col"
-                  className="px-6 py-4 text-center cursor-pointer"
+                  className="px-6 py-4 cursor-pointer"
                   onClick={() => handleSort('isActive')}
                 >
-                  Launch {renderSortIcon('isActive')}
+                  Status {renderSortIcon('isActive')}
                 </th>
-                <th scope="col" className="px-6 py-4 text-center rounded-tr-lg">
-                  Actions
-                </th>
+                <th className="px-6 py-4 rounded-tr-lg">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {loading
                 ? [...Array(5)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="w-12 h-12 bg-slate-300 rounded-md mb-2"></div>
-                          <div className="h-4 bg-slate-300 w-24 rounded"></div>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-16 bg-gray-200 rounded-md"></div>
+                          <div className="h-5 bg-gray-200 rounded w-40"></div>
                         </div>
                       </td>
-                      {[...Array(5)].map((_, i) => (
-                        <td key={i} className="px-6 py-4 text-center">
-                          <div className="h-4 bg-slate-300 rounded w-full"></div>
+                      {[...Array(5)].map((_, j) => (
+                        <td key={j} className="px-6 py-4">
+                          <div className="h-5 bg-gray-200 rounded w-24"></div>
                         </td>
                       ))}
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex justify-center gap-2">
-                          <div className="w-6 h-6 bg-slate-300 rounded-full"></div>
-                          <div className="w-6 h-6 bg-slate-300 rounded-full"></div>
-                          <div className="w-6 h-6 bg-slate-300 rounded-full"></div>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center gap-3">
+                          <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+                          <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+                          <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
                         </div>
                       </td>
                     </tr>
@@ -541,9 +565,8 @@ const EventsTable: React.FC = () => {
                 : filteredEvents.map((event, i) => (
                     <tr
                       key={i}
-                      className="hover:bg-indigo-700/10 dark:hover:bg-indigo-700/10 transition"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150"
+                      onClick={() => {
                         if (event.eventType === 'Sitting') {
                           handleSittingClick(event.id);
                         } else if (event.eventType === 'Non Sitting') {
@@ -551,25 +574,29 @@ const EventsTable: React.FC = () => {
                         }
                       }}
                     >
-                      <td className="px-6 py-5 text-center">
-                        <div className="flex flex-col items-center">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
                           <img
                             src={event.eventImage}
                             alt={event.name}
+                            className="w-12 h-16 object-cover rounded-md"
                             onError={(e) =>
                               (e.currentTarget.src =
-                                '../../../public/Image/Fallback Image/default-fallback-image.png')
+                                '/Image/Fallback Image/default-fallback-image.png')
                             }
-                            className="w-30 h-12 object-cover rounded-md mb-1"
                           />
-                          <span className="font-semibold text-sm truncate w-[8rem]">
+                          <span className="text-base font-semibold text-gray-800 dark:text-gray-100 max-w-[200px]">
                             {event.name}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-5 text-center font-bold">{event.city}</td>
-                      <td className="px-6 py-5 text-center">{event.eventType}</td>
-                      <td className="px-6 py-5 text-center">
+                      <td className="px-6  text-base py-4 text-gray-600 dark:text-gray-300">
+                        {event.city}
+                      </td>
+                      <td className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
+                        {event.eventType}
+                      </td>
+                      <td className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
                         {new Date(event.eventDate).toLocaleString(undefined, {
                           year: 'numeric',
                           month: '2-digit',
@@ -579,32 +606,32 @@ const EventsTable: React.FC = () => {
                           hour12: false,
                         })}
                       </td>
-                      <td className="px-6 py-5 text-center">
+                      <td className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
                         ₹{Number(event.totalEarnings).toLocaleString()}
                       </td>
-                      <td className="px-6 py-5 text-center">
+                      <td className="px-6 text-base py-4">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleStatus(event.id, event.isActive);
                           }}
-                          className={`inline-flex items-center justify-center rounded-full text-xs font-semibold px-3 py-1 transition ${
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition ${
                             event.isActive
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-800 dark:text-white'
-                              : 'bg-rose-100 text-rose-700 dark:bg-rose-800 dark:text-white'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
+                              : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'
                           }`}
                         >
                           {event.isActive ? 'Released' : 'Unreleased'}
                         </button>
                       </td>
-                      <td className="px-6 py-5 text-center">
-                        <div className="flex justify-center space-x-3">
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center gap-3">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEditClick(event.id);
                             }}
-                            className="text-indigo-500 hover:text-indigo-700 transition"
+                            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                             title="Edit"
                           >
                             <FontAwesomeIcon icon={faEdit} />
@@ -614,7 +641,7 @@ const EventsTable: React.FC = () => {
                               e.stopPropagation();
                               handleGrabaBiteClick(event.id);
                             }}
-                            className="text-indigo-500 hover:text-indigo-700 transition"
+                            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                             title="Grab a Bite"
                           >
                             <FontAwesomeIcon icon={faHamburger} />
@@ -624,7 +651,7 @@ const EventsTable: React.FC = () => {
                               e.stopPropagation();
                               handleDelete(event.id);
                             }}
-                            className="text-red-500 hover:text-red-700 transition"
+                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
                             title="Delete"
                           >
                             <FontAwesomeIcon icon={faTrashAlt} />
@@ -638,30 +665,30 @@ const EventsTable: React.FC = () => {
         )}
 
         {activeTab === 'banners' && (
-          <table className="w-full bg-slate-100 text-sm text-left text-gray-700 dark:text-gray-200">
-            <thead className="text-xs text-white uppercase bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600">
+          <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
+            <thead className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-4 text-center rounded-tl-lg">Banner</th>
-                <th className="px-6 py-4 text-center">Title</th>
-                <th className="px-6 py-4 text-center rounded-tr-lg">Actions</th>
+                <th className="px-6 py-4 rounded-tl-lg">Banner</th>
+                <th className="px-6 py-4">Title</th>
+                <th className="px-6 py-4 rounded-tr-lg">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {loading ? (
                 [...Array(3)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="w-30 h-12 bg-slate-300 rounded-md mb-2"></div>
-                        <div className="h-4 bg-slate-300 w-24 rounded"></div>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-16 bg-gray-200 rounded-md"></div>
+                        <div className="h-5 bg-gray-200 rounded w-24"></div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="h-4 bg-slate-300 rounded w-full"></div>
+                    <td className="px-6 py-4">
+                      <div className="h-5 bg-gray-200 rounded w-40"></div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <div className="w-6 h-6 bg-slate-300 rounded-full"></div>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center gap-3">
+                        <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
                       </div>
                     </td>
                   </tr>
@@ -670,42 +697,45 @@ const EventsTable: React.FC = () => {
                 filteredBanners.map((banner, i) => (
                   <tr
                     key={i}
-                    className="hover:bg-indigo-700/10 dark:hover:bg-gray-800 transition"
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150"
                   >
-                    <td className="px-6 py-5 text-center">
-                      <div className="flex flex-col items-center">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
                         <img
                           src={banner.bannerImage}
                           alt={banner.name}
+                          className="w-12 h-16 object-cover rounded-md"
                           onError={(e) =>
                             (e.currentTarget.src =
-                              '../../../public/Image/Fallback Image/default-fallback-image.png')
+                              '/Image/Fallback Image/default-fallback-image.png')
                           }
-                          className="w-30 h-12 object-cover rounded-md mb-1"
                         />
                         <button
                           onClick={() =>
-                            handleImagePreview(banner.name, banner?.bannerImage)
+                            handleImagePreview(
+                              banner.name || '',
+                              banner.bannerImage || '',
+                            )
                           }
-                          className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                          className="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                         >
-                          View Image
+                          View Banner
                         </button>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-center">
-                      <span className="font-semibold text-sm inline-block">
+                    <td className="px-6 py-4">
+                      <span className="text-base font-semibold text-gray-800 dark:text-gray-100">
                         {banner.name}
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-center">
-                      <div className="flex justify-center space-x-3">
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center gap-3">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(banner.id);
                           }}
-                          className="text-red-500 hover:text-red-700 transition"
+                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
                           title="Delete"
                         >
                           <FontAwesomeIcon icon={faTrashAlt} />
@@ -729,32 +759,30 @@ const EventsTable: React.FC = () => {
         )}
 
         {activeTab === 'advertisements' && (
-          <table className="w-full bg-slate-100 text-sm text-left text-gray-700 dark:text-gray-200">
-            <thead className="text-xs text-white uppercase bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600">
+          <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
+            <thead className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-4 text-center rounded-tl-lg">
-                  Advertisement
-                </th>
-                <th className="px-6 py-4 text-center">Title</th>
-                <th className="px-6 py-4 text-center rounded-tr-lg">Actions</th>
+                <th className="px-6 py-4 rounded-tl-lg">Advertisement</th>
+                <th className="px-6 py-4">Title</th>
+                <th className="px-6 py-4 rounded-tr-lg">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {loading ? (
                 [...Array(3)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="w-30 h-12 bg-slate-300 rounded-md mb-2"></div>
-                        <div className="h-4 bg-slate-300 w-24 rounded"></div>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-16 bg-gray-200 rounded-md"></div>
+                        <div className="h-5 bg-gray-200 rounded w-24"></div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="h-4 bg-slate-300 rounded w-full"></div>
+                    <td className="px-6 py-4">
+                      <div className="h-5 bg-gray-200 rounded w-40"></div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <div className="w-6 h-6 bg-slate-300 rounded-full"></div>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center gap-3">
+                        <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
                       </div>
                     </td>
                   </tr>
@@ -763,42 +791,42 @@ const EventsTable: React.FC = () => {
                 filteredAdvertisements.map((ad, i) => (
                   <tr
                     key={i}
-                    className="hover:bg-indigo-700/10 dark:hover:bg-gray-800 transition"
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150"
                   >
-                    <td className="px-6 py-5 text-center">
-                      <div className="flex flex-col items-center">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
                         <img
                           src={ad.advertisementImage}
                           alt={ad.name}
+                          className="w-12 h-16 object-cover rounded-md"
                           onError={(e) =>
                             (e.currentTarget.src =
-                              '../../../public/Image/Fallback Image/default-fallback-image.png')
+                              '/Image/Fallback Image/default-fallback-image.png')
                           }
-                          className="w-30 h-12 object-cover rounded-md mb-1"
                         />
                         <button
                           onClick={() =>
-                            handleImagePreview(ad.name, ad?.advertisementImage)
+                            handleImagePreview(ad.name, ad.advertisementImage)
                           }
-                          className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                          className="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                         >
-                          View Image
+                          View Advertisement
                         </button>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-center">
-                      <span className="font-semibold text-sm inline-block">
+                    <td className="px-6 py-4">
+                      <span className="text-base font-semibold text-gray-800 dark:text-gray-100">
                         {ad.name}
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-center">
-                      <div className="flex justify-center space-x-3">
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center gap-3">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(ad.id);
+                            handleAddDelete(ad.id);
                           }}
-                          className="text-red-500 hover:text-red-700 transition"
+                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
                           title="Delete"
                         >
                           <FontAwesomeIcon icon={faTrashAlt} />
@@ -829,16 +857,19 @@ const EventsTable: React.FC = () => {
           />
         )}
 
-        <div className="flex items-center justify-between mt-4">
-          <div>
-            <label htmlFor="itemsPerPage" className="mr-2">
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="itemsPerPage"
+              className="text-sm text-gray-600 dark:text-gray-300"
+            >
               Items per page:
             </label>
             <select
               id="itemsPerPage"
               value={itemsPerPage}
               onChange={handleItemsPerPageChange}
-              className="p-1 border border-gray-300 rounded dark:bg-boxdark"
+              className="p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-500"
             >
               <option value={10}>10</option>
               <option value={15}>15</option>
@@ -846,15 +877,17 @@ const EventsTable: React.FC = () => {
               <option value={50}>50</option>
             </select>
           </div>
-          <div>
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="mr-2 p-2 bg-gray-200 rounded disabled:opacity-50"
+              className={`px-4 py-2 bg-indigo-600 text-white rounded-md disabled:bg-gray-300 dark:disabled:bg-gray-600 transition ${
+                currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               Previous
             </button>
-            <span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
               Page {currentPage} of {totalPages}
             </span>
             <button
@@ -862,7 +895,7 @@ const EventsTable: React.FC = () => {
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages}
-              className="ml-2 p-2 bg-gray-200 rounded disabled:opacity-50"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md disabled:bg-gray-300 dark:disabled:bg-gray-600 transition"
             >
               Next
             </button>

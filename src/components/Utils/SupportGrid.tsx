@@ -63,7 +63,9 @@ const SupportGrid: React.FC = () => {
         toast.error('Failed to load support tickets');
       })
       .finally(() => {
-        setLoading(false);
+         setTimeout(() => {
+            setLoading(false);
+          }, 1000);
       });
   };
 
@@ -140,6 +142,7 @@ const SupportGrid: React.FC = () => {
       const formData = {
         ticketId,
         adminReply: replyMessage,
+        status: 'closed',
       };
       setLoading(true);
       const response = await axios.post(`${Urls.updateSupportTicket}`, formData, {
@@ -158,6 +161,7 @@ const SupportGrid: React.FC = () => {
     } finally {
       setLoading(false);
       setIsReply(false);
+      fetchSupportTickets(currentPage, itemsPerPage);
     }
   };
 

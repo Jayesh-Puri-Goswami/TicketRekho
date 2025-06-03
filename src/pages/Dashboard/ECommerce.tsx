@@ -18,12 +18,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 
+// import { motion } from 'framer-motion';
+
 // Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import ReactApexChart from 'react-apexcharts';
 import { motion } from 'framer-motion';
+import CouponForm from '../../components/CouponForm';
+import { Loader } from 'lucide-react';
+
 
 // Types
 interface Movie {
@@ -33,6 +38,16 @@ interface Movie {
   releaseDate: string;
   description: string;
 }
+interface Event {
+  _id: number;
+  name: string;
+  movieImage: string;
+  releaseDate: string;
+  description: string;
+  eventImage: string;
+  eventDate: string;
+}
+
 
 interface Advertisement {
   id: number;
@@ -185,17 +200,15 @@ const ECommerce: React.FC = () => {
     inactive: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [loadingAds, setLoadingAds] = useState(true);
   const [loadingCoupons, setLoadingCoupons] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [advClicked, setAdvClicked] = useState(false);
-  const [advRefreshClicked, setAdvRefreshClicked] = useState(false);
   const [couponsClicked, setCouponClicked] = useState(false);
   const [couponRefreshClicked, setCouponsRefreshClicked] = useState(false);
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
-  const [totalManager, setTotalManager] = useState(0);
+  const [showModal, setShowModal] = useState(false);
 
-  const [latestEvents, setLatestEvents] = useState<Movie[]>([
+
+  const [latestEvents, setLatestEvents] = useState<Event[]>([
     {
       _id: 0,
       name: '',
@@ -336,24 +349,25 @@ const ECommerce: React.FC = () => {
 
   const Navigate = useNavigate();
 
-  const handleAddClick = () => {
-    setAdvClicked(true);
-    setTimeout(() => setAdvClicked(false), 300);
-    Navigate('/advertisement');
-  };
+  // const handleAddClick = () => {
+  //   setAdvClicked(true);
+  //   setTimeout(() => setAdvClicked(false), 300);
+  //   Navigate('/advertisement');
+  // };
 
-  const handleRefreshClick = () => {
-    setAdvRefreshClicked(true);
-    setLoadingAds(true);
-    fetchData();
-    setTimeout(() => setAdvRefreshClicked(false), 1000);
-    setTimeout(() => setLoadingAds(false), 1000);
-  };
+  // const handleRefreshClick = () => {
+  //   setAdvRefreshClicked(true);
+  //   setLoadingAds(true);
+  //   fetchData();
+  //   setTimeout(() => setAdvRefreshClicked(false), 1000);
+  //   setTimeout(() => setLoadingAds(false), 1000);
+  // };
 
   const handleAddCouponsClick = () => {
     setCouponClicked(true);
     setTimeout(() => setCouponClicked(false), 300);
-    Navigate('/coupon');
+    // Navigate('/coupon');
+    setShowModal(true)
   };
 
   const handleCouponsRefreshClick = () => {
@@ -361,13 +375,21 @@ const ECommerce: React.FC = () => {
       setLoadingCoupons(true);
       setCouponsRefreshClicked(true);
       fetchData();
+      setShowModal(false)
     } catch (error) {
       console.error('Error refreshing coupons:', error);
     }
   };
 
-  if (loading)
-    return <div className="text-center mt-10 text-lg">Loading...</div>;
+
+   if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader size={48} className="text-indigo-600 animate-spin mb-4" />
+        <h2 className="text-xl font-medium text-gray-700">Loading Dashboard...</h2>
+      </div>
+    )
+  }
   if (error)
     return <div className="text-center text-red-500 mt-10">Error: {error}</div>;
 
@@ -380,7 +402,7 @@ const ECommerce: React.FC = () => {
       </div> */}
       {/* <Breadcrumb pageName="Dashboard" /> */}
 
-      <div className="p-4 md:p-6 lg:p-8">
+      <motion.div  className="p-4 md:p-6 lg:p-8">
         {/* <h2 className="text-2xl font-semibold mb-6 text-gray-700">Dashboard</h2> */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
           {adminCards.map((item, index) => (
@@ -425,7 +447,7 @@ const ECommerce: React.FC = () => {
                   <SwiperSlide key={movie._id}>
                     <div
                       className="bg-gray-100 cursor-pointer rounded-lg overflow-hidden"
-                      onClick={() => Navigate('/movies')}
+                      onClick={() => Navigate(`/movies/detail/${movie._id}`)}
                     >
                       <img
                         src={`${Urls.Image_url}${movie.movieImage}`}
@@ -461,7 +483,7 @@ const ECommerce: React.FC = () => {
           </div>
 
           {/* Managers Chart */}
-          <div className="bg-white rounded-xl shadow-md p-5 flex flex-col">
+          {/* <div className="bg-white rounded-xl shadow-md p-5 flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-indigo-purple">
                 All Managers Status
@@ -475,7 +497,7 @@ const ECommerce: React.FC = () => {
                 height={300}
               />
             </div>
-          </div>
+          </div> */}
           {/* Active Coupons Component */}
           <div className="bg-white rounded-xl shadow-md p-5">
             <div className="flex justify-between items-center mb-4">
@@ -512,7 +534,7 @@ const ECommerce: React.FC = () => {
                   </svg>
                 </button>
 
-                <button
+                {/* <button
                   onClick={handleCouponsRefreshClick}
                   className={`p-2 bg-slate-200 text-gray-700 rounded-md hover:bg-gray-300  `}
                 >
@@ -536,7 +558,7 @@ const ECommerce: React.FC = () => {
                       fill="#1C274C"
                     />
                   </svg>
-                </button>
+                </button> */}
               </div>
             </div>
             <div className="h-[250px] overflow-y-auto pr-2 scrollbar-thin">
@@ -595,7 +617,7 @@ const ECommerce: React.FC = () => {
                 spaceBetween={20}
                 slidesPerView={1}
                 loop={true}
-                autoplay={{ delay: 3000 }}
+                autoplay={{ delay: 3500 }}
                 breakpoints={{
                   640: {
                     slidesPerView: 2,
@@ -606,15 +628,15 @@ const ECommerce: React.FC = () => {
                 }}
                 className="movie-swiper"
               >
-                {latestEvents.map((movie) => (
-                  <SwiperSlide key={movie._id}>
+                {latestEvents.map((event) => (
+                  <SwiperSlide key={event._id}>
                     <div
                       className="bg-gray-100 cursor-pointer rounded-lg overflow-hidden"
-                      onClick={() => Navigate('/movies')}
+                      onClick={() => Navigate(`/event-realtime-sitting-seat-status/${event._id}`)}
                     >
                       <img
-                        src={`${Urls.Image_url}${movie?.eventImage}`}
-                        alt={movie.name}
+                        src={`${Urls.Image_url}${event?.eventImage}`}
+                        alt={event.name}
                         className="w-full h-48 lg:object-cover md:object-cover object-center"
                         onError={(e: any) => {
                           e.target.onerror = null;
@@ -624,11 +646,11 @@ const ECommerce: React.FC = () => {
                       />
                       <div className="p-3">
                         <h3 className="font-medium text-gray-800">
-                          {movie.name}
+                          {event.name}
                         </h3>
                         <p className="text-sm text-gray-500">
                           Released:{' '}
-                          {new Date(movie.eventDate).toLocaleDateString(
+                          {new Date(event.eventDate).toLocaleDateString(
                             'en-US',
                             {
                               year: 'numeric',
@@ -645,7 +667,16 @@ const ECommerce: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+
+
+        <CouponForm
+          onSubmitSuccess={handleCouponsRefreshClick}
+          onCancel={() => {
+            setShowModal(false);
+          }}
+          show={showModal}
+        />
+      </motion.div>
     </>
   );
 };

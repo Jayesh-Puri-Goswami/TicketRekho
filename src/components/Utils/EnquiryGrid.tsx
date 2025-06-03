@@ -18,6 +18,7 @@ export interface EnquiryTicket {
   email: string;
   description: string;
   status: string;
+  adminReply?: string;
 }
 
 const MySwal = withReactContent(Swal);
@@ -58,7 +59,9 @@ const EnquiryGrid: React.FC = () => {
         toast.error('Failed to load enquiry tickets');
       })
       .finally(() => {
-        setLoading(false);
+         setTimeout(() => {
+            setLoading(false);
+          }, 1000);
       });
   };
 
@@ -175,6 +178,7 @@ const handleDelete = async (id: string) => {
       const formData = {
         ticketId,
         adminReply: replyMessage,
+        status: 'closed'
       };
       setLoading(true);
       const response = await axios.post(
@@ -198,6 +202,7 @@ const handleDelete = async (id: string) => {
 
       setLoading(false);
       setIsReply(false);
+      fetchEnquiryTickets(currentPage, itemsPerPage);
     }
   };
 

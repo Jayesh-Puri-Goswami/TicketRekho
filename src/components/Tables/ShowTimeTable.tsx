@@ -215,14 +215,14 @@ const ShowTimeTable: React.FC = () => {
         <table className="w-full bg-slate-100 text-sm text-left text-gray-700 dark:text-gray-200">
           <thead className="text-xs text-white uppercase bg-gradient-to-r from-indigo-500 to-purple-500">
             <tr>
-              <th className="px-6 py-4 text-center rounded-tl-lg">Movie {renderSortIcon('movie')}</th>
-              <th className="px-6 py-4 text-center">Theatre {renderSortIcon('theatre')}</th>
-              <th className="px-6 py-4 text-center">Screen {renderSortIcon('screen')}</th>
-              <th className="px-6 py-4 text-center">Start {renderSortIcon('startTime')}</th>
-              <th className="px-6 py-4 text-center">End {renderSortIcon('endTime')}</th>
-              <th className="px-6 py-4 text-center">Earnings {renderSortIcon('totalEarnings')}</th>
-              <th className="px-6 py-4 text-center">Launch {renderSortIcon('isActive')}</th>
-              <th className="px-6 py-4 text-center rounded-tr-lg">Actions</th>
+              <th className="px-6 py-4 text-base text-center rounded-tl-lg">Movie {renderSortIcon('movie')}</th>
+              <th className="px-6 py-4 text-base text-center">Theatre {renderSortIcon('theatre')}</th>
+              <th className="px-6 py-4 text-base text-center">Screen {renderSortIcon('screen')}</th>
+              <th className="px-6 py-4 text-base text-center">Start {renderSortIcon('startTime')}</th>
+              <th className="px-6 py-4 text-base text-center">End {renderSortIcon('endTime')}</th>
+              <th className="px-6 py-4 text-base text-center">Earnings {renderSortIcon('totalEarnings')}</th>
+              <th className="px-6 py-4 text-base text-center">Launch {renderSortIcon('isActive')}</th>
+              <th className="px-6 py-4 text-base text-center rounded-tr-lg">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -236,13 +236,13 @@ const ShowTimeTable: React.FC = () => {
                 ))
               : filtered.map((s, i) => (
                   <tr key={i} onClick={() => handleMovieTicketClick(s._id)} className="hover:bg-indigo-700/10 transition cursor-pointer">
-                    <td className="px-6 py-5 text-center font-semibold">{s.movie.name}</td>
-                    <td className="px-6 py-5 text-center">{s.theatre.name}</td>
-                    <td className="px-6 py-5 text-center">{s.screen.name}</td>
-                    <td className="px-6 py-5 text-center">{s.startTime}</td>
-                    <td className="px-6 py-5 text-center">{s.endTime}</td>
-                    <td className="px-6 py-5 text-center">₹{Number(s.totalEarnings).toLocaleString()}</td>
-                    <td className="px-6 py-5 text-center">
+                    <td className="px-6 py-5 text-base text-center font-semibold">{s.movie.name}</td>
+                    <td className="px-6 py-5 text-base text-center">{s.theatre.name}</td>
+                    <td className="px-6 py-5 text-base text-center">{s.screen.name}</td>
+                    <td className="px-6 py-5 text-base text-center">{s.startTime}</td>
+                    <td className="px-6 py-5 text-base text-center">{s.endTime}</td>
+                    <td className="px-6 py-5 text-base text-center">₹{Number(s.totalEarnings).toLocaleString()}</td>
+                    <td className="px-6 py-5 text-base text-center">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

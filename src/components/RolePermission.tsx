@@ -32,29 +32,31 @@ const RolePermission = () => {
       'enquiries',
       'support & feedback',
       'terms & conditions',
-    ].map((name) => ({ name, status: false }))
+      'employee management',
+    ].map((name) => ({ name, status: false })),
   );
 
   const tooltipMap: Record<string, string> = {
-    'states': 'Manage state and location data',
-    'managers': 'Control access to manager roles',
-    'users': 'Manage user accounts and details',
+    states: 'Manage state and location data',
+    managers: 'Control access to manager roles',
+    users: 'Manage user accounts and details',
     'movie management': 'Handle movie listings',
     'manage theatres': 'Add/edit theatre information',
-    'showtimes': 'Set and manage movie show schedules',
+    showtimes: 'Set and manage movie show schedules',
     'movie qr management': 'Handle QR codes for movies',
     'manage theatre reports': 'Access theatre analytics and reports',
     'event management': 'Create and manage events',
     'manage venues': 'Edit venue details for events',
     'event qr management': 'Handle QR codes for events',
     'manage event reports': 'View and manage event reports',
-    'banners': 'Manage promotional banners',
-    'advertisements': 'Control ad content and placement',
+    banners: 'Manage promotional banners',
+    advertisements: 'Control ad content and placement',
     'coupon codes': 'Create and manage discount codes',
-    'notifications': 'Send and manage alerts/messages',
-    'enquiries': 'Handle customer enquiries',
+    notifications: 'Send and manage alerts/messages',
+    enquiries: 'Handle customer enquiries',
     'support & feedback': 'Manage user support and feedback',
     'terms & conditions': 'Edit platform policies and terms',
+    'employee management': 'Edit employee details and roles',
   };
 
   const fetchRoles = async () => {
@@ -90,7 +92,9 @@ const RolePermission = () => {
   };
 
   const resetPermissions = () => {
-    setPermissions(Object.keys(tooltipMap).map((name) => ({ name, status: false })));
+    setPermissions(
+      Object.keys(tooltipMap).map((name) => ({ name, status: false })),
+    );
   };
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -108,24 +112,32 @@ const RolePermission = () => {
   const handleUpdate = async () => {
     const selectedRole = roles.find((r) => r._id === selectedRoleId);
     if (!permissions.some((p) => p.status)) {
-      toast.error('Please select at least one permission before updating.');
+      toast.error('Please select at least one permission before updating.',{
+        className : 'z-[99999]'
+      });
       return;
     }
 
     try {
-      const res = await axios.post(`${Urls.updatePermission}`, {
-        id: selectedRoleId,
-        role: selectedRole?.role,
-        permissions,
-      }, {
-        headers: {
-          Authorization: `Bearer ${currentUser.token}`,
-          'Content-Type': 'application/json',
+      const res = await axios.post(
+        `${Urls.updatePermission}`,
+        {
+          id: selectedRoleId,
+          role: selectedRole?.role,
+          permissions,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
       if (res.status === 200) {
-        toast.success('Permissions updated successfully!');
+        toast.success('Permissions updated successfully!',{
+        className : 'z-[99999]'
+      });
         if (selectedRole?.role === 'admin') {
           toast('Your permissions changed. Logging out...');
           setTimeout(() => {
@@ -134,11 +146,15 @@ const RolePermission = () => {
           }, 1000);
         }
       } else {
-        toast.error(`Error: ${res.data.message}`);
+        toast.error(`Error: ${res.data.message}`,{
+        className : 'z-[99999]'
+      });
       }
     } catch (error) {
       console.error('Update failed:', error);
-      toast.error('Failed to update permissions.');
+      toast.error('Failed to update permissions.',{
+        className : 'z-[99999]'
+      });
     }
   };
 
@@ -148,7 +164,11 @@ const RolePermission = () => {
   };
 
   const formatRoleName = (str: string) =>
-    str.replace(/([a-z])([A-Z])/g, '$1 $2').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    str
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
 
   useEffect(() => {
     fetchRoles();
@@ -169,14 +189,16 @@ const RolePermission = () => {
             </h1>
           </div>
 
-          <div className="mb-6">
+          <div className="mb-8">
             <label className="mb-3 block text-black">Select Role</label>
             <select
               value={selectedRoleId}
               onChange={handleRoleChange}
               className="w-full border border-gray-300 rounded-xl px-4 py-2"
             >
-              <option value="" disabled>Select Role</option>
+              <option value="" disabled>
+                Select Role
+              </option>
               {roles.map((role) => (
                 <option key={role._id} value={role._id}>
                   {formatRoleName(role.role)}
@@ -189,7 +211,7 @@ const RolePermission = () => {
             {permissions.map((perm, index) => (
               <motion.label
                 key={perm.name}
-                className="flex items-center space-x-3 cursor-pointer bg-gray-100 rounded-lg px-4 py-3 relative group "
+                className="permission-label"
                 whileHover={{ scale: 1.01 }}
               >
                 <input
@@ -198,9 +220,14 @@ const RolePermission = () => {
                   onChange={() => togglePermission(index)}
                   className="hidden peer"
                 />
-                <div className="w-5 h-5 border border-gray-400 rounded-md peer-checked:bg-indigo-purple peer-checked:border-indigo-600 flex items-center justify-center transition">
+                <div className="custom-checkbox">
                   {perm.status && (
-                    <svg width="12px" height="12px" viewBox="0 0 24 24" fill="none">
+                    <svg
+                      width="12px"
+                      height="12px"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
                       <polyline
                         points="3.7 14.3 9.6 19 20.3 5"
                         stroke="#fff"
@@ -211,16 +238,11 @@ const RolePermission = () => {
                     </svg>
                   )}
                 </div>
-                <span className="text-gray-800 capitalize relative group-hover:underline">
+                <span className="permission-name">
                   {perm.name}
-                  <motion.span
-                    initial={{ opacity: 0, y: -10 }}
-                    whileHover={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute left-full ml-2 top-0 bg-indigo-purple text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 whitespace-nowrap z-[90]"
-                  >
+                  <span className="custom-tooltip">
                     {tooltipMap[perm.name]}
-                  </motion.span>
+                  </span>
                 </span>
               </motion.label>
             ))}

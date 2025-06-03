@@ -294,6 +294,7 @@ const EventSeatx: React.FC = () => {
         <input
           type="number"
           value={newRowSeats}
+          min={0}
           onChange={(e) => setNewRowSeats(parseInt(e.target.value, 10))}
           className="px-3 py-2 border rounded w-20"
           placeholder="Seats"
@@ -304,6 +305,7 @@ const EventSeatx: React.FC = () => {
        <input
           type="number"
           value={price}
+          min={0}
           onChange={(e) => setPrice(parseInt(e.target.value, 0))}
           className="px-3 py-2 border rounded w-20"
           placeholder="Price"

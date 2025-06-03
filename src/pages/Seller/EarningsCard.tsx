@@ -153,6 +153,7 @@ const EarningsCard = () => {
             <div className="flex flex-col items-center">
               <input
                 type="number"
+                min={0}
                 className="border border-gray-300 dark:border-strokedark rounded-md p-2 w-full text-center mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter amount to withdraw"
                 value={withdrawAmount}

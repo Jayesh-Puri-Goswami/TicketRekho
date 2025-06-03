@@ -86,7 +86,9 @@ const CreateManModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
       setOpen(false); // Close modal after successful submission
       reset();
       toast.success(
-        'Manager created successfully! The new manager is now part of your team.',
+        'Manager created successfully! The new manager is now part of your team.',{
+        className : 'z-[99999]'
+      }
       );
       setTimeout(() => setSuccess(false), 5000);
       setSelectedImage(null);
@@ -96,7 +98,9 @@ const CreateManModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
     } catch (err: any) {
       console.error('API Error:', err.response?.data || err.message);
       toast.error(
-        'Oops! There was an error creating the manager. Please try again later.',
+        'Oops! There was an error creating the manager. Please try again later.',{
+        className : 'z-[99999]'
+      }
       );
       setError(
         err.response?.data?.message ||

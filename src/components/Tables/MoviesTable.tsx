@@ -1,3 +1,4 @@
+
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,14 +18,7 @@ import UpdateMovie from '../Modals/UpdateMovie';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '../Utils/TableUI';
+import { Loader } from 'lucide-react';
 
 interface Movies {
   _id: string;
@@ -42,13 +36,6 @@ interface Movies {
   bannerImage: string;
 }
 
-interface Banner {
-  id: string;
-  title: string;
-  image: string;
-  isActive: boolean;
-}
-
 interface Advertisement {
   id: string;
   title: string;
@@ -61,20 +48,7 @@ type TabType = 'movies' | 'banners' | 'advertisements';
 const MoviesTable: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('movies');
   const [sellers, setSellers] = useState<Movies[]>([]);
-  const [banners, setBanners] = useState<Banner[]>([
-    {
-      id: '1',
-      title: 'Summer Sale',
-      image: '/placeholder.svg?height=400&width=800',
-      isActive: true,
-    },
-    {
-      id: '2',
-      title: 'New Releases',
-      image: '/placeholder.svg?height=400&width=800',
-      isActive: false,
-    },
-  ]);
+  const [tableLoading, setTableLoading] = useState(true);
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([
     {
       id: '1',
@@ -105,12 +79,11 @@ const MoviesTable: React.FC = () => {
     title: string;
     url: string;
   } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
 
   const handleEditClick = (movieId: string) => {
     setSelectedMovieId(movieId);
@@ -126,12 +99,6 @@ const MoviesTable: React.FC = () => {
     setActiveTab(tab);
     setSearchTerm('');
     setCurrentPage(1);
-    // if (tab === 'advertisements') {
-    //   fetchAdvertisement(currentPage, itemsPerPage);
-    //   console.log(advertisements);
-
-    // }else if (tab === 'banners') {
-    // }
   };
 
   const handleImagePreview = (title: string, imageUrl: string) => {
@@ -144,16 +111,13 @@ const MoviesTable: React.FC = () => {
 
   const fetchMovies = async (page: number, limit: number, search: string) => {
     try {
-      setLoading(true);
-
-      // Convert 'Active'/'Inactive' search to boolean
+      setTableLoading(true);
       let searchQuery = search;
       if (search.toLowerCase() === 'active') {
         searchQuery = 'true';
       } else if (search.toLowerCase() === 'inactive') {
         searchQuery = 'false';
       }
-      // Fetch data from API
       const response = await axios.get(
         `${
           Urls.getMovies
@@ -203,34 +167,10 @@ const MoviesTable: React.FC = () => {
     } catch (error) {
       console.error('Error fetching movies:', error);
     } finally {
+      setTableLoading(false);
       setLoading(false);
     }
   };
-
-  // const fetchAdvertisement = (page: number, limit: number) => {
-  //   setLoading(true);
-
-  //   axios
-  //     .get(`${Urls.getAdvertisementsUrl}?page=${page}&limit=${limit}`, {
-  //       // params: { page, limit }, // Append query parameters
-  //       headers: {
-  //         Authorization: `Bearer ${currentUser.token}`,
-  //       },
-  //     })
-  //     .then((response) => {
-  //       if (response.data.data.ads) {
-  //         const ticketData = response.data.data.ads;
-  //         setAdvertisements(ticketData);
-  //         setTotalPages(response.data.data.pagination?.totalPages || 1);
-  //         setSellers(ticketData)
-  //       }
-  //       setLoading(false);
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error fetching data:', error);
-  //       setLoading(false);
-  //     });
-  // };
 
   const handleUpdateSuccess = () => {
     fetchMovies(currentPage, itemsPerPage, searchTerm);
@@ -243,7 +183,6 @@ const MoviesTable: React.FC = () => {
         fetchMovies(currentPage, itemsPerPage, searchTerm);
       }
     }, 400);
-
     return () => clearTimeout(delayDebounce);
   }, [currentPage, itemsPerPage, searchTerm]);
 
@@ -276,8 +215,8 @@ const MoviesTable: React.FC = () => {
     setItemsPerPage(Number.parseInt(e.target.value, 10));
   };
 
-  const handleManagerClick = (id: number) => {
-    navigate(`/sellerDetail/${id}`);
+  const handleManagerClick = (id: string) => {
+    navigate(`/movies/detail/${id}`);
   };
 
   const handleToggleStatus = (id: string, currentStatus: boolean) => {
@@ -301,12 +240,12 @@ const MoviesTable: React.FC = () => {
           );
           toast.success('Movie status updated successfully!');
         } else {
-          toast.error('Failed to delete the movie.');
+          toast.error('Failed to update movie status.');
         }
       })
       .catch((error) => {
-        console.error('Error deleting movie:', error);
-        toast.error('Error deleting the movie. Please try again.');
+        console.error('Error updating movie status:', error);
+        toast.error('Error updating movie status. Please try again.');
       });
   };
 
@@ -323,8 +262,10 @@ const MoviesTable: React.FC = () => {
       reverseButtons: true,
       position: 'center',
       customClass: {
-        confirmButton: 'swal2-confirm-custom',
-        cancelButton: 'swal2-cancel-custom',
+        confirmButton:
+          'bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition',
+        cancelButton:
+          'bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition',
       },
     }).then((result) => {
       if (result.isConfirmed) {
@@ -346,11 +287,13 @@ const MoviesTable: React.FC = () => {
       )
       .then((response) => {
         if (response.data.status) {
+          setAdvertisements((prevAds) => prevAds.filter((ad) => ad.id !== id));
           toast.success('Advertisement deleted successfully.');
         }
       })
       .catch((error) => {
         console.error('Error deleting advertisement:', error);
+        toast.error('Error deleting advertisement.');
       });
   };
 
@@ -399,10 +342,7 @@ const MoviesTable: React.FC = () => {
 
   const filteredBanners = sellers.filter((seller) => {
     const search = searchTerm.toLowerCase();
-    // console.log(seller);
-
     const isBanner = seller.isBanner ? 'active' : 'inactive';
-
     if (seller.isBanner) {
       return (
         seller.name?.toLowerCase().includes(search) ||
@@ -411,14 +351,12 @@ const MoviesTable: React.FC = () => {
         isBanner.includes(search)
       );
     }
+    return false;
   });
 
   const filteredAdvertisements = sellers.filter((seller) => {
     const search = searchTerm.toLowerCase();
-    // console.log(seller);
-
     const isAds = seller.isAds ? 'active' : 'inactive';
-
     if (seller.isAds) {
       return (
         seller.name?.toLowerCase().includes(search) ||
@@ -427,14 +365,15 @@ const MoviesTable: React.FC = () => {
         isAds.includes(search)
       );
     }
+    return false;
   });
 
   const renderSortIcon = (key: keyof Movies) => {
     if (sortConfig.key === key) {
       return sortConfig.direction === 'ascending' ? (
-        <FontAwesomeIcon icon={faArrowUp} className="ml-2" />
+        <FontAwesomeIcon icon={faArrowUp} className="ml-2 text-gray-500" />
       ) : (
-        <FontAwesomeIcon icon={faArrowDown} className="ml-2" />
+        <FontAwesomeIcon icon={faArrowDown} className="ml-2 text-gray-500" />
       );
     }
     return null;
@@ -444,50 +383,59 @@ const MoviesTable: React.FC = () => {
     fetchMovies(currentPage, itemsPerPage, searchTerm);
   };
 
-  return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      {/* Tabs */}
-      <div className="flex border-b border-stroke mb-4">
-        <button
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'movies'
-              ? 'text-transparent bg-clip-text bg-indigo-purple border-b-2 border-primary'
-              : 'text-black dark:text-white'
-          }`}
-          onClick={() => handleTabChange('movies')}
-        >
-          Movies
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'banners'
-              ? 'text-transparent bg-clip-text bg-indigo-purple border-b-2 border-primary'
-              : 'text-black dark:text-white'
-          }`}
-          onClick={() => handleTabChange('banners')}
-        >
-          Banners
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'advertisements'
-              ? 'text-transparent bg-clip-text bg-indigo-purple border-b-2 border-primary'
-              : 'text-black dark:text-white'
-          }`}
-          onClick={() => handleTabChange('advertisements')}
-        >
-          Advertisements
-        </button>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader size={48} className="text-indigo-600 animate-spin mb-4" />
+        <h2 className="text-xl font-medium text-gray-700">Loading Movies...</h2>
       </div>
+    );
+  }
 
-      <div className="flex gap-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="mb-4 w-full p-2 border border-gray-300 rounded dark:bg-boxdark"
-          onChange={handleSearch}
-          value={searchTerm}
-        />
+  return (
+    <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+      {/* Tabs */}
+      {/* <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 mb-6">
+        {['movies'].map((tab) => (
+          <button
+            key={tab}
+            className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+              activeTab === tab
+                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
+            onClick={() => handleTabChange(tab as TabType)}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div> */}
+
+      {/* Search and Add Movie */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Search by name, genre, format, or status..."
+            className="w-full p-3 pl-10 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-500 transition"
+            onChange={handleSearch}
+            value={searchTerm}
+          />
+          <svg
+            className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
         {activeTab === 'movies' && (
           <MovieModalForm onSubmitSuccess={handleModalFormSubmit} />
         )}
@@ -495,78 +443,101 @@ const MoviesTable: React.FC = () => {
 
       {/* Image Preview Modal */}
       {previewImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-          <div className="bg-white dark:bg-boxdark rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-black dark:text-white">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                 {previewImage.title}
               </h3>
               <button
                 onClick={closeImagePreview}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
-                <span className="text-2xl">&times;</span>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
               </button>
             </div>
-            <div className="flex justify-center">
-              <img
-                src={previewImage.url || '/placeholder.svg'}
-                alt={previewImage.title}
-                className="max-w-full max-h-[70vh] object-contain"
-                onError={(e) => {
-                  e.currentTarget.src =
-                    '../../../public/Image/Fallback Image/default-fallback-image.png';
-                }}
-              />
-            </div>
+            <img
+              src={previewImage.url || '/placeholder.svg'}
+              alt={previewImage.title}
+              className="w-full max-h-[70vh] object-contain rounded-md"
+              onError={(e) => {
+                e.currentTarget.src =
+                  '/Image/Fallback Image/default-fallback-image.png';
+              }}
+            />
           </div>
         </div>
       )}
 
-      <div className="max-w-full overflow-x-auto">
+      <div className="overflow-x-auto">
         {activeTab === 'movies' && (
-          <table className="w-full bg-slate-100 text-sm text-left text-gray-700 dark:text-gray-200">
-            <thead className="text-xs text-white uppercase bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600">
+          <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
+            <thead className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th scope="col" className="px-6 py-4 text-center rounded-tl-lg">
-                  Movies {renderSortIcon('name')}
+                <th
+                  className="px-6 py-4 rounded-tl-lg cursor-pointer"
+                  onClick={() => handleSort('name')}
+                >
+                  Movie {renderSortIcon('name')}
                 </th>
-                <th scope="col" className="px-6 py-4 text-center">
+                <th
+                  className="px-6 py-4 cursor-pointer"
+                  onClick={() => handleSort('runtime')}
+                >
                   Run Time {renderSortIcon('runtime')}
                 </th>
-                <th scope="col" className="px-6 py-4 text-center">
+                <th
+                  className="px-6 py-4 cursor-pointer"
+                  onClick={() => handleSort('genre')}
+                >
                   Genre {renderSortIcon('genre')}
                 </th>
-                <th scope="col" className="px-6 py-4 text-center">
+                <th
+                  className="px-6 py-4 cursor-pointer"
+                  onClick={() => handleSort('format')}
+                >
                   Format {renderSortIcon('format')}
                 </th>
-                <th scope="col" className="px-6 py-4 text-center">
+                <th
+                  className="px-6 py-4 cursor-pointer"
+                  onClick={() => handleSort('isActive')}
+                >
                   Status {renderSortIcon('isActive')}
                 </th>
-                <th scope="col" className="px-6 py-4 text-center rounded-tr-lg">
-                  Actions
-                </th>
+                <th className="px-6 py-4 rounded-tr-lg">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {loading
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              {tableLoading
                 ? [...Array(5)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="w-12 h-12 bg-slate-300 rounded-md mb-2"></div>
-                          <div className="h-4 bg-slate-300 w-24 rounded"></div>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-16 bg-gray-200 rounded-md"></div>
+                          <div className="h-5 bg-gray-200 rounded w-40"></div>
                         </div>
                       </td>
-                      {[...Array(4)].map((_, i) => (
-                        <td key={i} className="px-6 py-4 text-center">
-                          <div className="h-4 bg-slate-300 rounded w-full"></div>
+                      {[...Array(4)].map((_, j) => (
+                        <td key={j} className="px-6 py-4">
+                          <div className="h-5 bg-gray-200 rounded w-24"></div>
                         </td>
                       ))}
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex justify-center gap-2">
-                          <div className="w-6 h-6 bg-slate-300 rounded-full"></div>
-                          <div className="w-6 h-6 bg-slate-300 rounded-full"></div>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center gap-3">
+                          <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+                          <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
                         </div>
                       </td>
                     </tr>
@@ -574,47 +545,57 @@ const MoviesTable: React.FC = () => {
                 : filteredMovies.map((movie, i) => (
                     <tr
                       key={i}
-                      className="hover:bg-indigo-700/10 dark:hover:bg-indigo-700/10 transition"
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150 cursor-pointer"
+                      onClick={() => handleManagerClick(movie.id)}
                     >
-                      <td className="px-6 py-5 text-center">
-                        <div className="flex flex-col items-center">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
                           <img
                             src={movie.image}
+                            alt={movie.name}
+                            className="w-12 h-16 object-cover rounded-md"
                             onError={(e) =>
                               (e.currentTarget.src =
-                                '../../../public/Image/Fallback Image/default-fallback-image.png')
+                                '/Image/Fallback Image/default-fallback-image.png')
                             }
-                            alt={movie.name}
-                            className="w-30 h-12 object-cover rounded-md mb-1"
                           />
-                          <span className="font-semibold truncate w-[8rem]">
+                          <span className="text-base font-semibold text-gray-800 dark:text-gray-100 max-w-[200px]">
                             {movie.name}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-5 text-center">{movie.runtime}</td>
-                      <td className="px-6 py-5 text-center">{movie.genre}</td>
-                      <td className="px-6 py-5 text-center">{movie.format}</td>
-                      <td className="px-6 py-5 text-center">
+                      <td className="px-6 py-4 text-base text-gray-600 dark:text-gray-300">
+                        {movie.runtime}
+                      </td>
+                      <td className="px-6 py-4 text-base text-gray-600 dark:text-gray-300">
+                        {movie.genre}
+                      </td>
+                      <td className="px-6 py-4 text-base text-gray-600 dark:text-gray-300">
+                        {movie.format}
+                      </td>
+                      <td className="px-6 py-4">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleStatus(movie.id, movie.isActive);
                           }}
-                          className={`inline-flex items-center justify-center rounded-full text-xs font-semibold px-3 py-1 transition ${
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition ${
                             movie.isActive
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-800 dark:text-white'
-                              : 'bg-rose-100 text-rose-700 dark:bg-rose-800 dark:text-white'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
+                              : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'
                           }`}
                         >
                           {movie.isActive ? 'Active' : 'Inactive'}
                         </button>
                       </td>
-                      <td className="px-6 py-5 text-center">
-                        <div className="flex justify-center space-x-3">
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center gap-3">
                           <button
-                            onClick={() => handleEditClick(movie.id)}
-                            className="text-indigo-500 hover:text-indigo-700 transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditClick(movie.id);
+                            }}
+                            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                             title="Edit"
                           >
                             <FontAwesomeIcon icon={faEdit} />
@@ -624,7 +605,7 @@ const MoviesTable: React.FC = () => {
                               e.stopPropagation();
                               handleDelete(movie.id);
                             }}
-                            className="text-red-500 hover:text-red-700 transition"
+                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
                             title="Delete"
                           >
                             <FontAwesomeIcon icon={faTrashAlt} />
@@ -637,52 +618,52 @@ const MoviesTable: React.FC = () => {
           </table>
         )}
 
-        {activeTab === 'banners' && (
-          <table className="w-full bg-slate-100 text-sm text-left text-gray-700 dark:text-gray-200">
-            <thead className="text-xs text-white uppercase bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600">
+        {/* {activeTab === 'banners' && (
+          <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
+            <thead className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-4 text-center rounded-tl-lg">Banner</th>
-                <th className="px-6 py-4 text-center">Title</th>
-                <th className="px-6 py-4 text-center rounded-tr-lg">Actions</th>
+                <th className="px-6 py-4 rounded-tl-lg">Banner</th>
+                <th className="px-6 py-4">Title</th>
+                <th className="px-6 py-4 rounded-tr-lg">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {filteredBanners.map((banner, i) => (
                 <tr
                   key={i}
-                  className="hover:bg-indigo-700/10 dark:hover:bg-gray-800 transition"
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150"
                 >
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex flex-col items-center">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
                       <img
-                        src={banner.image}
+                        src={banner.bannerImage}
                         alt={banner.name}
+                        className="w-12 h-16 object-cover rounded-md"
                         onError={(e) =>
                           (e.currentTarget.src =
-                            '../../../public/Image/Fallback Image/default-fallback-image.png')
+                            '/Image/Fallback Image/default-fallback-image.png')
                         }
-                        className="w-30 h-12 object-cover rounded-md mb-1"
                       />
                       <button
                         onClick={() =>
-                          handleImagePreview(banner.name, banner.image)
+                          handleImagePreview(banner.name, banner.bannerImage)
                         }
-                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                        className="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                       >
-                        View Image
+                        View Banner
                       </button>
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-center">
-                    <span className="font-semibold text-sm inline-block">
+                  <td className="px-6 py-4">
+                    <span className="text-base font-semibold text-gray-800 dark:text-gray-100">
                       {banner.name}
                     </span>
                   </td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex justify-center space-x-3">
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-3">
                       <button
                         onClick={() => handleEditClick(banner.id)}
-                        className="text-indigo-500 hover:text-indigo-700 transition"
+                        className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                         title="Edit"
                       >
                         <FontAwesomeIcon icon={faEdit} />
@@ -696,56 +677,61 @@ const MoviesTable: React.FC = () => {
         )}
 
         {activeTab === 'advertisements' && (
-          <table className="w-full bg-slate-100 text-sm text-left text-gray-700 dark:text-gray-200">
-            <thead className="text-xs text-white uppercase bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600">
+          <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
+            <thead className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-4 text-center rounded-tl-lg">
-                  Advertisement
-                </th>
-                <th className="px-6 py-4 text-center">Title</th>
-                <th className="px-6 py-4 text-center rounded-tr-lg">Actions</th>
+                <th className="px-6 py-4 rounded-tl-lg">Advertisement</th>
+                <th className="px-6 py-4">Title</th>
+                <th className="px-6 py-4 rounded-tr-lg">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredAdvertisements.map((banner, i) => (
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              {filteredAdvertisements.map((ad, i) => (
                 <tr
                   key={i}
-                  className="hover:bg-indigo-700/10 dark:hover:bg-gray-800 transition"
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150"
                 >
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex flex-col items-center">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
                       <img
-                        src={banner.image}
-                        alt={banner.name}
+                        src={ad.advertisementImage}
+                        alt={ad.name}
+                        className="w-12 h-16 object-cover rounded-md"
                         onError={(e) =>
                           (e.currentTarget.src =
-                            '../../../public/Image/Fallback Image/default-fallback-image.png')
+                            '/Image/Fallback Image/default-fallback-image.png')
                         }
-                        className="w-30 h-12 object-cover rounded-md mb-1"
                       />
                       <button
                         onClick={() =>
-                          handleImagePreview(banner.name, banner.image)
+                          handleImagePreview(ad.name, ad.advertisementImage)
                         }
-                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                        className="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                       >
-                        View Image
+                        View Advertisement
                       </button>
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-center">
-                    <span className="font-semibold text-sm  inline-block">
-                      {banner.name}
+                  <td className="px-6 py-4">
+                    <span className="text-base font-semibold text-gray-800 dark:text-gray-100">
+                      {ad.name}
                     </span>
                   </td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex justify-center space-x-3">
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-3">
                       <button
-                        onClick={() => handleEditClick(banner.id)}
-                        className="text-indigo-500 hover:text-indigo-700 transition"
+                        onClick={() => handleEditClick(ad.id)}
+                        className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                         title="Edit"
                       >
                         <FontAwesomeIcon icon={faEdit} />
+                      </button>
+                      <button
+                        onClick={() => handleAddDelete(ad.id)}
+                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
+                        title="Delete"
+                      >
+                        <FontAwesomeIcon icon={faTrashAlt} />
                       </button>
                     </div>
                   </td>
@@ -753,7 +739,7 @@ const MoviesTable: React.FC = () => {
               ))}
             </tbody>
           </table>
-        )}
+        )} */}
 
         {isModalOpen && selectedMovieId && (
           <UpdateMovie
@@ -763,16 +749,19 @@ const MoviesTable: React.FC = () => {
           />
         )}
 
-        <div className="flex items-center justify-between mt-4">
-          <div>
-            <label htmlFor="itemsPerPage" className="mr-2">
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="itemsPerPage"
+              className="text-sm text-gray-600 dark:text-gray-300"
+            >
               Items per page:
             </label>
             <select
               id="itemsPerPage"
               value={itemsPerPage}
               onChange={handleItemsPerPageChange}
-              className="p-1 border border-gray-300 rounded dark:bg-boxdark"
+              className="p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-500"
             >
               <option value={10}>10</option>
               <option value={15}>15</option>
@@ -780,15 +769,17 @@ const MoviesTable: React.FC = () => {
               <option value={50}>50</option>
             </select>
           </div>
-          <div>
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="mr-2 p-2 bg-gray-200 rounded disabled:opacity-50"
+              className={`px-4 py-2 bg-indigo-600 text-white rounded-md disabled:bg-gray-300 dark:disabled:bg-gray-600 transition ${
+                currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               Previous
             </button>
-            <span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
               Page {currentPage} of {totalPages}
             </span>
             <button
@@ -796,7 +787,7 @@ const MoviesTable: React.FC = () => {
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages}
-              className="ml-2 p-2 bg-gray-200 rounded disabled:opacity-50"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md disabled:bg-gray-300 dark:disabled:bg-gray-600 transition"
             >
               Next
             </button>

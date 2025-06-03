@@ -258,7 +258,9 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
     if (invalidSeats.length > 0) {
       // console.log("Validation failed. The following seat types have invalid prices:");
       invalidSeats.forEach((seat) => {
-        toast.error(`- ${seat.seatType} should have a price greater than 0`);
+        toast.error(`- ${seat.seatType} should have a price greater than 0`,{
+        className : 'z-[99999]'
+      });
       });
       setError('Price should be greater than 0.');
       return;
@@ -284,7 +286,9 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
       });
       //  console.log('Success:', response.data);
       toast.success(
-        'Showtime added successfully! Your new showtime is now available.',
+        'Showtime added successfully! Your new showtime is now available.',{
+        className : 'z-[99999]'
+      }
       );
       // setTimeout(() => setSuccess(false), 5000);
       if (onSubmitSuccess) {
@@ -296,7 +300,9 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
     } catch (error) {
       console.error('Error:', error);
       toast.error(
-        'Oops! Something went wrong while adding the showtime. Please try again later.',
+        'Oops! Something went wrong while adding the showtime. Please try again later.',{
+        className : 'z-[99999]'
+      }
       );
     }
   };

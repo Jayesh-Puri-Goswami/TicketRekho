@@ -162,8 +162,8 @@ const UsersTable: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-transparent p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent p-4 md:p-8 max-w-7xl">
+      <div className="w-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -181,7 +181,7 @@ const UsersTable: React.FC = () => {
               </p>
             </div>
           </motion.div>
-          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <SearchBar placeholder= {`Search Users ...`} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </div>
 
         <motion.div

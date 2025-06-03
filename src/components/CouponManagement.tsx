@@ -53,7 +53,9 @@ const CouponManagement: React.FC = () => {
       })
       .catch((error) => {
         console.error('Error fetching coupons:', error);
-        toast.error(error.response?.data?.message || 'Error fetching coupons');
+        toast.error(error.response?.data?.message || 'Error fetching coupons',{
+        className : 'z-[99999]'
+      });
         setLoading(false);
       });
   };
@@ -114,12 +116,16 @@ const CouponManagement: React.FC = () => {
             { headers: { Authorization: `Bearer ${currentUser.token}` } }
           )
           .then(() => {
-            toast.success('Coupon deleted successfully!');
+            toast.success('Coupon deleted successfully!',{
+        className : 'z-[99999]'
+      });
             setCoupons(prev => prev.filter(c => c._id !== couponId));
           })
           .catch(error => {
             console.error('Delete error:', error);
-            toast.error(error.response?.data?.message || 'Delete failed');
+            toast.error(error.response?.data?.message || 'Delete failed',{
+        className : 'z-[99999]'
+      });
           });
       }
     });

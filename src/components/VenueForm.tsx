@@ -100,10 +100,14 @@ const VenueForm: React.FC<ModalformProps> = ({
 
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
-        toast.success('Tickets added successfully!');
+        toast.success('Tickets added successfully!',{
+        className : 'z-[99999]'
+      });
       }
     } catch (err) {
-      toast.error('Oops! Something went wrong while adding the tickets.');
+      toast.error('Oops! Something went wrong while adding the tickets.',{
+        className : 'z-[99999]'
+      });
       setError('Failed to process the request. Please try again.');
     } finally {
       setLoading(false);
@@ -166,6 +170,7 @@ const VenueForm: React.FC<ModalformProps> = ({
                         type="number"
                         value={ticket.price === 0 ? '' : ticket.price}
                         placeholder="Price"
+                        min={0}
                         onChange={(e) =>
                           setNonSittingTicketsType(
                             nonSittingTicketsType.map((t, i) =>
@@ -180,6 +185,7 @@ const VenueForm: React.FC<ModalformProps> = ({
                         type="number"
                         value={ticket.ticketCount === 0 ? '' : ticket.ticketCount}
                         placeholder="Total Ticket"
+                        min={0}
                         onChange={(e) =>
                           setNonSittingTicketsType(
                             nonSittingTicketsType.map((t, i) =>

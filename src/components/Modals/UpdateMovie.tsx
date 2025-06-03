@@ -4,7 +4,17 @@ import Urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Film, Clock, User, Tag, Languages, Cast, Calendar, Image as ImageIcon } from 'lucide-react';
+import {
+  X,
+  Film,
+  Clock,
+  User,
+  Tag,
+  Languages,
+  Cast,
+  Calendar,
+  Image as ImageIcon,
+} from 'lucide-react';
 import ImageUploader from '../Utils/ImageUploader';
 import FormField from '../Utils/FormField';
 
@@ -99,14 +109,16 @@ const UpdateMovie: React.FC<{
         setExistingBannerImage(data.bannerImage || '');
         setExistingAdvImage(data.advImage || '');
         setExistingCastImages(data.castImages || []);
-        setIsBanner(data.isBanner === 'true');
-        setIsAds(data.isAds === 'true');
-        setIsPopular(data.isPopular === 'true');
-        setIsLatest(data.isLatest === 'true');
+        setIsBanner(data.isBanner === true);
+        setIsAds(data.isAds === true);
+        setIsPopular(data.isPopular === true);
+        setIsLatest(data.isLatest === true);
         setReleaseDate(formatDate(data.releaseDate));
       } catch (error) {
         console.error('Error fetching movie data:', error);
-        toast.error('Failed to load movie data.');
+        toast.error('Failed to load movie data.', {
+          className: 'z-[99999]',
+        });
       }
     };
 
@@ -165,43 +177,63 @@ const UpdateMovie: React.FC<{
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      toast.error('Please enter the movie name.');
+      toast.error('Please enter the movie name.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (!description.trim()) {
-      toast.error('Please enter the movie description.');
+      toast.error('Please enter the movie description.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (!director.trim()) {
-      toast.error('Please enter the director name.');
+      toast.error('Please enter the director name.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (!runtime.trim()) {
-      toast.error('Please enter the runtime.');
+      toast.error('Please enter the runtime.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (!certification.trim()) {
-      toast.error('Please enter the certification.');
+      toast.error('Please enter the certification.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (genres.length === 0 || genres.some((g) => !g.trim())) {
-      toast.error('Please enter at least one genre.');
+      toast.error('Please enter at least one genre.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (formats.length === 0 || formats.some((f) => !f.trim())) {
-      toast.error('Please select at least one format.');
+      toast.error('Please select at least one format.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (languages.length === 0 || languages.some((l) => !l.trim())) {
-      toast.error('Please select at least one language.');
+      toast.error('Please select at least one language.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (cast.length === 0) {
-      toast.error('Please add at least one cast member.');
+      toast.error('Please add at least one cast member.', {
+        className: 'z-[99999]',
+      });
       return;
     }
     if (!releaseDate) {
-      toast.error('Please select the release date.');
+      toast.error('Please select the release date.', {
+        className: 'z-[99999]',
+      });
       return;
     }
 
@@ -235,7 +267,9 @@ const UpdateMovie: React.FC<{
           'Content-Type': 'multipart/form-data',
         },
       });
-      toast.success('Movie updated successfully!');
+      toast.success('Movie updated successfully!', {
+        className: 'z-[99999]',
+      });
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
       }
@@ -246,7 +280,9 @@ const UpdateMovie: React.FC<{
       const errorMessage =
         error?.response?.data?.message ||
         'Oops! Something went wrong while updating the movie. Please try again later.';
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        className: 'z-[99999]',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -286,7 +322,10 @@ const UpdateMovie: React.FC<{
       {isOpen && (
         <div
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
-          onClick={() => { setIsOpen(false); onClose(); }}
+          onClick={() => {
+            setIsOpen(false);
+            onClose();
+          }}
         >
           <motion.div
             className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
@@ -304,7 +343,10 @@ const UpdateMovie: React.FC<{
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => { setIsOpen(false); onClose(); }}
+                onClick={() => {
+                  setIsOpen(false);
+                  onClose();
+                }}
                 className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 <X size={20} />
@@ -417,7 +459,13 @@ const UpdateMovie: React.FC<{
                               <input
                                 type="text"
                                 value={genre}
-                                onChange={(e) => setGenres(genres.map((g, i) => i === index ? e.target.value : g))}
+                                onChange={(e) =>
+                                  setGenres(
+                                    genres.map((g, i) =>
+                                      i === index ? e.target.value : g,
+                                    ),
+                                  )
+                                }
                                 className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                                 placeholder="Enter genre"
                               />
@@ -426,7 +474,9 @@ const UpdateMovie: React.FC<{
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               type="button"
-                              onClick={() => setGenres(genres.filter((_, i) => i !== index))}
+                              onClick={() =>
+                                setGenres(genres.filter((_, i) => i !== index))
+                              }
                               className="px-3 py-2 bg-red-500 text-white rounded-md"
                             >
                               <X size={16} />
@@ -452,7 +502,13 @@ const UpdateMovie: React.FC<{
                             <input
                               type="text"
                               value={format}
-                              onChange={(e) => setFormats(formats.map((f, i) => i === index ? e.target.value : f))}
+                              onChange={(e) =>
+                                setFormats(
+                                  formats.map((f, i) =>
+                                    i === index ? e.target.value : f,
+                                  ),
+                                )
+                              }
                               className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                               placeholder="Enter format"
                             />
@@ -460,7 +516,11 @@ const UpdateMovie: React.FC<{
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               type="button"
-                              onClick={() => setFormats(formats.filter((_, i) => i !== index))}
+                              onClick={() =>
+                                setFormats(
+                                  formats.filter((_, i) => i !== index),
+                                )
+                              }
                               className="px-3 py-2 bg-red-500 text-white rounded-md"
                             >
                               <X size={16} />
@@ -490,7 +550,13 @@ const UpdateMovie: React.FC<{
                               <input
                                 type="text"
                                 value={language}
-                                onChange={(e) => setLanguages(languages.map((l, i) => i === index ? e.target.value : l))}
+                                onChange={(e) =>
+                                  setLanguages(
+                                    languages.map((l, i) =>
+                                      i === index ? e.target.value : l,
+                                    ),
+                                  )
+                                }
                                 className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                                 placeholder="Enter language"
                               />
@@ -499,7 +565,11 @@ const UpdateMovie: React.FC<{
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               type="button"
-                              onClick={() => setLanguages(languages.filter((_, i) => i !== index))}
+                              onClick={() =>
+                                setLanguages(
+                                  languages.filter((_, i) => i !== index),
+                                )
+                              }
                               className="px-3 py-2 bg-red-500 text-white rounded-md"
                             >
                               <X size={16} />
@@ -533,7 +603,15 @@ const UpdateMovie: React.FC<{
                             <input
                               type="text"
                               value={member.name}
-                              onChange={(e) => setCast(cast.map((c, i) => i === index ? { ...c, name: e.target.value } : c))}
+                              onChange={(e) =>
+                                setCast(
+                                  cast.map((c, i) =>
+                                    i === index
+                                      ? { ...c, name: e.target.value }
+                                      : c,
+                                  ),
+                                )
+                              }
                               className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                               placeholder="Actor name"
                             />
@@ -541,7 +619,15 @@ const UpdateMovie: React.FC<{
                           <input
                             type="text"
                             value={member.role}
-                            onChange={(e) => setCast(cast.map((c, i) => i === index ? { ...c, role: e.target.value } : c))}
+                            onChange={(e) =>
+                              setCast(
+                                cast.map((c, i) =>
+                                  i === index
+                                    ? { ...c, role: e.target.value }
+                                    : c,
+                                ),
+                              )
+                            }
                             className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                             placeholder="Role"
                           />
@@ -549,7 +635,9 @@ const UpdateMovie: React.FC<{
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             type="button"
-                            onClick={() => setCast(cast.filter((_, i) => i !== index))}
+                            onClick={() =>
+                              setCast(cast.filter((_, i) => i !== index))
+                            }
                             className="px-3 py-2 bg-red-500 text-white rounded-md"
                           >
                             <X size={16} />
@@ -570,27 +658,36 @@ const UpdateMovie: React.FC<{
 
                   {/* Image Uploads */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField label="Movie Image (104 × 123 px)" name="movieImage">
+                    <FormField
+                      label="Movie Image (104 × 123 px)"
+                      name="movieImage"
+                    >
                       <ImageUploader
                         onImageChange={(file: any) => setMovieImage(file)}
                         selectedImage={movieImage}
-                        existingImage={existingMovieImage}
+                        existingImage={Urls.Image_url + existingMovieImage}
                       />
                     </FormField>
 
-                    <FormField label="Banner Image (345 × 153 px)" name="bannerImage">
+                    <FormField
+                      label="Banner Image (345 × 153 px)"
+                      name="bannerImage"
+                    >
                       <ImageUploader
                         onImageChange={(file: any) => setBannerImage(file)}
                         selectedImage={bannerImage}
-                        existingImage={existingBannerImage}
+                        existingImage={Urls.Image_url + existingBannerImage}
                       />
                     </FormField>
 
-                    <FormField label="Advertisement Image (306 × 485 px)" name="advImage">
+                    <FormField
+                      label="Advertisement Image (306 × 485 px)"
+                      name="advImage"
+                    >
                       <ImageUploader
                         onImageChange={(file: any) => setAdvImage(file)}
                         selectedImage={advImage}
-                        existingImage={existingAdvImage}
+                        existingImage={Urls.Image_url + existingAdvImage}
                       />
                     </FormField>
 
@@ -602,18 +699,27 @@ const UpdateMovie: React.FC<{
                         <input
                           type="file"
                           multiple
-                          onChange={(e) => handleCastImageChange(e.target.files)}
+                          onChange={(e) =>
+                            handleCastImageChange(e.target.files)
+                          }
                           className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                           accept="image/*"
                         />
                       </div>
                       <div className="mt-2 space-y-1">
                         {existingCastImages.map((url, index) => (
-                          <div key={`existing-${index}`} className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600">Existing Image {index + 1}</span>
+                          <div
+                            key={`existing-${index}`}
+                            className="flex items-center justify-between text-sm"
+                          >
+                            <span className="text-slate-600">
+                              Existing Image {index + 1}
+                            </span>
                             <button
                               type="button"
-                              onClick={() => handleRemoveExistingCastImage(index)}
+                              onClick={() =>
+                                handleRemoveExistingCastImage(index)
+                              }
                               className="text-red-500 hover:text-red-700"
                             >
                               Remove
@@ -621,7 +727,10 @@ const UpdateMovie: React.FC<{
                           </div>
                         ))}
                         {castImages.map((image, index) => (
-                          <div key={index} className="flex items-center justify-between text-sm">
+                          <div
+                            key={index}
+                            className="flex items-center justify-between text-sm"
+                          >
                             <span className="text-slate-600">{image.name}</span>
                             <button
                               type="button"
@@ -637,42 +746,89 @@ const UpdateMovie: React.FC<{
                   </div>
 
                   {/* Checkboxes */}
-                  <div className="flex flex-wrap gap-4">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={isBanner}
-                        onChange={(e) => setIsBanner(e.target.checked)}
-                        className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                      />
-                      <span className="text-sm text-slate-700">Banner</span>
+                  <div className="flex flex-wrap gap-6">
+                    {/* Banner */}
+                    <label
+                      htmlFor="banner"
+                      className="flex items-center cursor-pointer"
+                    >
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          id="banner"
+                          className="sr-only peer"
+                          checked={isBanner}
+                          onChange={(e) => setIsBanner(e.target.checked)}
+                        />
+                        <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                      </div>
+                      <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Banner
+                      </span>
                     </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={isPopular}
-                        onChange={(e) => setIsPopular(e.target.checked)}
-                        className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                      />
-                      <span className="text-sm text-slate-700">Popular</span>
+
+                    {/* Popular */}
+                    <label
+                      htmlFor="popular"
+                      className="flex items-center cursor-pointer"
+                    >
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          id="popular"
+                          className="sr-only peer"
+                          checked={isPopular}
+                          onChange={(e) => setIsPopular(e.target.checked)}
+                        />
+                        <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                      </div>
+                      <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Popular
+                      </span>
                     </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={isLatest}
-                        onChange={(e) => setIsLatest(e.target.checked)}
-                        className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                      />
-                      <span className="text-sm text-slate-700">Latest</span>
+
+                    {/* Latest */}
+                    <label
+                      htmlFor="latest"
+                      className="flex items-center cursor-pointer"
+                    >
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          id="latest"
+                          className="sr-only peer"
+                          checked={isLatest}
+                          onChange={(e) => setIsLatest(e.target.checked)}
+                        />
+                        <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                      </div>
+                      <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Latest
+                      </span>
                     </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={isAds}
-                        onChange={(e) => setIsAds(e.target.checked)}
-                        className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                      />
-                      <span className="text-sm text-slate-700">Ads</span>
+
+                    {/* Ads */}
+                    <label
+                      htmlFor="ads"
+                      className="flex items-center cursor-pointer"
+                    >
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          id="ads"
+                          className="sr-only peer"
+                          checked={isAds}
+                          onChange={(e) => setIsAds(e.target.checked)}
+                        />
+                        <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                      </div>
+                      <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Ads
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -683,7 +839,10 @@ const UpdateMovie: React.FC<{
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                     type="button"
-                    onClick={() => { setIsOpen(false); onClose(); }}
+                    onClick={() => {
+                      setIsOpen(false);
+                      onClose();
+                    }}
                     className="w-full sm:w-auto px-5 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Cancel
@@ -700,9 +859,25 @@ const UpdateMovie: React.FC<{
                   >
                     {isLoading ? (
                       <span className="flex items-center justify-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Updating...
                       </span>

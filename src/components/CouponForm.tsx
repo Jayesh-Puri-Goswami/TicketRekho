@@ -130,7 +130,9 @@ const CouponForm: React.FC<ModalformProps> = ({ coupon, onSubmitSuccess, onCance
       setOpen(false)
 
       if (onSubmitSuccess) {
-        toast.success(response.data.message)
+        toast.success(response.data.message,{
+        className : 'z-[99999]'
+      })
         onSubmitSuccess(response.data)
       }
     } catch (err) {
@@ -326,10 +328,12 @@ const CouponForm: React.FC<ModalformProps> = ({ coupon, onSubmitSuccess, onCance
                       <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
                         <DollarSign size={16} className="text-indigo-500" />
                         Discount Value
+
                       </label>
                       <motion.div variants={inputVariants} whileFocus="focus">
                         <input
                           type="number"
+                          min={0}
                           placeholder="Enter discount value"
                           className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500"
                           {...register("discountValue", {

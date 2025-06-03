@@ -135,7 +135,9 @@ useEffect(() => {
         console.log('Response:', response); // Log response for debugging
         if (response.data && response.data.status) {
           toast.success(
-            'User status changed successfully!',
+            'User status changed successfully!',{
+        className : 'z-[99999]'
+      }
           );
           // Update the status locally after a successful API response
 
@@ -150,14 +152,18 @@ useEffect(() => {
           );
         } else {
           toast.error(
-            response?.data?.message
+            response?.data?.message,{
+        className : 'z-[99999]'
+      }
           );
           console.error('Unexpected response structure:', response.data);
         }
       })
       .catch((error) => {
         toast.error(
-         'An error occured.'
+         'An error occured.',{
+        className : 'z-[99999]'
+      }
         );
         console.error('Error updating user status:', error);
       })

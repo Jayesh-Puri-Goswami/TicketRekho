@@ -28,6 +28,7 @@ const MovieForm: React.FC<MovieFormProps> = ({ onSave }) => {
       />
       <input
         type="number"
+        min={0}
         placeholder="Duration (min)"
         value={duration}
         onChange={(e) => setDuration(Number(e.target.value))}

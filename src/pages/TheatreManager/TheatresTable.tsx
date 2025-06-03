@@ -236,8 +236,8 @@ const TheatresTable: React.FC = () => {
                         <span className="font-semibold text-sm">{t.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-center" onClick={()=> handleManagerClick(t._id)}>{t.location}</td>
-                    <td className="px-6 py-5 text-center" onClick={()=> handleManagerClick(t._id)}>
+                    <td className="px-6 py-5 text-base text-center" onClick={()=> handleManagerClick(t._id)}>{t.location}</td>
+                    <td className="px-6 py-5 text-base text-center" onClick={()=> handleManagerClick(t._id)}>
                       <span
                         className={`text-sm font-medium ${
                           t.isGrabABite ? 'text-green-600' : 'text-red-600'

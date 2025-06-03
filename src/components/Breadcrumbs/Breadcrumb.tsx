@@ -38,7 +38,7 @@ const Breadcrumb = ({ pageName, parentName, parentPath }: BreadcrumbProps) => {
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <li className="flex items-center gap-1">
             <Link
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 
+              className="text-[16px] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 
                 dark:hover:text-indigo-300 transition-colors duration-200 hover:underline"
               to={dashboardPath}
             >
@@ -50,7 +50,7 @@ const Breadcrumb = ({ pageName, parentName, parentPath }: BreadcrumbProps) => {
           {parentName && parentPath && (
             <li className="flex items-center gap-1">
               <Link
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 
+                className="text-[16px] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 
                   dark:hover:text-indigo-300 transition-colors duration-200 hover:underline"
                 to={parentPath}
               >
@@ -60,7 +60,7 @@ const Breadcrumb = ({ pageName, parentName, parentPath }: BreadcrumbProps) => {
             </li>
           )}
 
-          <li className="text-sm font-semibold text-gray-800 dark:text-white">
+          <li className="text-[16px] font-semibold text-gray-800 dark:text-white">
             {pageName}
           </li>
         </ol>
@@ -68,7 +68,7 @@ const Breadcrumb = ({ pageName, parentName, parentPath }: BreadcrumbProps) => {
           {shouldShowBack && (
             <button
               onClick={() => navigate(-1)}
-              className="inline-flex items-center gap-2 text-sm font-medium text-white px-3 py-1.5 rounded-lg 
+              className="inline-flex items-center gap-2 text-[16px] font-medium text-white px-3 py-1.5 rounded-lg 
               bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600
               shadow-sm transition-all duration-200 ease-in-out transform hover:scale-105"
               aria-label="Go back"

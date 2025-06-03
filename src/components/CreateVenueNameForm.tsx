@@ -111,7 +111,9 @@ const CreateVenueNameForm: React.FC<ModalformProps> = ({
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
         toast.success(
-          'Venue added successfully! Your new venue is now available.',
+          'Venue added successfully! Your new venue is now available.',{
+        className : 'z-[99999]'
+      }
         );
       }
     } catch (error: any) {
@@ -121,7 +123,9 @@ const CreateVenueNameForm: React.FC<ModalformProps> = ({
     error?.response?.data?.message ||
     'Oops! Something went wrong while adding the venue name. Please try again later.';
 
-  toast.error(errorMessage);
+  toast.error(errorMessage,{
+        className : 'z-[99999]'
+      });
       setError(
         venue
           ? 'Failed to update venue. Please try again.'

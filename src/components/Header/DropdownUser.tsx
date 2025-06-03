@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
-import profile from '../../images/profile.png';
+import profile from '../../../public/Image/Profile/user.svg';
 import Urls from '../../networking/app_urls';
 import { useDispatch, useSelector } from 'react-redux';
 import { signOut } from '../../redux/user/userSlice';
@@ -9,6 +9,9 @@ import { signOut } from '../../redux/user/userSlice';
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
+
+  console.log(currentUser);
+  
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,20 +39,20 @@ const DropdownUser = () => {
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-4"
+        className="flex items-center gap-4 z-1 rounded-xl"
         to="#"
       >
-        <span className="hidden text-right lg:block">
+        {/* <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white capitalize">
             {currentUser.name}
           </span>
           <span className="block text-xs">{currentUser.role}</span>
-        </span>
+        </span> */}
 
-        <span className="h-12 w-12 rounded-full flex items-center justify-center">
+        <span className="w-12 rounded-full flex items-center justify-center">
           {/* <img src={UserOne} alt="User" /> */}
           <img
-            className="h-10 w-10 rounded-full bg-white"
+            className="w-15 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-1.5"
             src={`${Urls.Image_url}${currentUser.profileImage}` || profile}
             onError={(e) => {
               e.currentTarget.src = profile;
@@ -78,7 +81,7 @@ const DropdownUser = () => {
       {/* <!-- Dropdown Start --> */}
       {dropdownOpen && (
         <div
-          className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark`}
+          className={`absolute rounded-xl right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark`}
         >
           <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
             <li>

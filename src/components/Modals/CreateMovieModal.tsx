@@ -95,19 +95,45 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
     setLoading(true);
 
     // Validation checks
-    if (!name.trim()) return toast.error('Please enter the movie name.');
-    if (!description.trim()) return toast.error('Please enter the movie description.');
-    if (!director.trim()) return toast.error('Please enter the director name.');
-    if (!runtime.trim()) return toast.error('Please enter the runtime.');
-    if (!certification) return toast.error('Please select the certification.');
-    if (genres.length === 0) return toast.error('Please add at least one genre.');
-    if (formats.length === 0) return toast.error('Please add at least one format.');
-    if (languages.length === 0) return toast.error('Please add at least one language.');
-    if (cast.length === 0) return toast.error('Please add at least one cast member.');
-    if (!movieImage) return toast.error('Please upload the movie image.');
-    if (!bannerImage) return toast.error('Please upload the banner image.');
-    if (!advImage) return toast.error('Please upload the advertisement image.');
-    if (!releaseDate) return toast.error('Please select the release date.');
+    if (!name.trim()) return toast.error('Please enter the movie name.',{
+        className : 'z-[99999]'
+      });
+    if (!description.trim()) return toast.error('Please enter the movie description.',{
+        className : 'z-[99999]'
+      });
+    if (!director.trim()) return toast.error('Please enter the director name.',{
+        className : 'z-[99999]'
+      });
+    if (!runtime.trim()) return toast.error('Please enter the runtime.',{
+        className : 'z-[99999]'
+      });
+    if (!certification) return toast.error('Please select the certification.',{
+        className : 'z-[99999]'
+      });
+    if (genres.length === 0) return toast.error('Please add at least one genre.',{
+        className : 'z-[99999]'
+      });
+    if (formats.length === 0) return toast.error('Please add at least one format.',{
+        className : 'z-[99999]'
+      });
+    if (languages.length === 0) return toast.error('Please add at least one language.',{
+        className : 'z-[99999]'
+      });
+    if (cast.length === 0) return toast.error('Please add at least one cast member.',{
+        className : 'z-[99999]'
+      });
+    if (!movieImage) return toast.error('Please upload the movie image.',{
+        className : 'z-[99999]'
+      });
+    if (!bannerImage) return toast.error('Please upload the banner image.',{
+        className : 'z-[99999]'
+      });
+    if (!advImage) return toast.error('Please upload the advertisement image.',{
+        className : 'z-[99999]'
+      });
+    if (!releaseDate) return toast.error('Please select the release date.',{
+        className : 'z-[99999]'
+      });
 
     const formData = new FormData();
     formData.append('name', name);
@@ -137,13 +163,17 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
         },
       });
 
-      toast.success('Movie added successfully!');
+      toast.success('Movie added successfully!',{
+        className : 'z-[99999]'
+      });
       clearFormState();
       setIsOpen(false);
       if (onSubmitSuccess) onSubmitSuccess();
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Failed to add movie. Please try again.';
-      toast.error(errorMessage);
+      toast.error(errorMessage,{
+        className : 'z-[999999]'
+      });
     } finally {
       setLoading(false);
     }
@@ -171,7 +201,7 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsOpen(true)}
-        className="bg-indigo-purple hover:bg-indigo-purple-dark text-white px-7 rounded mb-4"
+        className="bg-indigo-purple hover:bg-indigo-purple-dark text-white px-7 rounded h-[2.9rem]"
       >
         <span>Add</span>
         

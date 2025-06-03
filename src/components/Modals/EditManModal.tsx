@@ -96,13 +96,17 @@ const onSubmit = async (data: ManagerFormData) => {
     });
 
     setSuccess(true);
-    toast.success('Manager updated successfully!');
+    toast.success('Manager updated successfully!',{
+        className : 'z-[99999]'
+      });
     if (onSubmitSuccess) {
       onSubmitSuccess(response.data);
     }
     reset();
   } catch (err: any) {
-    toast.error('Oops! Something went wrong.');
+    toast.error('Oops! Something went wrong.',{
+        className : 'z-[99999]'
+      });
     setError(err.response?.data?.message || 'An error occurred.');
   } finally {
     setLoading(false);

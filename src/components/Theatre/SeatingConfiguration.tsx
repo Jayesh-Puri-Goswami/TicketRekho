@@ -31,6 +31,7 @@ const SeatingConfiguration: React.FC<SeatingConfigurationProps> = ({
           </label>
           <input
             type="number"
+            min={0}
             placeholder="Seating Capacity"
             value={capacity}
             onChange={(e) => setCapacity(Number(e.target.value))}
