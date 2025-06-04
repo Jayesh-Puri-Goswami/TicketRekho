@@ -4,7 +4,15 @@ import axios from 'axios';
 import urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Mail, Phone, Lock, Check, AlertCircleIcon } from 'lucide-react';
+import {
+  X,
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Check,
+  AlertCircleIcon,
+} from 'lucide-react';
 import clsx from 'clsx';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -78,9 +86,12 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
       setSuccess(true);
       setIsOpen(false);
       reset();
-      toast.success('Employee created successfully! The new Employee is now part of your team.',{
-        className : 'z-[99999]'
-      });
+      toast.success(
+        'Employee created successfully! The new Employee is now part of your team.',
+        {
+          className: 'z-[99999]',
+        },
+      );
       setTimeout(() => setSuccess(false), 5000);
       setSelectedImage(null);
       if (onSubmitSuccess) {
@@ -88,10 +99,49 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
       }
     } catch (err: any) {
       console.error('API Error:', err.response?.data || err.message);
-      toast.error('Oops! There was an error creating the Employee. Please try again later.',{
-        className : 'z-[99999]'
+      let errorMessage = err.response?.data?.message || err.message;
+      const rawMessage = err.response?.data?.message || err.message || '';
+      let isPhoneDuplicate = false;
+      let isEmailDuplicate = false;
+      const phoneMatch = rawMessage.match(/phoneNumber"\s*:\s*"([^"]+)"/);
+      const emailMatch = rawMessage.match(/email"\s*:\s*"([^"]+)"/);
+      if (rawMessage.includes('E11000 duplicate key error')) {
+        if (err.keyValue) {
+          if (err.keyValue.phoneNumber) {
+            isPhoneDuplicate = true;
+          }
+          if (err.keyValue.email) {
+            isEmailDuplicate = true;
+          }
+        } else {
+          if (phoneMatch) {
+            isPhoneDuplicate = true;
+          }
+          if (emailMatch) {
+            isEmailDuplicate = true;
+          }
+        }
+
+        if (isPhoneDuplicate && isEmailDuplicate) {
+          errorMessage = 'The phone number and email address already exist.';
+        } else if (isPhoneDuplicate) {
+          errorMessage =
+            'The phone number already exists. Please use a different number.';
+        } else if (isEmailDuplicate) {
+          errorMessage =
+            'The email address already exists. Please use a different email.';
+        } else {
+          errorMessage = 'A record with a duplicate value already exists.';
+        }
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+
+      // Set error in UI and show toast
+      setError(errorMessage);
+      toast.error(errorMessage, {
+        className: 'z-[99999]',
       });
-      setError(err.response?.data?.message || 'Failed to create Employee. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -130,7 +180,7 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
 
   return (
     <>
-      <Toaster />
+      {/* <Toaster /> */}
       <motion.button
         whileHover={{ scale: 1 }}
         whileTap={{ scale: 0.98 }}
@@ -146,7 +196,7 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
             initial="hidden"
             animate="visible"
             exit="hidden"
@@ -316,11 +366,13 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
                               required: 'Password is required',
                               minLength: {
                                 value: 7,
-                                message: 'Password must be at least 7 characters',
+                                message:
+                                  'Password must be at least 7 characters',
                               },
                               maxLength: {
                                 value: 12,
-                                message: 'Password must be at most 12 characters',
+                                message:
+                                  'Password must be at most 12 characters',
                               },
                             })}
                           />
@@ -344,13 +396,19 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
                                 ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
                                 : 'border-slate-300 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:text-white',
                             )}
-                            {...register('role', { required: 'Role is required' })}
+                            {...register('role', {
+                              required: 'Role is required',
+                            })}
                           >
                             <option value="" disabled>
                               Select a role
                             </option>
-                            <option value="theatreEmployee">Theatre Employee</option>
-                            <option value="eventEmployee">Event Employee</option>
+                            <option value="theatreEmployee">
+                              Theatre Employee
+                            </option>
+                            <option value="eventEmployee">
+                              Event Employee
+                            </option>
                           </select>
                           {errors.role && (
                             <span className="text-red-500 text-sm mt-1">
@@ -418,7 +476,8 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
                       disabled={loading}
                       className="w-full sm:w-auto relative overflow-hidden rounded-md py-2.5 px-6 font-medium text-white disabled:opacity-70"
                       style={{
-                        background: 'linear-gradient(to right, #6366F1, #8B5CF6)',
+                        background:
+                          'linear-gradient(to right, #6366F1, #8B5CF6)',
                       }}
                     >
                       {loading ? (
@@ -460,7 +519,7 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {error && (
           <motion.div
             className="fixed top-10 right-10 bg-red-600/90 text-white px-4 py-3 rounded-md shadow-lg z-[10000]"
@@ -475,7 +534,7 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </>
   );
 };

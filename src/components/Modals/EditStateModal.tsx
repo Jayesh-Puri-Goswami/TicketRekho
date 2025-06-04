@@ -87,7 +87,7 @@ const EditStateModal: React.FC<EditStateModalProps> = ({
           </div>
 
           {/* Dropzone Uploader */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
               Upload New Image (104 × 123 px)
             </label>
@@ -142,7 +142,7 @@ const EditStateModal: React.FC<EditStateModalProps> = ({
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Footer Buttons */}

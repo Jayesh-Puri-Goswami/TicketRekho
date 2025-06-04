@@ -1,24 +1,24 @@
 import React, { useState, useCallback, FormEvent } from 'react';
-import { useDropzone } from 'react-dropzone';
+// import { useDropzone } from 'react-dropzone';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 import { motion } from 'framer-motion';
 
-import { faUpload, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faUpload, faTimes } from '@fortawesome/free-solid-svg-icons';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import StateTable from '../components/Tables/StateTable';
 import url from '../networking/app_urls';
 import statesData from '../common/States&City/States&City.json';
-import { Building2, Shield } from 'lucide-react';
+import { Building2, ChevronDown, Shield } from 'lucide-react';
 
 const State: React.FC = () => {
   const [state, setState] = useState<string>('');
-  const [file, setFile] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  // const [file, setFile] = useState<File | null>(null);
+  // const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
@@ -26,21 +26,21 @@ const State: React.FC = () => {
 
   const stateNames = Object.keys(statesData);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const selectedFile = acceptedFiles[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setPreviewImage(URL.createObjectURL(selectedFile));
-    }
-  }, []);
+  // const onDrop = useCallback((acceptedFiles: File[]) => {
+  //   const selectedFile = acceptedFiles[0];
+  //   if (selectedFile) {
+  //     setFile(selectedFile);
+  //     setPreviewImage(URL.createObjectURL(selectedFile));
+  //   }
+  // }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png'],
-    },
-    maxFiles: 1,
-  });
+  // const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  //   onDrop,
+  //   accept: {
+  //     'image/*': ['.jpeg', '.jpg', '.png'],
+  //   },
+  //   maxFiles: 1,
+  // });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,20 +50,20 @@ const State: React.FC = () => {
       return;
     }
 
-    if (!file) {
-      setErrorMessage('Please upload an image.');
-      return;
-    }
+    // if (!file) {
+    //   setErrorMessage('Please upload an image.');
+    //   return;
+    // }
 
     setErrorMessage(null);
     setLoading(true);
 
     const formData = new FormData();
     formData.append('name', state);
-    formData.append('stateImage', file);
+    formData.append('stateImage', '');
 
     try {
-      await axios.post(url.CreateStates, formData, {
+      const response = await axios.post(url.CreateStates, formData, {
         headers: {
           Authorization: `Bearer ${currentUser.token}`,
           'Content-Type': 'multipart/form-data',
@@ -72,13 +72,16 @@ const State: React.FC = () => {
 
       toast.success('State added successfully!');
       setState('');
-      setFile(null);
-      setPreviewImage(null);
+
+      // setFile(null);
+      // setPreviewImage(null);
       setReload((prev) => !prev);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       toast.error('Something went wrong while adding the state.');
-      setErrorMessage('Failed to add state. Please try again.');
+      setErrorMessage(
+        err?.response?.message || 'Failed to add state. Please try again.',
+      );
     } finally {
       setLoading(false);
     }
@@ -122,27 +125,34 @@ const State: React.FC = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="p-6.5 space-y-6">
-              <div>
+              <div className="mb-8 relative">
                 <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                   Select State
                 </label>
-                <select
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="w-full rounded-xl border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black dark:text-white dark:border-form-strokedark dark:bg-form-input transition focus:border-primary dark:focus:border-primary"
-                >
-                  <option value="" disabled>
-                    Choose a State
-                  </option>
-                  {stateNames.map((stateName) => (
-                    <option key={stateName} value={stateName}>
-                      {stateName}
+                <div className="relative">
+                  <select
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    className="w-full appearance-none rounded-xl border-[1.5px] border-stroke bg-transparent py-3 px-5 pr-12 text-black dark:text-white dark:border-form-strokedark dark:bg-form-input transition focus:border-primary dark:focus:border-primary"
+                  >
+                    <option value="" disabled>
+                      Choose a State
                     </option>
-                  ))}
-                </select>
+                    {stateNames.map((stateName) => (
+                      <option key={stateName} value={stateName}>
+                        {stateName}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Custom dropdown icon */}
+                  <div className="pointer-events-none absolute top-1/2 right-5 transform -translate-y-1/2 text-gray-500 dark:text-slate-300">
+                    <ChevronDown size={20} />
+                  </div>
+                </div>
               </div>
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                   Upload Image
                 </label>
@@ -196,7 +206,7 @@ const State: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               {errorMessage && (
                 <p className="text-red-500 text-sm">{errorMessage}</p>
@@ -204,11 +214,11 @@ const State: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={loading || !state || !file}
-                className={`w-full py-3 px-4 rounded-xl text-white font-medium transition-colors duration-500 ${
-                  state && file
-                    ? 'bg-indigo-purple hover:bg-indigo-purple-dark'
-                    : 'bg-gray-300 cursor-not-allowed'
+                disabled={loading || !state}
+                className={`w-full py-3 px-4 rounded-xl  font-medium transition-colors duration-500 ${
+                  state
+                    ? 'bg-indigo-purple hover:bg-indigo-purple-dark text-white'
+                    : 'bg-slate-300 cursor-not-allowed text-black'
                 }`}
               >
                 {loading ? 'Submitting...' : 'Add State'}

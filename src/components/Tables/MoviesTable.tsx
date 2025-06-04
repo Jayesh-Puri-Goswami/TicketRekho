@@ -1,4 +1,3 @@
-
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -238,7 +237,7 @@ const MoviesTable: React.FC = () => {
               movie.id === id ? { ...movie, isActive: updatedStatus } : movie,
             ),
           );
-          toast.success('Movie status updated successfully!');
+          // toast.success('Movie status updated successfully!');
         } else {
           toast.error('Failed to update movie status.');
         }
@@ -265,7 +264,7 @@ const MoviesTable: React.FC = () => {
         confirmButton:
           'bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition',
         cancelButton:
-          'bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition',
+          'bg-slate-200 text-slate-700 px-4 py-2 rounded-md hover:bg-slate-300 transition',
       },
     }).then((result) => {
       if (result.isConfirmed) {
@@ -443,7 +442,7 @@ const MoviesTable: React.FC = () => {
 
       {/* Image Preview Modal */}
       {previewImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999] backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
@@ -574,19 +573,43 @@ const MoviesTable: React.FC = () => {
                         {movie.format}
                       </td>
                       <td className="px-6 py-4">
-                        <button
+                        <label
+                          htmlFor={`status-toggle-${movie.id}`}
+                          className="flex items-center cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleStatus(movie.id, movie.isActive);
                           }}
-                          className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                            movie.isActive
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
-                              : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'
-                          }`}
                         >
-                          {movie.isActive ? 'Active' : 'Inactive'}
-                        </button>
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              id={`status-toggle-${movie.id}`}
+                              className="sr-only peer"
+                              checked={movie.isActive}
+                              readOnly // prevents uncontrolled warning, as we're handling externally
+                            />
+                            <div
+                              className={`w-11 h-6 rounded-full transition-colors duration-300 ${
+                                movie.isActive ? 'bg-green-500' : 'bg-red-500'
+                              }`}
+                            ></div>
+                            <div
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform ${
+                                movie.isActive ? 'translate-x-5' : ''
+                              }`}
+                            ></div>
+                          </div>
+                          <span
+                            className={`ml-3 text-xs font-semibold transition-colors ${
+                              movie.isActive
+                                ? 'text-green-700 dark:text-green-200'
+                                : 'text-red-700 dark:text-red-200'
+                            }`}
+                          >
+                            {movie.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </label>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-center gap-3">
@@ -595,21 +618,27 @@ const MoviesTable: React.FC = () => {
                               e.stopPropagation();
                               handleEditClick(movie.id);
                             }}
-                            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
-                            title="Edit"
+                            className="group flex items-center gap-1 px-3 py-1 rounded-full border border-indigo-500 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-800/30 transition-all duration-200 text-xs font-medium"
+                            title="Edit Movie"
                           >
-                            <FontAwesomeIcon icon={faEdit} />
+                            <FontAwesomeIcon
+                              icon={faEdit}
+                              className="text-indigo-500 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition"
+                            />
+                            <span className="group-hover:underline">Edit</span>
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(movie.id);
-                            }}
-                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
-                            title="Delete"
-                          >
-                            <FontAwesomeIcon icon={faTrashAlt} />
-                          </button>
+                          {!movie.isActive && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(movie.id);
+                              }}
+                              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
+                              title="Delete"
+                            >
+                              <FontAwesomeIcon icon={faTrashAlt} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

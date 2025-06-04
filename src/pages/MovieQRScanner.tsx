@@ -5,11 +5,15 @@ import Urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { QrData, MovieTicket, GrabABiteItem } from '../types/scanner';
-import { fetchTicketDetails, fetchGrabABiteList, verifyTicket } from '../hooks/scanner';
+import {
+  fetchTicketDetails,
+  fetchGrabABiteList,
+  verifyTicket,
+} from '../hooks/scanner';
 import ScannerOverlay from '../components/Scanner/ScannerOverlay';
 import TicketDetails from '../components/Scanner/TicketDetails';
 import FoodList from '../components/Scanner/FoodList';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import { faCameraRotate } from '@fortawesome/free-solid-icons';
 // import './Scanner.css';
 const MovieQRScanner: React.FC = () => {
@@ -18,13 +22,17 @@ const MovieQRScanner: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [cameraFacing, setCameraFacing] = useState<'environment' | 'user'>('environment');
+  const [cameraFacing, setCameraFacing] = useState<'environment' | 'user'>(
+    'environment',
+  );
   const [ticketDetails, setTicketDetails] = useState<MovieTicket | null>(null);
   const [grabABiteList, setGrabABiteList] = useState<GrabABiteItem[]>([]);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const currentUser = useSelector((state: RootState) => state.user.currentUser?.data);
+  const currentUser = useSelector(
+    (state: RootState) => state.user.currentUser?.data,
+  );
 
   const startCameraScanner = async () => {
     setIsCameraActive(true);
@@ -85,7 +93,9 @@ const MovieQRScanner: React.FC = () => {
   };
 
   const switchCamera = () => {
-    setCameraFacing((prev) => (prev === 'environment' ? 'user' : 'environment'));
+    setCameraFacing((prev) =>
+      prev === 'environment' ? 'user' : 'environment',
+    );
     stopCameraScanner();
     startCameraScanner();
   };
@@ -99,6 +109,8 @@ const MovieQRScanner: React.FC = () => {
 
     try {
       const result = await QrScanner.scanImage(file);
+      console.log(result);
+      
       const parsedData: QrData = JSON.parse(result);
       setQrData(parsedData);
 
@@ -129,7 +141,8 @@ const MovieQRScanner: React.FC = () => {
     } catch (error: any) {
       console.error('Failed to verify ticket:', error);
       setErrorMessage(
-        error.response?.data?.message || 'Failed to verify ticket. Please try again.',
+        error.response?.data?.message ||
+          'Failed to verify ticket. Please try again.',
       );
     } finally {
       setIsSending(false);

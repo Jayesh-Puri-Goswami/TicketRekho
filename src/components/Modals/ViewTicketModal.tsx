@@ -85,7 +85,7 @@ const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-[999] bg-black bg-opacity-50 flex items-center justify-center p-4"
         variants={backdropVariants}
         initial="hidden"
         animate="visible"

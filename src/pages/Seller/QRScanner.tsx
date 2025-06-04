@@ -4,12 +4,15 @@ import axios from 'axios';
 import Urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import { faCameraRotate } from '@fortawesome/free-solid-icons';
 
 interface QrData {
   userId: string;
   bookingId: string;
+  appUserId: string;
+  email: string;
+  showtimeId: string;
 }
 
 interface GrabABiteItem {
@@ -36,12 +39,15 @@ const QRScanner: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [cameraFacing, setCameraFacing] = useState<'environment' | 'user'>('environment');
+  const [cameraFacing, setCameraFacing] = useState<'environment' | 'user'>(
+    'environment',
+  );
   const [grabABiteList, setGrabABiteList] = useState<GrabABiteItem[]>([]);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const currentUser = useSelector((state: any) => state.user.currentUser?.data);
+
 
   const startCameraScanner = async () => {
     setIsCameraActive(true);
@@ -95,7 +101,9 @@ const QRScanner: React.FC = () => {
   };
 
   const switchCamera = () => {
-    setCameraFacing((prev) => (prev === 'environment' ? 'user' : 'environment'));
+    setCameraFacing((prev) =>
+      prev === 'environment' ? 'user' : 'environment',
+    );
     stopCameraScanner();
     startCameraScanner();
   };
@@ -109,7 +117,11 @@ const QRScanner: React.FC = () => {
 
     try {
       const result = await QrScanner.scanImage(file);
+      
       const parsedData: QrData = JSON.parse(result);
+
+      console.log('Parsed QR Data:', parsedData);
+      
       setQrData(parsedData);
 
       await fetchGrabABiteList(parsedData.bookingId);
@@ -164,7 +176,8 @@ const QRScanner: React.FC = () => {
     } catch (error: any) {
       console.error('Failed to send Booking ID:', error);
       setErrorMessage(
-        error.response?.data?.message || 'Failed to verify ticket. Please try again.',
+        error.response?.data?.message ||
+          'Failed to verify ticket. Please try again.',
       );
     } finally {
       setIsSending(false);
@@ -235,7 +248,8 @@ const QRScanner: React.FC = () => {
         {qrData && (
           <div className="mt-4 p-4 bg-blue-100 text-blue-900 rounded-md text-center">
             <p className="text-md font-medium">
-              Booking ID: <span className="font-semibold">{qrData.bookingId}</span>
+              Booking ID:{' '}
+              <span className="font-semibold">{qrData.bookingId}</span>
             </p>
           </div>
         )}
@@ -274,15 +288,21 @@ const QRScanner: React.FC = () => {
 
         {grabABiteList.length > 0 && (
           <div className="mt-6 w-full">
-            <h3 className="text-xl mb-2 font-bold text-black">Grab a Bite List:</h3>
+            <h3 className="text-xl mb-2 font-bold text-black">
+              Grab a Bite List:
+            </h3>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-200">
                     <th className="border border-gray-300 px-4 py-2">Image</th>
                     <th className="border border-gray-300 px-4 py-2">Name</th>
-                    <th className="border border-gray-300 px-4 py-2">Description</th>
-                    <th className="border border-gray-300 px-4 py-2">Quantity</th>
+                    <th className="border border-gray-300 px-4 py-2">
+                      Description
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2">
+                      Quantity
+                    </th>
                     <th className="border border-gray-300 px-4 py-2">Price</th>
                   </tr>
                 </thead>
@@ -298,10 +318,18 @@ const QRScanner: React.FC = () => {
                           />
                         )}
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">{item.grabABiteId.name}</td>
-                      <td className="border border-gray-300 px-4 py-2 text-gray-600">{item.grabABiteId.description}</td>
-                      <td className="border border-gray-300 px-4 py-2 text-center">{item.qty}</td>
-                      <td className="border border-gray-300 px-4 py-2 text-green-600 text-center">{item.grabABiteId.price}</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {item.grabABiteId.name}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-gray-600">
+                        {item.grabABiteId.description}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {item.qty}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-green-600 text-center">
+                        {item.grabABiteId.price}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

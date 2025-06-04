@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import Urls from '../networking/app_urls';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { Shield } from 'lucide-react';
+import { ChevronDown, Shield } from 'lucide-react';
 
 const RolePermission = () => {
   const currentUser = useSelector((state: any) => state.user.currentUser?.data);
@@ -112,8 +112,8 @@ const RolePermission = () => {
   const handleUpdate = async () => {
     const selectedRole = roles.find((r) => r._id === selectedRoleId);
     if (!permissions.some((p) => p.status)) {
-      toast.error('Please select at least one permission before updating.',{
-        className : 'z-[99999]'
+      toast.error('Please select at least one permission before updating.', {
+        className: 'z-[99999]',
       });
       return;
     }
@@ -135,9 +135,9 @@ const RolePermission = () => {
       );
 
       if (res.status === 200) {
-        toast.success('Permissions updated successfully!',{
-        className : 'z-[99999]'
-      });
+        toast.success('Permissions updated successfully!', {
+          className: 'z-[99999]',
+        });
         if (selectedRole?.role === 'admin') {
           toast('Your permissions changed. Logging out...');
           setTimeout(() => {
@@ -146,14 +146,14 @@ const RolePermission = () => {
           }, 1000);
         }
       } else {
-        toast.error(`Error: ${res.data.message}`,{
-        className : 'z-[99999]'
-      });
+        toast.error(`Error: ${res.data.message}`, {
+          className: 'z-[99999]',
+        });
       }
     } catch (error) {
       console.error('Update failed:', error);
-      toast.error('Failed to update permissions.',{
-        className : 'z-[99999]'
+      toast.error('Failed to update permissions.', {
+        className: 'z-[99999]',
       });
     }
   };
@@ -189,23 +189,30 @@ const RolePermission = () => {
             </h1>
           </div>
 
-          <div className="mb-8">
+          <div className="mb-8 relative">
             <label className="mb-3 block text-black">Select Role</label>
-            <select
-              value={selectedRoleId}
-              onChange={handleRoleChange}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2"
-            >
-              <option value="" disabled>
-                Select Role
-              </option>
-              {roles.map((role) => (
-                <option key={role._id} value={role._id}>
-                  {formatRoleName(role.role)}
+            <div className="relative">
+              <select
+                value={selectedRoleId}
+                onChange={handleRoleChange}
+                className="w-full appearance-none border border-gray-300 rounded-xl px-4 py-2 pr-10 bg-white dark:bg-slate-900 text-black dark:text-white"
+              >
+                <option value="" disabled>
+                  Select Role
                 </option>
-              ))}
-            </select>
-          </div>
+                {roles.map((role) => (
+                  <option key={role._id} value={role._id}  >
+                    {formatRoleName(role.role)}
+                  </option>
+                ))}
+              </select>
+
+              {/* Custom dropdown icon */}
+              <div className="pointer-events-none absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-500 dark:text-slate-300">
+                <ChevronDown size={20} />
+              </div>
+            </div>
+          </div>  
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
             {permissions.map((perm, index) => (
@@ -219,6 +226,7 @@ const RolePermission = () => {
                   checked={perm.status}
                   onChange={() => togglePermission(index)}
                   className="hidden peer"
+                  disabled
                 />
                 <div className="custom-checkbox">
                   {perm.status && (
@@ -255,12 +263,12 @@ const RolePermission = () => {
             >
               Cancel
             </button> */}
-            <button
+            {/* <button
               onClick={handleUpdate}
               className="px-6 py-2 bg-indigo-purple text-white hover:bg-indigo-purple-dark rounded"
             >
               Update
-            </button>
+            </button> */}
           </div>
         </motion.div>
       </div>

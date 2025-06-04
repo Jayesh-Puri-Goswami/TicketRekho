@@ -1,24 +1,22 @@
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDropzone } from 'react-dropzone';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {motion} from 'framer-motion';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUpload, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import CityTable from '../components/Tables/CityTable';
 import url from '../networking/app_urls';
 
 import statesData from '../common/States&City/States&City.json';
-import { Building2 } from 'lucide-react';
+import { Building2, ChevronDown } from 'lucide-react';
+
 const City: React.FC = () => {
   const { id } = useParams();
   const [city, setCity] = useState('');
   const [stateName, setStateName] = useState('');
+  const [customCity, setCustomCity] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -42,35 +40,19 @@ const City: React.FC = () => {
     if (id) fetchState();
   }, [id, currentUser.token]);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const selected = acceptedFiles[0];
-    if (selected) {
-      setFile(selected);
-      setPreviewImage(URL.createObjectURL(selected));
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png'],
-    },
-    maxFiles: 1,
-  });
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!city) return setErrorMessage('City name is required.');
-    if (!file) return setErrorMessage('Please upload an image.');
+    const cityToSubmit = city === 'custom' ? customCity : city;
+    if (!cityToSubmit) return setErrorMessage('City name is required.');
 
     setErrorMessage(null);
     setLoading(true);
 
     const formData = new FormData();
-    formData.append('name', city);
+    formData.append('name', cityToSubmit);
     formData.append('state', id as string);
-    formData.append('cityImage', file);
+    formData.append('cityImage', '');
 
     try {
       await axios.post(url.CreateCities, formData, {
@@ -82,6 +64,7 @@ const City: React.FC = () => {
 
       toast.success('City added successfully!');
       setCity('');
+      setCustomCity('');
       setFile(null);
       setPreviewImage(null);
       setReload((prev) => !prev);
@@ -94,6 +77,11 @@ const City: React.FC = () => {
     }
   };
 
+  // Get all unique cities from statesData
+  const allCities = Array.from(
+    new Set(Object.values(statesData).flat())
+  ).sort();
+
   return (
     <div className="mx-auto max-w-270">
       <Breadcrumb
@@ -104,12 +92,7 @@ const City: React.FC = () => {
 
       <div className="flex flex-col gap-9 mb-9">
         <div className="rounded-xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          {/* <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-            <h3 className="font-medium text-transparent bg-clip-text bg-indigo-purple">
-              Add City
-            </h3>
-          </div> */}
-           <motion.div
+          <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
@@ -118,7 +101,6 @@ const City: React.FC = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-800 flex items-center">
                 <Building2 size={28} className="mr-2 text-indigo-600" />
-               
                 City Management
               </h1>
               <p className="text-gray-600 mt-1">
@@ -128,79 +110,51 @@ const City: React.FC = () => {
             </div>
           </motion.div>
 
-
           <form onSubmit={handleSubmit}>
             <div className="p-6.5 space-y-6">
-              <div>
+              
+              <div className="mb-8 relative">
                 <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                  Select City
+                  Select State
                 </label>
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full rounded-xl border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black dark:text-white dark:border-form-strokedark dark:bg-form-input transition focus:border-primary dark:focus:border-primary"
-                >
-                  <option value="" disabled>
-                    Choose a City
-                  </option>
-                  {statesData[stateName]?.map((cityName: string) => (
+                <div className="relative">
+                  <select
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full appearance-none rounded-xl border-[1.5px] border-stroke bg-transparent py-3 px-5 pr-12 text-black dark:text-white dark:border-form-strokedark dark:bg-form-input transition focus:border-primary dark:focus:border-primary"
+                  >
+                    <option value="" disabled>
+                      Choose a State
+                    </option>
+                     <option value="custom">Add Custom City</option>
+                    {allCities.map((cityName: string) => (
                     <option key={cityName} value={cityName}>
                       {cityName}
                     </option>
                   ))}
-                </select>
-              </div>
+                  </select>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                  Upload Image
-                </label>
-                <div
-                  {...getRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                    isDragActive
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-300 hover:border-indigo-400 dark:border-form-strokedark'
-                  }`}
-                >
-                  <input {...getInputProps()} />
-                  {previewImage ? (
-                    <div className="relative">
-                      <img
-                        src={previewImage}
-                        alt="Preview"
-                        className="mx-auto h-48 object-cover rounded"
-                      />
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setFile(null);
-                          setPreviewImage(null);
-                        }}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                      >
-                        <FontAwesomeIcon icon={faTimes} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <FontAwesomeIcon
-                        icon={faUpload}
-                        className="text-gray-400 text-3xl mx-auto"
-                      />
-                      <p className="text-gray-600 dark:text-gray-300">
-                        {isDragActive
-                          ? 'Drop the image here'
-                          : 'Drag & drop or click to upload'}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        PNG, JPG up to 10MB
-                      </p>
-                    </div>
-                  )}
+                  {/* Custom dropdown icon */}
+                  <div className="pointer-events-none absolute top-1/2 right-5 transform -translate-y-1/2 text-gray-500 dark:text-slate-300">
+                    <ChevronDown size={20} />
+                  </div>
                 </div>
               </div>
+
+              {city === 'custom' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Custom City Name
+                  </label>
+                  <input
+                    type="text"
+                    value={customCity}
+                    onChange={(e) => setCustomCity(e.target.value)}
+                    placeholder="Enter custom city name"
+                    className="w-full rounded-xl border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black dark:text-white dark:border-form-strokedark dark:bg-form-input transition focus:border-primary dark:focus:border-primary"
+                  />
+                </div>
+              )}
 
               {errorMessage && (
                 <p className="text-red-500 text-sm">{errorMessage}</p>
@@ -208,11 +162,11 @@ const City: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={loading || !city || !file}
-                className={`w-full py-3 px-4 rounded-xl text-white font-medium transition ${
-                  city && file
-                    ? 'bg-indigo-purple hover:bg-indigo-purple-dark'
-                    : 'bg-gray-300 cursor-not-allowed'
+                disabled={loading || !city || (city === 'custom' && !customCity)}
+                className={`w-full py-3 px-4 rounded-xl font-medium transition ${
+                  city && (city !== 'custom' || customCity)
+                    ? 'bg-indigo-purple hover:bg-indigo-purple-dark text-white'
+                    : 'bg-slate-300 cursor-not-allowed text-black'
                 }`}
               >
                 {loading ? 'Submitting...' : 'Add City'}

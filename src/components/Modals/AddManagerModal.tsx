@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
@@ -31,6 +29,7 @@ import {
   addManagerSuccess,
   addManagerFailure,
 } from '../../redux/manager/managerSlice';
+import toast from 'react-hot-toast';
 
 interface State {
   _id: string;
@@ -195,6 +194,9 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
         const errorMsg = response.data.message || 'Failed to create manager';
         dispatch(addManagerFailure(errorMsg));
       }
+      toast.success('Manager created successfully!',{
+        className : 'z-[99999]'
+      })
     } catch (error: any) {
       const message = error.response?.data?.message || 'Error creating manager';
       dispatch(addManagerFailure(message));
@@ -321,12 +323,12 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
             initial="hidden"
             animate="visible"
             exit="hidden"
             variants={backdropVariants}
-            onClick={closeModal}
+            // onClick={closeModal}
           >
             <motion.div
               className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"

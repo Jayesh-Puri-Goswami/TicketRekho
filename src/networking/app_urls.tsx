@@ -53,6 +53,7 @@ const getCouponDetail = `${Bash_url}/admin/getCouponDetail`;
 
 const assignCouponCodeToSingleUser = `${Bash_url}/admin/assignCouponCodeToSingleUser`;
 const assignCouponCodeToAllUsers = `${Bash_url}/admin/assignCouponCodeToAllUsers`;
+const assignCouponCodeAccordingToStatesAndCity = `${Bash_url}/admin/assignCouponCodeAccordingToStatesAndCity`;
 
 // state
 const getStates = `${Bash_url}/admin/getStates`;
@@ -266,6 +267,7 @@ export default {
 
   assignCouponCodeToSingleUser,
   assignCouponCodeToAllUsers,
+  assignCouponCodeAccordingToStatesAndCity,
 
   getStates,
   getStatesList,

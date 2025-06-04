@@ -102,7 +102,7 @@ const MovieDetail: React.FC<MovieDetailProps> = () => {
 
   if (isLoading || !movieData) {
     return (
-      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999]">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl flex flex-col items-center justify-center space-y-4">
           <div className="animate-spin rounded-full border-t-4 border-indigo-500 w-12 h-12 border-b-4 border-slate-200"></div>
           <p className="text-lg text-slate-700 dark:text-slate-200 font-semibold">
@@ -130,7 +130,7 @@ const MovieDetail: React.FC<MovieDetailProps> = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden">
+    <div className="min-h-screen  text-slate-900 overflow-x-hidden">
       {/* Hero Section with Banner */}
       <div className="relative h-[70vh] overflow-hidden rounded-xl">
         <motion.div
@@ -217,7 +217,7 @@ const MovieDetail: React.FC<MovieDetailProps> = () => {
               className="rounded-2xl overflow-hidden shadow-xl shadow-indigo-200 relative aspect-[2/3]"
             >
               <img
-                src={Urls.Image_url+ movieData.movieImage}
+                src={Urls.Image_url + movieData.movieImage}
                 alt={`${movieData.name} poster`}
                 className="w-full h-full object-cover"
                 onError={(e: any) => {
@@ -351,19 +351,26 @@ const MovieDetail: React.FC<MovieDetailProps> = () => {
                 Cast & Crew
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div
+                className={`${
+                  movieData.cast.length > 3
+                    ? 'flex overflow-x-auto gap-4 pb-2 -mx-4 px-4 snap-x snap-mandatory'
+                    : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
+                }`}
+              >
                 {movieData.cast.map((member, index) => (
                   <motion.div
                     key={member._id || index}
                     whileHover={{ y: 0 }}
-                    className="bg-gradient-to-r from-indigo-100 to-blue-100 rounded-xl overflow-hidden shadow-md group transition-transform duration-300"
+                    className={`bg-gradient-to-r from-indigo-100 to-blue-100 rounded-xl overflow-hidden shadow-md group transition-transform duration-300 ${
+                      movieData.cast.length > 3
+                        ? 'min-w-[250px] snap-start'
+                        : ''
+                    }`}
                   >
                     <div className="aspect-[3/4] overflow-hidden">
                       <img
-                        src={
-                           Urls.Image_url+member.castImage ||
-                          ''
-                        }
+                        src={Urls.Image_url + member.castImage || ''}
                         alt={member.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         onError={(e: any) => {

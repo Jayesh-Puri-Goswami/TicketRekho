@@ -24,10 +24,10 @@ const CityCard: React.FC<StateCardProps> = ({
   onClick,
 }) => {
   return (
-    <div className="bg-white group rounded-xl cursor-pointer overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl border border-gray-100">
+    <div className="bg-[#f1f5f9] group rounded-xl cursor-pointer overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl border border-black/10 ">
       <div onClick={onClick} className="relative h-48 overflow-hidden">
         <img
-          src={`${Urls.Image_url}${state.cityImage}`}
+          src={`../../../public//Image/Fallback Image/78787.jpg`}
           alt={`${state.name} landscape`}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 group-hover:scale-105"
           onError={(e: any) => {
@@ -36,7 +36,7 @@ const CityCard: React.FC<StateCardProps> = ({
               '../../../public/Image/Fallback Image/default-fallback-image.png'; // Your fallback image path
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
         <div className="absolute bottom-0 left-0 p-4 w-full">
           <h2 className="text-white text-2xl font-bold tracking-tight">
             {state.name}

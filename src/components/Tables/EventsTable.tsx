@@ -264,9 +264,9 @@ const EventsTable: React.FC = () => {
       position: 'center',
       customClass: {
         confirmButton:
-          'bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition',
+          'bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition',
         cancelButton:
-          'bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition',
+          'bg-slate-200 text-slate-700 px-4 py-2 rounded-md hover:bg-slategray-300 transition',
       },
     }).then((result) => {
       if (result.isConfirmed) {
@@ -395,14 +395,13 @@ const EventsTable: React.FC = () => {
     navigate(`/event-realtime-nonsitting-seat-status/${id}`);
   };
 
-
-    if (loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader size={48} className="text-indigo-600 animate-spin mb-4" />
         <h2 className="text-xl font-medium text-gray-700">Loading Events...</h2>
       </div>
-    )
+    );
   }
 
   return (
@@ -456,7 +455,7 @@ const EventsTable: React.FC = () => {
 
       {/* Image Preview Modal */}
       {previewImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999] backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
@@ -646,16 +645,18 @@ const EventsTable: React.FC = () => {
                           >
                             <FontAwesomeIcon icon={faHamburger} />
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(event.id);
+                          {!event.isActive && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(event.id);
                             }}
-                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
-                            title="Delete"
-                          >
-                            <FontAwesomeIcon icon={faTrashAlt} />
-                          </button>
+                              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
+                              title="Delete"
+                            >
+                              <FontAwesomeIcon icon={faTrashAlt} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

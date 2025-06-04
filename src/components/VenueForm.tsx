@@ -136,7 +136,7 @@ const VenueForm: React.FC<ModalformProps> = ({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50">
           <div
             onClick={(e) => e.stopPropagation()}
             className="rounded-sm border border-stroke bg-white shadow-default w-full max-w-md lg:max-w-xl overflow-y-auto transform translate-x-30"

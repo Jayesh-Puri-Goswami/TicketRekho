@@ -370,7 +370,7 @@ const UpdateEvent: React.FC<{
 
   if (!eventData) {
     return (
-      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999]">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl flex flex-col items-center justify-center space-y-4">
           <div className="animate-spin rounded-full border-t-4 border-indigo-500 w-12 h-12 border-b-4 border-slate-200"></div>
           <p className="text-lg text-slate-700 dark:text-slate-200 font-semibold">
@@ -385,7 +385,7 @@ const UpdateEvent: React.FC<{
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
           onClick={() => {
             setIsOpen(false);
             onClose();

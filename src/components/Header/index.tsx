@@ -15,7 +15,7 @@ const Header = (props: {
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
   return (
     <header
-      className="sticky top-0 z-[999] flex w-full backdrop-blur-sm bg-white/30 shadow-sm"
+      className="sticky top-0 z-[998] flex w-full backdrop-blur-sm bg-white/30 shadow-sm"
       style={{
         background: 'rgba(255, 255, 255, 0.8)',
         backdropFilter: 'blur(16px)',
@@ -31,7 +31,7 @@ const Header = (props: {
               e.stopPropagation();
               props.setSidebarOpen(!props.sidebarOpen);
             }}
-            className="z-[9999] block rounded-xl border border-white/30 bg-white/60 p-2 shadow hover:bg-white/80 transition duration-150"
+            className="z-[999] block rounded-xl border border-white/30 bg-white/60 p-2 shadow hover:bg-white/80 transition duration-150"
           >
             {props.sidebarOpen ? (
               <X className="h-5 w-5 text-gray-700" />
@@ -78,7 +78,7 @@ const Header = (props: {
               <h2 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Welcome! {currentUser?.name || 'User'}
               </h2>
-              <p className="text-sm text-gray-600">Have a great day!</p>
+              {/* <p className="text-sm text-gray-600">Have a great day!</p> */}
             </div>
           </div>
         </motion.div>

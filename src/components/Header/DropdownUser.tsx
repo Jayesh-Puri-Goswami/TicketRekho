@@ -10,7 +10,7 @@ const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
 
-  console.log(currentUser);
+  // console.log(currentUser);
   
 
   const dispatch = useDispatch();

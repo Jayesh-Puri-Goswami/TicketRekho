@@ -46,6 +46,18 @@ const ScreensTable: React.FC = () => {
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
   const roleName = currentUser.role;
 
+  //   useEffect(() => {
+  //   const unlisten = window.addEventListener('popstate', () => {
+  //     Swal.close(); // Closes the currently open modal, if any
+  //   });
+
+  //   return () => {
+  //     window.removeEventListener('popstate', () => {
+  //       Swal.close();
+  //     });
+  //   };
+  // }, []);
+
   const fetchSellers = (page: number, limit: number) => {
     setLoading(true);
     axios
@@ -109,7 +121,9 @@ const ScreensTable: React.FC = () => {
       .then((res) => {
         if (res.data.status) {
           setSellers((prev) =>
-            prev.map((s) => (s._id === id ? { ...s, isActive: !currentStatus } : s)),
+            prev.map((s) =>
+              s._id === id ? { ...s, isActive: !currentStatus } : s,
+            ),
           );
           toast.success('Screen status updated!');
         }
@@ -125,6 +139,12 @@ const ScreensTable: React.FC = () => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        confirmButton:
+          'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
+        cancelButton:
+          'bg-slate-300 text-slate-700 hover:bg-slate-400 focus:ring-slate-500',
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         axios
@@ -162,7 +182,9 @@ const ScreensTable: React.FC = () => {
           onChange={handleSearch}
         />
         {roleName !== 'admin' && (
-          <AddScreenModal onSubmitSuccess={() => fetchSellers(currentPage, itemsPerPage)} />
+          <AddScreenModal
+            onSubmitSuccess={() => fetchSellers(currentPage, itemsPerPage)}
+          />
         )}
       </div>
 
@@ -173,9 +195,15 @@ const ScreensTable: React.FC = () => {
               <th className="px-6 py-4 text-center rounded-tl-lg">
                 Screen {renderSortIcon('name')}
               </th>
-              <th className="px-6 py-4 text-center">Capacity {renderSortIcon('seatingCapacity')}</th>
-              <th className="px-6 py-4 text-center">Type {renderSortIcon('screenType')}</th>
-              <th className="px-6 py-4 text-center">Status {renderSortIcon('isActive')}</th>
+              <th className="px-6 py-4 text-center">
+                Capacity {renderSortIcon('seatingCapacity')}
+              </th>
+              <th className="px-6 py-4 text-center">
+                Type {renderSortIcon('screenType')}
+              </th>
+              <th className="px-6 py-4 text-center">
+                Status {renderSortIcon('isActive')}
+              </th>
               <th className="px-6 py-4 text-center rounded-tr-lg">Actions</th>
             </tr>
           </thead>
@@ -208,12 +236,21 @@ const ScreensTable: React.FC = () => {
                   >
                     <td className="px-6 py-5 text-center">
                       <div className="flex flex-col items-center">
-                        <FontAwesomeIcon icon={faTv} className="text-xl text-indigo-500 mb-1" />
-                        <span className="font-semibold text-sm">{screen.name}</span>
+                        <FontAwesomeIcon
+                          icon={faTv}
+                          className="text-xl text-indigo-500 mb-1"
+                        />
+                        <span className="font-semibold text-sm">
+                          {screen.name}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-center">{screen.seatingCapacity}</td>
-                    <td className="px-6 py-5 text-center">{screen.screenType}</td>
+                    <td className="px-6 py-5 text-center">
+                      {screen.seatingCapacity}
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      {screen.screenType}
+                    </td>
                     <td className="px-6 py-5 text-center">
                       <button
                         onClick={(e) => {
@@ -240,15 +277,17 @@ const ScreensTable: React.FC = () => {
                         >
                           <FontAwesomeIcon icon={faEdit} />
                         </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(screen._id);
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <FontAwesomeIcon icon={faTrashAlt} />
-                        </button>
+                        {!screen.isActive && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(screen._id);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <FontAwesomeIcon icon={faTrashAlt} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -300,7 +339,9 @@ const ScreensTable: React.FC = () => {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
             className="ml-2 p-2 bg-gray-200 rounded disabled:opacity-50"
           >

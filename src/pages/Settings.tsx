@@ -244,7 +244,7 @@ const Settings = () => {
                     <input
                       type="file"
                       accept="image/*"
-                      className="absolute inset-0 z-[9999] m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
+                      className="absolute inset-0 z-[999] m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
                     />
                     <div className="flex flex-col items-center justify-center space-y-3">
                       <span className="flex h-10 w-10 items-center justify-center rounded-full border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">

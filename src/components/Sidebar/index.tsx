@@ -205,6 +205,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     }
   }, [sidebarExpanded]);
 
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1000) {
+        setSidebarOpen(true);
+      }else{
+        setSidebarOpen(false);
+      }
+    })
+  })
+
   let redirectTo = '/';
   if (currentUser?.role === 'admin') redirectTo = '/dashboard';
   else if (currentUser?.role === 'eventManager')
@@ -234,7 +244,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         animate={{ x: sidebarOpen ? 0 : '-100%' }}
         exit={{ x: '-100%' }}
         transition={{ type: 'tween', ease: 'easeInOut', duration: 0.3 }}
-        className={`fixed left-0 top-0 z-[9999] flex h-screen w-72 flex-col overflow-hidden bg-gradient-to-t from-indigo-500/90 to-purple-500/90 backdrop-blur-lg dark:from-indigo-600/90 dark:to-purple-600/90 lg:static lg:translate-x-0 lg:z-auto`}
+        className={`fixed left-0 top-0 z-[999] flex h-screen w-72 flex-col overflow-hidden bg-gradient-to-t from-indigo-500/90 to-purple-500/90 backdrop-blur-lg dark:from-indigo-600/90 dark:to-purple-600/90 lg:static lg:translate-x-0  lg:z-auto`}
       >
         {/* Header */}
         <div className="relative flex items-center justify-between px-6 py-6 ">

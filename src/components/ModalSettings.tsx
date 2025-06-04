@@ -69,7 +69,7 @@ export const Modal = ({ closeModal, onSubmit, defaultValue }) => {
 
   return (
     <div
-      className="modal-container fixed z-[9999] flex top-25 bottom-5 "
+      className="modal-container fixed z-[999] flex top-25 bottom-5 "
       onClick={(e) => {
         if (e.target.className === "modal-container") closeModal();
       }}

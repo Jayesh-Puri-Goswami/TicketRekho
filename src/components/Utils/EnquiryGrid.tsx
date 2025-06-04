@@ -129,6 +129,10 @@ const handleDelete = async (id: string) => {
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
     confirmButtonText: 'Yes, delete it!',
+     customClass: {
+      confirmButton: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
+      cancelButton: 'bg-slate-300 text-slate-700 hover:bg-slate-400 focus:ring-slate-500',
+    },
   });
 
   if (result.isConfirmed) {

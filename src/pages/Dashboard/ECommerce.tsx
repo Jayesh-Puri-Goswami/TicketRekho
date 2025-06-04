@@ -580,13 +580,18 @@ const ECommerce: React.FC = () => {
                         </span>
                       </div>
                       <div className="mt-2 flex justify-between text-sm">
-                        <span className="text-[#9264c9] font-semibold">
+                        {/* <span className="text-[#9264c9] font-semibold">
                           {coupon.discountValue}
                           {coupon.discountType === 'percentage'
                             ? '%'
                             : 'Flat'}{' '}
                           OFF
-                        </span>
+                        </span> */}
+                        {coupon.discountType === 'percentage' ? (
+                          <span className='text-[#9264c9] font-semibold'>{coupon.discountValue}% OFF</span>
+                        ) : (
+                          <span className='text-[#9264c9] font-semibold'>₹{coupon.discountValue} OFF</span>
+                        )}
                         <span className="text-gray-500">
                           Valid until:{' '}
                           {new Date(coupon.expirationDate).toLocaleDateString(

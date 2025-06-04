@@ -212,7 +212,7 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
       <AnimatePresence>
         {isOpen && (
           <div 
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
             onClick={() => setIsOpen(false)}
           >
             <motion.div

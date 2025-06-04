@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
@@ -13,7 +14,6 @@ import {
   Languages,
   Cast,
   Calendar,
-  Image as ImageIcon,
 } from 'lucide-react';
 import ImageUploader from '../Utils/ImageUploader';
 import FormField from '../Utils/FormField';
@@ -21,6 +21,7 @@ import FormField from '../Utils/FormField';
 interface CastMember {
   name: string;
   role: string;
+  image: File | null;
 }
 
 interface MovieData {
@@ -52,7 +53,7 @@ const UpdateMovie: React.FC<{
 }> = ({ movieId, onClose, onSubmitSuccess }) => {
   const currentUser = useSelector((state: any) => state.user.currentUser?.data);
   const [movieData, setMovieData] = useState<MovieData | null>(null);
-  const [isOpen, setIsOpen] = useState(true); // Modal is open by default
+  const [isOpen, setIsOpen] = useState(true);
 
   // Form fields
   const [name, setName] = useState('');
@@ -67,7 +68,6 @@ const UpdateMovie: React.FC<{
   const [movieImage, setMovieImage] = useState<File | null>(null);
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [advImage, setAdvImage] = useState<File | null>(null);
-  const [castImages, setCastImages] = useState<File[]>([]);
   const [existingMovieImage, setExistingMovieImage] = useState('');
   const [existingBannerImage, setExistingBannerImage] = useState('');
   const [existingAdvImage, setExistingAdvImage] = useState('');
@@ -104,16 +104,26 @@ const UpdateMovie: React.FC<{
         setGenres(data.genre);
         setFormats(data.format);
         setLanguages(data.language);
-        setCast(data.cast);
         setExistingMovieImage(data.movieImage || '');
         setExistingBannerImage(data.bannerImage || '');
         setExistingAdvImage(data.advImage || '');
-        setExistingCastImages(data.castImages || []);
+        setExistingCastImages(data.cast.castImage || []);
         setIsBanner(data.isBanner === true);
         setIsAds(data.isAds === true);
         setIsPopular(data.isPopular === true);
         setIsLatest(data.isLatest === true);
         setReleaseDate(formatDate(data.releaseDate));
+        setCast(
+          data.cast.map((member: any) => ({
+            name: member.name,
+            role: member.role,
+            image: null,
+          })),
+        );
+
+        console.log(cast[0]);
+        
+        
       } catch (error) {
         console.error('Error fetching movie data:', error);
         toast.error('Failed to load movie data.', {
@@ -155,31 +165,19 @@ const UpdateMovie: React.FC<{
     setRuntime(formatted);
   };
 
-  const handleAddGenre = () => setGenres([...genres, '']);
-  const handleAddFormat = () => setFormats([...formats, '']);
-  const handleAddLanguage = () => setLanguages([...languages, '']);
-  const handleAddCast = () => setCast([...cast, { name: '', role: '' }]);
-
-  const handleCastImageChange = (files: FileList | null) => {
-    if (files) {
-      setCastImages([...castImages, ...Array.from(files)]);
-    }
-  };
-
-  const handleRemoveCastImage = (index: number) => {
-    setCastImages(castImages.filter((_, i) => i !== index));
-  };
-
-  const handleRemoveExistingCastImage = (index: number) => {
-    setExistingCastImages(existingCastImages.filter((_, i) => i !== index));
+  const handleCastImageChange = (index: number, file: File | null) => {
+    setCast(
+      cast.map((member, i) =>
+        i === index ? { ...member, image: file } : member,
+      ),
+    );
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!name.trim()) {
-      toast.error('Please enter the movie name.', {
-        className: 'z-[99999]',
-      });
+      toast.error('Please enter the movie name.', { className: 'z-[99999]' });
       return;
     }
     if (!description.trim()) {
@@ -195,9 +193,7 @@ const UpdateMovie: React.FC<{
       return;
     }
     if (!runtime.trim()) {
-      toast.error('Please enter the runtime.', {
-        className: 'z-[99999]',
-      });
+      toast.error('Please enter the runtime.', { className: 'z-[99999]' });
       return;
     }
     if (!certification.trim()) {
@@ -249,16 +245,28 @@ const UpdateMovie: React.FC<{
     genres.forEach((genre) => formData.append('genre[]', genre));
     formats.forEach((format) => formData.append('format[]', format));
     languages.forEach((language) => formData.append('language[]', language));
+
     if (movieImage) formData.append('movieImage', movieImage);
     if (bannerImage) formData.append('bannerImage', bannerImage);
     if (advImage) formData.append('advImage', advImage);
+
     formData.append('isBanner', String(isBanner));
     formData.append('isAds', String(isAds));
     formData.append('isPopular', String(isPopular));
     formData.append('isLatest', String(isLatest));
     formData.append('releaseDate', releaseDate);
-    if (castImages.length > 0) formData.append('cast', JSON.stringify(cast));
-    castImages.forEach((file) => formData.append('castImages', file));
+
+    const castData = cast.map((member) => ({
+      name: member.name,
+      role: member.role,
+    }));
+    formData.append('cast', JSON.stringify(castData));
+
+    cast.forEach((member) => {
+      if (member.image) {
+        formData.append('castImages', member.image);
+      }
+    });
 
     try {
       const response = await axios.post(`${Urls.updateMovie}`, formData, {
@@ -267,22 +275,21 @@ const UpdateMovie: React.FC<{
           'Content-Type': 'multipart/form-data',
         },
       });
-      toast.success('Movie updated successfully!', {
-        className: 'z-[99999]',
-      });
+
+      toast.success('Movie updated successfully!', { className: 'z-[99999]' });
+
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
       }
+
       setIsOpen(false);
       onClose();
     } catch (error: any) {
       console.error('Error:', error);
       const errorMessage =
         error?.response?.data?.message ||
-        'Oops! Something went wrong while updating the movie. Please try again later.';
-      toast.error(errorMessage, {
-        className: 'z-[99999]',
-      });
+        'Failed to update movie. Please try again.';
+      toast.error(errorMessage, { className: 'z-[99999]' });
     } finally {
       setIsLoading(false);
     }
@@ -304,9 +311,14 @@ const UpdateMovie: React.FC<{
     },
   };
 
+  const handleBackdropClick = () => {
+    setIsOpen(false);
+    onClose();
+  };
+
   if (!movieData) {
     return (
-      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999]">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl flex flex-col items-center justify-center space-y-4">
           <div className="animate-spin rounded-full border-t-4 border-indigo-500 w-12 h-12 border-b-4 border-slate-200"></div>
           <p className="text-lg text-slate-700 dark:text-slate-200 font-semibold">
@@ -321,11 +333,8 @@ const UpdateMovie: React.FC<{
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
-          onClick={() => {
-            setIsOpen(false);
-            onClose();
-          }}
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
+          onClick={handleBackdropClick}
         >
           <motion.div
             className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
@@ -343,10 +352,7 @@ const UpdateMovie: React.FC<{
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => {
-                  setIsOpen(false);
-                  onClose();
-                }}
+                onClick={handleBackdropClick}
                 className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 <X size={20} />
@@ -487,7 +493,7 @@ const UpdateMovie: React.FC<{
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           type="button"
-                          onClick={handleAddGenre}
+                          onClick={() => setGenres([...genres, ''])}
                           className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                         >
                           + Add Genre
@@ -531,7 +537,7 @@ const UpdateMovie: React.FC<{
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           type="button"
-                          onClick={handleAddFormat}
+                          onClick={() => setFormats([...formats, ''])}
                           className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                         >
                           + Add Format
@@ -580,7 +586,7 @@ const UpdateMovie: React.FC<{
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           type="button"
-                          onClick={handleAddLanguage}
+                          onClick={() => setLanguages([...languages, ''])}
                           className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                         >
                           + Add Language
@@ -590,65 +596,89 @@ const UpdateMovie: React.FC<{
                   </div>
                 </div>
 
-                {/* Cast Section */}
+                {/* Cast Section - Updated to match CreateMovie */}
                 <div className="space-y-4">
                   <FormField label="Cast Members" name="cast">
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       {cast.map((member, index) => (
-                        <div key={index} className="flex gap-2">
-                          <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                              <Cast className="h-4 w-4 text-slate-400" />
+                        <div
+                          key={index}
+                          className="border border-slate-200 rounded-lg p-4 space-y-3"
+                        >
+                          <div className="flex gap-2">
+                            <div className="relative flex-1">
+                              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <Cast className="h-4 w-4 text-slate-400" />
+                              </div>
+                              <input
+                                type="text"
+                                value={member.name}
+                                onChange={(e) =>
+                                  setCast(
+                                    cast.map((c, i) =>
+                                      i === index
+                                        ? { ...c, name: e.target.value }
+                                        : c,
+                                    ),
+                                  )
+                                }
+                                className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="Actor name"
+                              />
                             </div>
                             <input
                               type="text"
-                              value={member.name}
+                              value={member.role}
                               onChange={(e) =>
                                 setCast(
                                   cast.map((c, i) =>
                                     i === index
-                                      ? { ...c, name: e.target.value }
+                                      ? { ...c, role: e.target.value }
                                       : c,
                                   ),
                                 )
                               }
-                              className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                              placeholder="Actor name"
+                              className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
+                              placeholder="Role"
+                            />
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              type="button"
+                              onClick={() =>
+                                setCast(cast.filter((_, i) => i !== index))
+                              }
+                              className="px-3 py-2 bg-red-500 text-white rounded-md"
+                            >
+                              <X size={16} />
+                            </motion.button>
+                          </div>
+
+                          {/* Individual Cast Image Upload */}
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-slate-700">
+                              Cast Image
+                            </label>
+                            <ImageUploader
+                              onImageChange={(file: File | null) =>
+                                handleCastImageChange(index, file)
+                              }
+                              selectedImage={member.image}
+                              existingImage={Urls.Image_url + existingCastImages[index]}
                             />
                           </div>
-                          <input
-                            type="text"
-                            value={member.role}
-                            onChange={(e) =>
-                              setCast(
-                                cast.map((c, i) =>
-                                  i === index
-                                    ? { ...c, role: e.target.value }
-                                    : c,
-                                ),
-                              )
-                            }
-                            className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                            placeholder="Role"
-                          />
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            type="button"
-                            onClick={() =>
-                              setCast(cast.filter((_, i) => i !== index))
-                            }
-                            className="px-3 py-2 bg-red-500 text-white rounded-md"
-                          >
-                            <X size={16} />
-                          </motion.button>
                         </div>
                       ))}
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         type="button"
-                        onClick={handleAddCast}
+                        onClick={() =>
+                          setCast([
+                            ...cast,
+                            { name: '', role: '', image: null },
+                          ])
+                        }
                         className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                       >
                         + Add Cast Member
@@ -657,7 +687,7 @@ const UpdateMovie: React.FC<{
                   </FormField>
 
                   {/* Image Uploads */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <FormField
                       label="Movie Image (104 × 123 px)"
                       name="movieImage"
@@ -665,7 +695,11 @@ const UpdateMovie: React.FC<{
                       <ImageUploader
                         onImageChange={(file: any) => setMovieImage(file)}
                         selectedImage={movieImage}
-                        existingImage={Urls.Image_url + existingMovieImage}
+                        existingImage={
+                          existingMovieImage
+                            ? Urls.Image_url + existingMovieImage
+                            : undefined
+                        }
                       />
                     </FormField>
 
@@ -676,7 +710,11 @@ const UpdateMovie: React.FC<{
                       <ImageUploader
                         onImageChange={(file: any) => setBannerImage(file)}
                         selectedImage={bannerImage}
-                        existingImage={Urls.Image_url + existingBannerImage}
+                        existingImage={
+                          existingBannerImage
+                            ? Urls.Image_url + existingBannerImage
+                            : undefined
+                        }
                       />
                     </FormField>
 
@@ -687,61 +725,12 @@ const UpdateMovie: React.FC<{
                       <ImageUploader
                         onImageChange={(file: any) => setAdvImage(file)}
                         selectedImage={advImage}
-                        existingImage={Urls.Image_url + existingAdvImage}
+                        existingImage={
+                          existingAdvImage
+                            ? Urls.Image_url + existingAdvImage
+                            : undefined
+                        }
                       />
-                    </FormField>
-
-                    <FormField label="Cast Images" name="castImages">
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <ImageIcon className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                          type="file"
-                          multiple
-                          onChange={(e) =>
-                            handleCastImageChange(e.target.files)
-                          }
-                          className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                          accept="image/*"
-                        />
-                      </div>
-                      <div className="mt-2 space-y-1">
-                        {existingCastImages.map((url, index) => (
-                          <div
-                            key={`existing-${index}`}
-                            className="flex items-center justify-between text-sm"
-                          >
-                            <span className="text-slate-600">
-                              Existing Image {index + 1}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveExistingCastImage(index)
-                              }
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
-                        {castImages.map((image, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between text-sm"
-                          >
-                            <span className="text-slate-600">{image.name}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveCastImage(index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
-                      </div>
                     </FormField>
                   </div>
 
@@ -839,10 +828,7 @@ const UpdateMovie: React.FC<{
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                     type="button"
-                    onClick={() => {
-                      setIsOpen(false);
-                      onClose();
-                    }}
+                    onClick={handleBackdropClick}
                     className="w-full sm:w-auto px-5 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Cancel

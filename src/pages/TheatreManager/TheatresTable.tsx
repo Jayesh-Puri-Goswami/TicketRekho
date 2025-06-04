@@ -158,7 +158,7 @@ const TheatresTable: React.FC = () => {
     s.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-    const handleTheatreClick = (id: string) => {
+  const handleTheatreClick = (id: string) => {
     navigate(`/grabABites/${id}`);
   };
 
@@ -227,7 +227,10 @@ const TheatresTable: React.FC = () => {
                     key={i}
                     className="hover:bg-indigo-700/10 transition cursor-pointer"
                   >
-                    <td className="px-6 py-5 text-center" onClick={()=> handleManagerClick(t._id)}>
+                    <td
+                      className="px-6 py-5 text-center"
+                      onClick={() => handleManagerClick(t._id)}
+                    >
                       <div className="flex flex-col items-center">
                         <FontAwesomeIcon
                           icon={faTheaterMasks}
@@ -236,8 +239,16 @@ const TheatresTable: React.FC = () => {
                         <span className="font-semibold text-sm">{t.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-base text-center" onClick={()=> handleManagerClick(t._id)}>{t.location}</td>
-                    <td className="px-6 py-5 text-base text-center" onClick={()=> handleManagerClick(t._id)}>
+                    <td
+                      className="px-6 py-5 text-base text-center"
+                      onClick={() => handleManagerClick(t._id)}
+                    >
+                      {t.location}
+                    </td>
+                    <td
+                      className="px-6 py-5 text-base text-center"
+                      onClick={() => handleManagerClick(t._id)}
+                    >
                       <span
                         className={`text-sm font-medium ${
                           t.isGrabABite ? 'text-green-600' : 'text-red-600'
@@ -272,21 +283,23 @@ const TheatresTable: React.FC = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(t._id);
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <FontAwesomeIcon icon={faTrashAlt} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
                             navigate(`/grabABites/${t._id}`);
                           }}
                           className="text-amber-600 hover:text-amber-800"
                         >
                           <FontAwesomeIcon icon={faHamburger} />
                         </button>
+                        {!t.isActive && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(t._id);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <FontAwesomeIcon icon={faTrashAlt} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -227,7 +227,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="absolute z-[9999] mt-2 w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-2xl"
+            className="absolute z-[999] mt-2 w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-2xl"
           >
             {/* Search Header */}
             <div className="border-b border-gray-200 dark:border-gray-600 p-4">

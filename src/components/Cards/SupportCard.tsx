@@ -56,7 +56,7 @@ const SupportCard: React.FC<SupportCardProps> = ({
       {/* Status indicator */}
       <div
         className={`absolute top-0 right-0 w-3 h-3 m-3 rounded-full ${
-          isActive ? 'bg-success' : 'bg-danger'
+          isActive ? 'bg-success  animate-pulse' : 'bg-danger  animate-pulse'
         }`}
       />
 
@@ -94,7 +94,7 @@ const SupportCard: React.FC<SupportCardProps> = ({
           </p>
         </div>
 
-        {ticket.adminReply && (
+        {/* {ticket.adminReply && (
           <div className="mb-5">
             <div className="flex items-center mb-2">
               <MessageSquareMore
@@ -106,10 +106,10 @@ const SupportCard: React.FC<SupportCardProps> = ({
               </h4>
             </div>
             <p className="text-gray-600 dark:text-gray-400 text-sm bg-indigo-50 dark:bg-gray-700 p-3 rounded-lg">
-              {truncateText(ticket.adminReply, 120)}
+              {truncateText(ticket.adminReply, 40)}
             </p>
           </div>
-        )}
+        )} */}
 
         {/* Action buttons */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
@@ -134,9 +134,9 @@ const SupportCard: React.FC<SupportCardProps> = ({
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onToggleStatus}
+            whileHover={{ scale: 1 }}
+            whileTap={{ scale: 1 }}
+            // onClick={onToggleStatus}
             className={`px-3 py-1 rounded-full text-xs font-medium ${
               isActive
                 ? 'bg-success bg-opacity-10 text-success'

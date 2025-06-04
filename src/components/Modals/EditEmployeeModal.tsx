@@ -162,7 +162,7 @@ const EditEmployeeModal: React.FC<ModalFormProps> = ({
       <AnimatePresence>
         {true && (
           <motion.div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
             initial="hidden"
             animate="visible"
             exit="hidden"

@@ -17,11 +17,10 @@ import CreateVenueNameForm from '../CreateVenueNameForm';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
-
 interface Venue {
   _id: string;
   name: string;
-   address: string;
+  address: string;
   seatType: string;
   isActive: boolean;
 }
@@ -44,17 +43,16 @@ const VenueTable: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
- // console.log("currentUser",currentUser.role);
+  // console.log("currentUser",currentUser.role);
   const roleName = currentUser.role;
 
-
   const formatName = (str: string) => {
-  return str
-    .replace(/([a-z])([A-Z])/g, '$1 $2')         // Add space before capital letters
-    .split(' ')                                   // Split into words
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
-    .join(' ');                                   // Join words back
-};
+    return str
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space before capital letters
+      .split(' ') // Split into words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+      .join(' '); // Join words back
+  };
 
   const fetchManagers = (page: number, limit: number) => {
     setLoading(true);
@@ -65,12 +63,9 @@ const VenueTable: React.FC = () => {
         },
       })
       .then((response) => {
-        console.log("response.data.data ",response.data.data);
-        if(      
-          response.data.status &&
-          response.data.data         
-        ) {
-          const managerData = response.data.data;        
+        console.log('response.data.data ', response.data.data);
+        if (response.data.status && response.data.data) {
+          const managerData = response.data.data;
           setVenues(managerData);
           setTotalPages(response.data.data.pagination.totalPages); // Set total pages from API
           setLoading(false);
@@ -115,13 +110,12 @@ const VenueTable: React.FC = () => {
     setCurrentPage(1); // Reset to first page when changing items per page
   };
 
-
   const toggleStatus = (venueId: string, currentStatus: boolean) => {
     const updatedStatus = !currentStatus;
     axios
       .post(
         `${Urls.changeVenueStatus}`,
-        { venueId,isActive: updatedStatus ? true : false, },
+        { venueId, isActive: updatedStatus ? true : false },
         {
           headers: {
             Authorization: `Bearer ${currentUser.token}`,
@@ -130,12 +124,7 @@ const VenueTable: React.FC = () => {
       )
       .then((response) => {
         if (response.data.status) {
-
-          toast.success(
-            'Venue status changed successfully!',
-          );
-
-        
+          toast.success('Venue status changed successfully!');
 
           setVenues((prevVenues) =>
             prevVenues.map((venue) =>
@@ -144,7 +133,6 @@ const VenueTable: React.FC = () => {
                 : venue,
             ),
           );
-
         }
       })
       .catch((error) => {
@@ -155,34 +143,30 @@ const VenueTable: React.FC = () => {
       });
   };
 
+  const MySwal = withReactContent(Swal);
 
- const MySwal = withReactContent(Swal);
-
-const handleDelete = (venueId: string) => {
-  MySwal.fire({
-    title: 'Are you sure?',
-    text: 'Do you really want to delete this venue? This action cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'Cancel',
-    reverseButtons: true,
-    position: 'center', // Ensure modal is centered
-    customClass: {
-      confirmButton: 'swal2-confirm-custom',
-      cancelButton: 'swal2-cancel-custom',
-    },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      deleteVenue(venueId);
-    }
-  });
-};
-
-
+  const handleDelete = (venueId: string) => {
+    MySwal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to delete this venue? This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      position: 'center', // Ensure modal is centered
+      customClass: {
+        confirmButton: 'swal2-confirm-custom',
+        cancelButton: 'swal2-cancel-custom',
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteVenue(venueId);
+      }
+    });
+  };
 
   const deleteVenue = (venueId: string) => {
-
     axios
       .post(
         `${Urls.deleteVenue}`,
@@ -195,43 +179,33 @@ const handleDelete = (venueId: string) => {
       )
       .then((response) => {
         if (response.data.status) {
+          toast.success('Venue deleted successfully!');
 
-          toast.success(
-            'Venue deleted successfully!',
-          );
-
-           setVenues((prevVenues) =>
+          setVenues((prevVenues) =>
             prevVenues.filter((venue) => venue._id !== venueId),
           );
-
-        
         }
       })
       .catch((error: any) => {
+        console.error('Error:', error);
 
-          console.error('Error:', error);
+        const errorMessage =
+          error?.response?.data?.message ||
+          'Oops! Something went wrong while deleting the venue. Please try again later.';
 
-  const errorMessage =
-    error?.response?.data?.message ||
-     'Oops! Something went wrong while deleting the venue. Please try again later.';
-
-  toast.error(errorMessage);
-      
-
+        toast.error(errorMessage);
       });
   };
 
+  const filteredManagers = venues.filter((manager) => {
+    const search = searchTerm.toLowerCase();
 
-const filteredManagers = venues.filter((manager) => {
-  const search = searchTerm.toLowerCase();
-
-  return (
-    manager.name?.toLowerCase().includes(search) ||
-    manager.seatType?.toLowerCase().includes(search) ||
-    (manager.isActive ? 'Active' : 'Inactive').includes(search)
-  );
-});
-
+    return (
+      manager.name?.toLowerCase().includes(search) ||
+      manager.seatType?.toLowerCase().includes(search) ||
+      (manager.isActive ? 'Active' : 'Inactive').includes(search)
+    );
+  });
 
   const renderSortIcon = (key: keyof Venue) => {
     if (sortConfig.key === key) {
@@ -250,7 +224,6 @@ const filteredManagers = venues.filter((manager) => {
     fetchManagers(currentPage, itemsPerPage);
   };
 
-
   const handleCancelEdit = () => {
     // Reset selectedBanner and close the modal
     setSelectedCoupon(null);
@@ -265,10 +238,8 @@ const filteredManagers = venues.filter((manager) => {
     navigate(`/nonsittingvenue/${id}`);
   };
 
-
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-       
       <div className="flex gap-4">
         <input
           type="text"
@@ -276,17 +247,15 @@ const filteredManagers = venues.filter((manager) => {
           className="mb-4 w-full p-2 border border-gray-300 rounded dark:bg-boxdark"
           onChange={handleSearch}
         />
-          {roleName !== 'admin' && (
-      <CreateVenueNameForm
-        onSubmitSuccess={handleModalFormSubmit}
-        onCancel={handleCancelEdit} // Add this prop to handle canceling edit
-      />
-    )}
-    
+        {roleName !== 'admin' && (
+          <CreateVenueNameForm
+            onSubmitSuccess={handleModalFormSubmit}
+            onCancel={handleCancelEdit} // Add this prop to handle canceling edit
+          />
+        )}
       </div>
 
       <div className="max-w-full overflow-x-auto">
-        
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-2 text-left dark:bg-meta-4">
@@ -300,27 +269,25 @@ const filteredManagers = venues.filter((manager) => {
                 className="min-w-[150px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center"
                 onClick={() => handleSort('seatType')}
               >
-                 Type {renderSortIcon('seatType')}
+                Type {renderSortIcon('seatType')}
               </th>
 
-                 <th
+              <th
                 className="min-w-[150px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center"
                 onClick={() => handleSort('address')}
               >
-                 Address {renderSortIcon('address')}
+                Address {renderSortIcon('address')}
               </th>
-             
+
               <th
                 className="min-w-[150px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center"
                 onClick={() => handleSort('isActive')}
               >
-                 Status {renderSortIcon('isActive')}
+                Status {renderSortIcon('isActive')}
               </th>
-               <th
-                 className="min-w-[120px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center"
-              >
-                Action 
-              </th> 
+              <th className="min-w-[120px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -353,25 +320,24 @@ const filteredManagers = venues.filter((manager) => {
                     </tr>
                   ))
               : filteredManagers.map((venue, index) => (
-                  <tr key={index}
-                  onClick={(e) =>{ e.stopPropagation();
-                            
-                    if (venue.seatType === 'sitting') {
-                      handleSittingClick(venue._id)
-                    } else if (venue.seatType === 'nonSitting') {
-                      handleNonSittingClick(venue._id)
-                    }
+                  <tr
+                    key={index}
+                    onClick={(e) => {
+                      e.stopPropagation();
 
+                      if (venue.seatType === 'sitting') {
+                        handleSittingClick(venue._id);
+                      } else if (venue.seatType === 'nonSitting') {
+                        handleNonSittingClick(venue._id);
+                      }
                     }}
-                   className="cursor-pointer"
-                   >
+                    className="cursor-pointer"
+                  >
                     <td className="border-b border-[#eee] py-5 px-4  dark:border-strokedark text-center">
-                     
-                      <h5 
-                      //  title="Click to view seat layout"
-                     
-                      className="text-black dark:text-white"
+                      <h5
+                        //  title="Click to view seat layout"
 
+                        className="text-black dark:text-white"
                       >
                         {venue.name}
                       </h5>
@@ -381,8 +347,8 @@ const filteredManagers = venues.filter((manager) => {
                         {formatName(venue.seatType)}
                       </p>
                     </td>
-                   
-                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
+
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
                       <p className="text-black dark:text-white">
                         {venue.address}
                       </p>
@@ -392,7 +358,10 @@ const filteredManagers = venues.filter((manager) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleStatus(venue._id, venue.isActive ? true : false);
+                          toggleStatus(
+                            venue._id,
+                            venue.isActive ? true : false,
+                          );
                         }}
                         className={`inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium ${
                           venue.isActive == true
@@ -404,19 +373,23 @@ const filteredManagers = venues.filter((manager) => {
                       </button>
                     </td>
 
-                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
-                                          {/* <div className="flex gap-2"> */}
-                                            <button
-                                              onClick={(e) =>{
-                                                 e.stopPropagation();
-                                               handleDelete(venue._id)}}
-                                              className="p-2 text-sm font-medium rounded-md hover:text-[#d43232] focus:outline-none "
-                                            >
-                                              <FontAwesomeIcon icon={faTrashAlt} />
-                                            </button>
-                                          {/* </div> */}
-                                        </td> 
-
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
+                      {/* <div className="flex gap-2"> */}
+                      {venue.isActive ? (
+                        '-'
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(venue._id);
+                          }}
+                          className="p-2 text-sm font-medium rounded-md hover:text-[#d43232] focus:outline-none "
+                        >
+                          <FontAwesomeIcon icon={faTrashAlt} />
+                        </button>
+                      )}
+                      {/* </div> */}
+                    </td>
                   </tr>
                 ))}
           </tbody>
@@ -466,4 +439,3 @@ const filteredManagers = venues.filter((manager) => {
 };
 
 export default VenueTable;
-

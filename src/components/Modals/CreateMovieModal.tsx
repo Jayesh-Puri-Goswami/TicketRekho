@@ -1,17 +1,29 @@
-import React, { useState, useRef } from 'react';
+'use client';
+
+import type React from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import Urls from '../../networking/app_urls';
 import toast from 'react-hot-toast';
-import { X, Film, Clock, User, Tag, Languages, Cast, Calendar, Image as ImageIcon } from 'lucide-react';
+import {
+  X,
+  Film,
+  Clock,
+  User,
+  Tag,
+  Languages,
+  Cast,
+  Calendar,
+} from 'lucide-react';
 import ImageUploader from '../Utils/ImageUploader';
 import FormField from '../Utils/FormField';
-import clsx from 'clsx';
 
 interface CastMember {
   name: string;
   role: string;
+  image: File | null;
 }
 
 interface MovieModalFormProps {
@@ -22,7 +34,7 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
   const currentUser = useSelector((state: any) => state.user.currentUser?.data);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   // Form fields
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -39,7 +51,6 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
   const [movieImage, setMovieImage] = useState<File | null>(null);
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [advImage, setAdvImage] = useState<File | null>(null);
-  const [castImages, setCastImages] = useState<File[]>([]);
 
   // Flags
   const [isBanner, setIsBanner] = useState(false);
@@ -83,79 +94,128 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
     setMovieImage(null);
     setBannerImage(null);
     setAdvImage(null);
-    setCastImages([]);
     setIsBanner(false);
     setIsAds(false);
     setIsPopular(false);
     setIsLatest(false);
+    setLoading(false);
+  };
+
+  const handleCastImageChange = (index: number, file: File | null) => {
+    setCast(
+      cast.map((member, i) =>
+        i === index ? { ...member, image: file } : member,
+      ),
+    );
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    // Validation checks
-    if (!name.trim()) return toast.error('Please enter the movie name.',{
-        className : 'z-[99999]'
-      });
-    if (!description.trim()) return toast.error('Please enter the movie description.',{
-        className : 'z-[99999]'
-      });
-    if (!director.trim()) return toast.error('Please enter the director name.',{
-        className : 'z-[99999]'
-      });
-    if (!runtime.trim()) return toast.error('Please enter the runtime.',{
-        className : 'z-[99999]'
-      });
-    if (!certification) return toast.error('Please select the certification.',{
-        className : 'z-[99999]'
-      });
-    if (genres.length === 0) return toast.error('Please add at least one genre.',{
-        className : 'z-[99999]'
-      });
-    if (formats.length === 0) return toast.error('Please add at least one format.',{
-        className : 'z-[99999]'
-      });
-    if (languages.length === 0) return toast.error('Please add at least one language.',{
-        className : 'z-[99999]'
-      });
-    if (cast.length === 0) return toast.error('Please add at least one cast member.',{
-        className : 'z-[99999]'
-      });
-    if (!movieImage) return toast.error('Please upload the movie image.',{
-        className : 'z-[99999]'
-      });
-    if (!bannerImage) return toast.error('Please upload the banner image.',{
-        className : 'z-[99999]'
-      });
-    if (!advImage) return toast.error('Please upload the advertisement image.',{
-        className : 'z-[99999]'
-      });
-    if (!releaseDate) return toast.error('Please select the release date.',{
-        className : 'z-[99999]'
-      });
-
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('description', description);
-    formData.append('director', director);
-    formData.append('runtime', runtime);
-    formData.append('certification', certification);
-    genres.forEach(genre => formData.append('genre[]', genre));
-    formats.forEach(format => formData.append('format[]', format));
-    languages.forEach(language => formData.append('language[]', language));
-    formData.append('movieImage', movieImage);
-    formData.append('bannerImage', bannerImage);
-    formData.append('advImage', advImage);
-    formData.append('cast', JSON.stringify(cast));
-    formData.append('isBanner', String(isBanner));
-    formData.append('isAds', String(isAds));
-    formData.append('isPopular', String(isPopular));
-    formData.append('isLatest', String(isLatest));
-    formData.append('releaseDate', releaseDate);
-    castImages.forEach(file => formData.append('castImages', file));
-
     try {
+      if (!name.trim())
+        return toast.error('Please enter the movie name.', {
+          style: { zIndex: 9999999 },
+        });
+      if (!description.trim())
+        return toast.error('Please enter the movie description.', {
+          className: 'z-[99999]',
+        });
+      if (!director.trim())
+        return toast.error('Please enter the director name.', {
+          className: 'z-[99999]',
+        });
+      if (!runtime.trim())
+        return toast.error('Please enter the runtime.', {
+          className: 'z-[99999]',
+        });
+      if (!certification)
+        return toast.error('Please select the certification.', {
+          className: 'z-[99999]',
+        });
+      if (genres.length === 0)
+        return toast.error('Please add at least one genre.', {
+          className: 'z-[99999]',
+        });
+      if (formats.length === 0)
+        return toast.error('Please add at least one format.', {
+          className: 'z-[99999]',
+        });
+      if (languages.length === 0)
+        return toast.error('Please add at least one language.', {
+          className: 'z-[99999]',
+        });
+      if (cast.length === 0)
+        return toast.error('Please add at least one cast member.', {
+          className: 'z-[99999]',
+        });
+      if (!movieImage)
+        return toast.error('Please upload the movie image.', {
+          className: 'z-[99999]',
+        });
+      if (!bannerImage)
+        return toast.error('Please upload the banner image.', {
+          className: 'z-[99999]',
+        });
+      if (!advImage)
+        return toast.error('Please upload the advertisement image.', {
+          className: 'z-[99999]',
+        });
+      if (!releaseDate)
+        return toast.error('Please select the release date.', {
+          className: 'z-[99999]',
+        });
+
+      // Check if all cast members have images
+      const castMembersWithoutImages = cast.filter((member) => !member.image);
+      if (castMembersWithoutImages.length > 0) {
+        return toast.error('Please upload images for all cast members.', {
+          className: 'z-[99999]',
+        });
+      }
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('description', description);
+      formData.append('director', director);
+      formData.append('runtime', runtime);
+      formData.append('certification', certification);
+      genres.forEach((genre) => formData.append('genre[]', genre));
+      formats.forEach((format) => formData.append('format[]', format));
+      languages.forEach((language) => formData.append('language[]', language));
+      formData.append('movieImage', movieImage);
+      formData.append('bannerImage', bannerImage);
+      formData.append('advImage', advImage);
+
+      // Prepare cast data (name and role only) for JSON
+      const castData = cast.map((member) => ({
+        name: member.name,
+        role: member.role,
+      }));
+      formData.append('cast', JSON.stringify(castData));
+
+      formData.append('isBanner', String(isBanner));
+      formData.append('isAds', String(isAds));
+      formData.append('isPopular', String(isPopular));
+      formData.append('isLatest', String(isLatest));
+      formData.append('releaseDate', releaseDate);
+
+      cast.forEach((member) => {
+        if (member.image) {
+          formData.append('castImages', member.image);
+        }
+      });
+
+      console.log('=== FormData Debug ===');
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}:`, value.name, `(${value.size} bytes)`);
+        } else {
+          console.log(`${key}:`, value);
+        }
+      }
+      console.log('=== End FormData Debug ===');
+
       const response = await axios.post(Urls.createMovie, formData, {
         headers: {
           Authorization: `Bearer ${currentUser.token}`,
@@ -163,17 +223,20 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
         },
       });
 
-      toast.success('Movie added successfully!',{
-        className : 'z-[99999]'
+      toast.success('Movie added successfully!', {
+        className: 'z-[99999]',
       });
       clearFormState();
       setIsOpen(false);
       if (onSubmitSuccess) onSubmitSuccess();
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || 'Failed to add movie. Please try again.';
-      toast.error(errorMessage,{
-        className : 'z-[999999]'
+      const errorMessage =
+        error?.response?.data?.message ||
+        'Failed to add movie. Please try again.';
+      toast.error(errorMessage, {
+        className: 'z-[999999]',
       });
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -181,18 +244,23 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
 
   const modalVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    visible: {
+      opacity: 1,
+      y: 0,
       scale: 1,
-      transition: { type: 'spring', damping: 25, stiffness: 300 }
+      transition: { type: 'spring', damping: 25, stiffness: 300 },
     },
-    exit: { 
+    exit: {
       opacity: 0,
       y: 20,
       scale: 0.95,
-      transition: { duration: 0.2 }
-    }
+      transition: { duration: 0.2 },
+    },
+  };
+
+  const handleBackdropClick = () => {
+    clearFormState();
+    setIsOpen(false);
   };
 
   return (
@@ -204,18 +272,13 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
         className="bg-indigo-purple hover:bg-indigo-purple-dark text-white px-7 rounded h-[2.9rem]"
       >
         <span>Add</span>
-        
       </motion.button>
 
       <AnimatePresence>
         {isOpen && (
-          <div 
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
-            onClick={() => setIsOpen(false)}
-          >
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4">
             <motion.div
               className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
-              onClick={e => e.stopPropagation()}
               variants={modalVariants}
               initial="hidden"
               animate="visible"
@@ -223,13 +286,11 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
             >
               {/* Header */}
               <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
-                <h3 className="text-xl font-semibold ">
-                  Add New Movie
-                </h3>
+                <h3 className="text-xl font-semibold ">Add New Movie</h3>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleBackdropClick}
                   className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 >
                   <X size={20} />
@@ -342,7 +403,13 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                                 <input
                                   type="text"
                                   value={genre}
-                                  onChange={(e) => setGenres(genres.map((g, i) => i === index ? e.target.value : g))}
+                                  onChange={(e) =>
+                                    setGenres(
+                                      genres.map((g, i) =>
+                                        i === index ? e.target.value : g,
+                                      ),
+                                    )
+                                  }
                                   className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                                   placeholder="Enter genre"
                                 />
@@ -351,7 +418,11 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 type="button"
-                                onClick={() => setGenres(genres.filter((_, i) => i !== index))}
+                                onClick={() =>
+                                  setGenres(
+                                    genres.filter((_, i) => i !== index),
+                                  )
+                                }
                                 className="px-3 py-2 bg-red-500 text-white rounded-md"
                               >
                                 <X size={16} />
@@ -377,7 +448,13 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                               <input
                                 type="text"
                                 value={format}
-                                onChange={(e) => setFormats(formats.map((f, i) => i === index ? e.target.value : f))}
+                                onChange={(e) =>
+                                  setFormats(
+                                    formats.map((f, i) =>
+                                      i === index ? e.target.value : f,
+                                    ),
+                                  )
+                                }
                                 className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                                 placeholder="Enter format"
                               />
@@ -385,7 +462,11 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 type="button"
-                                onClick={() => setFormats(formats.filter((_, i) => i !== index))}
+                                onClick={() =>
+                                  setFormats(
+                                    formats.filter((_, i) => i !== index),
+                                  )
+                                }
                                 className="px-3 py-2 bg-red-500 text-white rounded-md"
                               >
                                 <X size={16} />
@@ -415,7 +496,13 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                                 <input
                                   type="text"
                                   value={language}
-                                  onChange={(e) => setLanguages(languages.map((l, i) => i === index ? e.target.value : l))}
+                                  onChange={(e) =>
+                                    setLanguages(
+                                      languages.map((l, i) =>
+                                        i === index ? e.target.value : l,
+                                      ),
+                                    )
+                                  }
                                   className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                                   placeholder="Enter language"
                                 />
@@ -424,7 +511,11 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 type="button"
-                                onClick={() => setLanguages(languages.filter((_, i) => i !== index))}
+                                onClick={() =>
+                                  setLanguages(
+                                    languages.filter((_, i) => i !== index),
+                                  )
+                                }
                                 className="px-3 py-2 bg-red-500 text-white rounded-md"
                               >
                                 <X size={16} />
@@ -445,47 +536,88 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                     </div>
                   </div>
 
-                  {/* Cast Section */}
+                  {/* Cast Section - Updated */}
                   <div className="space-y-4">
                     <FormField label="Cast Members" name="cast">
-                      <div className="space-y-2">
+                      <div className="space-y-4">
                         {cast.map((member, index) => (
-                          <div key={index} className="flex gap-2">
-                            <div className="relative flex-1">
-                              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <Cast className="h-4 w-4 text-slate-400" />
+                          <div
+                            key={index}
+                            className="border border-slate-200 rounded-lg p-4 space-y-3"
+                          >
+                            <div className="flex gap-2">
+                              <div className="relative flex-1">
+                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                  <Cast className="h-4 w-4 text-slate-400" />
+                                </div>
+                                <input
+                                  type="text"
+                                  value={member.name}
+                                  onChange={(e) =>
+                                    setCast(
+                                      cast.map((c, i) =>
+                                        i === index
+                                          ? { ...c, name: e.target.value }
+                                          : c,
+                                      ),
+                                    )
+                                  }
+                                  className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
+                                  placeholder="Actor name"
+                                />
                               </div>
                               <input
                                 type="text"
-                                value={member.name}
-                                onChange={(e) => setCast(cast.map((c, i) => i === index ? { ...c, name: e.target.value } : c))}
-                                className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Actor name"
+                                value={member.role}
+                                onChange={(e) =>
+                                  setCast(
+                                    cast.map((c, i) =>
+                                      i === index
+                                        ? { ...c, role: e.target.value }
+                                        : c,
+                                    ),
+                                  )
+                                }
+                                className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="Role"
+                              />
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                type="button"
+                                onClick={() =>
+                                  setCast(cast.filter((_, i) => i !== index))
+                                }
+                                className="px-3 py-2 bg-red-500 text-white rounded-md"
+                              >
+                                <X size={16} />
+                              </motion.button>
+                            </div>
+
+                            {/* Individual Cast Image Upload */}
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-slate-700">
+                                Cast Image
+                              </label>
+                              <ImageUploader
+                                onImageChange={(file: File | null) =>
+                                  handleCastImageChange(index, file)
+                                }
+                                selectedImage={member.image}
                               />
                             </div>
-                            <input
-                              type="text"
-                              value={member.role}
-                              onChange={(e) => setCast(cast.map((c, i) => i === index ? { ...c, role: e.target.value } : c))}
-                              className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                              placeholder="Role"
-                            />
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              type="button"
-                              onClick={() => setCast(cast.filter((_, i) => i !== index))}
-                              className="px-3 py-2 bg-red-500 text-white rounded-md"
-                            >
-                              <X size={16} />
-                            </motion.button>
                           </div>
                         ))}
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           type="button"
-                          onClick={() => setCast([...cast, { name: '', role: '' }])}
+                          onClick={() =>
+                            setCast([
+                              ...cast,
+                              { name: '', role: '', image: null },
+                            ])
+                          }
                           className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                         >
                           + Add Cast Member
@@ -493,98 +625,123 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                       </div>
                     </FormField>
 
-                    {/* Image Uploads */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField label="Movie Image (104 × 123 px)" name="movieImage">
+                    {/* Image Uploads - Removed Cast Images */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <FormField
+                        label="Movie Image (104 × 123 px)"
+                        name="movieImage"
+                      >
                         <ImageUploader
-                          onImageChange={(file : any) => setMovieImage(file)}
+                          onImageChange={(file: any) => setMovieImage(file)}
                           selectedImage={movieImage}
                         />
                       </FormField>
 
-                      <FormField label="Banner Image (345 × 153 px)" name="bannerImage">
+                      <FormField
+                        label="Banner Image (345 × 153 px)"
+                        name="bannerImage"
+                      >
                         <ImageUploader
-                          onImageChange={(file : any) => setBannerImage(file)}
+                          onImageChange={(file: any) => setBannerImage(file)}
                           selectedImage={bannerImage}
                         />
                       </FormField>
 
-                      <FormField label="Advertisement Image (306 × 485 px)" name="advImage">
+                      <FormField
+                        label="Advertisement Image (306 × 485 px)"
+                        name="advImage"
+                      >
                         <ImageUploader
-                          onImageChange={(file : any) => setAdvImage(file)}
+                          onImageChange={(file: any) => setAdvImage(file)}
                           selectedImage={advImage}
                         />
-                      </FormField>
-
-                      <FormField label="Cast Images" name="castImages">
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <ImageIcon className="h-4 w-4 text-slate-400" />
-                          </div>
-                          <input
-                            type="file"
-                            multiple
-                            onChange={(e) => setCastImages(e.target.files ? Array.from(e.target.files) : [])}
-                            className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                            accept="image/*"
-                          />
-                        </div>
-                        {castImages.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {castImages.map((image, index) => (
-                              <div key={index} className="flex items-center justify-between text-sm">
-                                <span className="text-slate-600">{image.name}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => setCastImages(castImages.filter((_, i) => i !== index))}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
                       </FormField>
                     </div>
 
                     {/* Checkboxes */}
                     <div className="flex flex-wrap gap-4">
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={isBanner}
-                          onChange={(e) => setIsBanner(e.target.checked)}
-                          className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                        />
-                        <span className="text-sm text-slate-700">Banner</span>
+                      {/* Banner Toggle */}
+                      <label
+                        htmlFor="banner"
+                        className="flex items-center cursor-pointer"
+                      >
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            id="banner"
+                            className="sr-only peer"
+                            checked={isBanner}
+                            onChange={(e) => setIsBanner(e.target.checked)}
+                          />
+                          <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                          <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                          Banner
+                        </span>
                       </label>
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={isPopular}
-                          onChange={(e) => setIsPopular(e.target.checked)}
-                          className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                        />
-                        <span className="text-sm text-slate-700">Popular</span>
+
+                      {/* Popular Toggle */}
+                      <label
+                        htmlFor="popular"
+                        className="flex items-center cursor-pointer"
+                      >
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            id="popular"
+                            className="sr-only peer"
+                            checked={isPopular}
+                            onChange={(e) => setIsPopular(e.target.checked)}
+                          />
+                          <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                          <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                          Popular
+                        </span>
                       </label>
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={isLatest}
-                          onChange={(e) => setIsLatest(e.target.checked)}
-                          className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                        />
-                        <span className="text-sm text-slate-700">Latest</span>
+
+                      {/* Latest Toggle */}
+                      <label
+                        htmlFor="latest"
+                        className="flex items-center cursor-pointer"
+                      >
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            id="latest"
+                            className="sr-only peer"
+                            checked={isLatest}
+                            onChange={(e) => setIsLatest(e.target.checked)}
+                          />
+                          <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                          <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                          Latest
+                        </span>
                       </label>
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={isAds}
-                          onChange={(e) => setIsAds(e.target.checked)}
-                          className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                        />
-                        <span className="text-sm text-slate-700">Ads</span>
+
+                      {/* Ads Toggle */}
+                      <label
+                        htmlFor="ads"
+                        className="flex items-center cursor-pointer"
+                      >
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            id="ads"
+                            className="sr-only peer"
+                            checked={isAds}
+                            onChange={(e) => setIsAds(e.target.checked)}
+                          />
+                          <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                          <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                          Ads
+                        </span>
                       </label>
                     </div>
                   </div>
@@ -595,7 +752,7 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       type="button"
-                      onClick={() => setIsOpen(false)}
+                      onClick={handleBackdropClick}
                       className="w-full sm:w-auto px-5 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       Cancel
@@ -607,14 +764,31 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                       disabled={loading}
                       className="w-full sm:w-auto relative overflow-hidden rounded-md py-2.5 px-6 font-medium text-white disabled:opacity-70"
                       style={{
-                        background: 'linear-gradient(to right, #6366F1, #8B5CF6)',
+                        background:
+                          'linear-gradient(to right, #6366F1, #8B5CF6)',
                       }}
                     >
                       {loading ? (
                         <span className="flex items-center justify-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
                           Processing...
                         </span>

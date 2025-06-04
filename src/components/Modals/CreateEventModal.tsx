@@ -343,6 +343,11 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
     }
   };
 
+  const handleBackdropClick = () => {
+    setIsOpen(false);
+    clearFormState();
+  }
+
   return (
     <>
       <motion.button
@@ -357,8 +362,8 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
       <AnimatePresence>
         {isOpen && (
           <div 
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
-            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
+            onClick={handleBackdropClick}
           >
             <motion.div
               className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
@@ -373,7 +378,7 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleBackdropClick}
                   className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 >
                   <X size={20} />
@@ -693,7 +698,7 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       type="button"
-                      onClick={() => setIsOpen(false)}
+                      onClick={handleBackdropClick}
                       className="w-full sm:w-auto px-5 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       Cancel

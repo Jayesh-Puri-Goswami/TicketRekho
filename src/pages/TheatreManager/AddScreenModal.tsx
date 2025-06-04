@@ -96,7 +96,7 @@ const AddScreenModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
     <>
       <button
         onClick={handleOpen}
-        className="bg-[#865BFF] hover:bg-[#6a48c9] text-white px-7 rounded mb-4"
+        className="bg-indigo-purple hover:bg-indigo-purple-dark text-white px-7 h-[2.7rem] rounded"
       >
         Add
       </button>

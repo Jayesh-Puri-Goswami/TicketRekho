@@ -104,6 +104,7 @@ const SupportGrid: React.FC = () => {
       .then((response) => {
         if (response.data && response.data.status) {
           toast.success('Support ticket status changed successfully!');
+          
           setTickets((prevTickets) =>
             prevTickets.map((ticket) =>
               ticket._id === id ? { ...ticket, status: updatedStatus } : ticket,

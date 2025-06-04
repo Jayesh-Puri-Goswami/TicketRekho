@@ -94,7 +94,7 @@ const MultiSelect: React.FC<DropdownProps> = ({ id }) => {
     });
 
   return (
-    <div className="relative z-[9999]">
+    <div className="relative z-[999]">
       <label className="mb-3 block text-sm font-medium text-black dark:text-white">
         Multiselect Dropdown
       </label>

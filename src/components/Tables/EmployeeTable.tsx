@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowUp, faArrowDown, faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowUp,
+  faArrowDown,
+  faEdit,
+  faTrashAlt,
+} from '@fortawesome/free-solid-svg-icons';
 import Urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
 import Sellerform from '../Sellerform';
@@ -42,21 +47,23 @@ const EmployeeTable: React.FC = () => {
 
   const navigate = useNavigate();
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
-     const [isModalOpen, setIsModalOpen] = useState(false);
-     const [selectedManagerId, setSelectedManagerId] =useState<TManager | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedManagerId, setSelectedManagerId] = useState<TManager | null>(
+    null,
+  );
 
   const formatRoleName = (str: string) => {
-  return str
-    .replace(/([a-z])([A-Z])/g, '$1 $2')         // Add space before capital letters
-    .split(' ')                                   // Split into words
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
-    .join(' ');                                   // Join words back
-};
+    return str
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space before capital letters
+      .split(' ') // Split into words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+      .join(' '); // Join words back
+  };
 
   const fetchSellers = (page: number, limit: number, search: string) => {
     setLoading(true);
 
-      // Convert 'Active'/'Inactive' search to boolean
+    // Convert 'Active'/'Inactive' search to boolean
     let searchQuery = search;
     if (search.toLowerCase() === 'active') {
       searchQuery = 'true';
@@ -65,26 +72,35 @@ const EmployeeTable: React.FC = () => {
     }
 
     axios
-      .get(`${Urls.getEmployeeListBymanagerId}?page=${page}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`, {
-        headers: {
-          Authorization: `Bearer ${currentUser.token}`,
+      .get(
+        `${
+          Urls.getEmployeeListBymanagerId
+        }?page=${page}&limit=${limit}&search=${encodeURIComponent(
+          searchQuery,
+        )}`,
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
         },
-      })
+      )
       .then((response) => {
         if (
           response.data.status &&
           response.data.data.userList &&
           Array.isArray(response.data.data.userList)
         ) {
-          const managerData = response.data.data.userList.map((manager: any) => ({
-            ...manager,
-            image: `${Urls.Image_url}${manager.profileImage}`,
-            phoneNumber: manager.phoneNumber,
-            email: manager.email,
-            password:manager.password,
-            status: manager.active,
-            role: formatRoleName(manager.role),
-          }));
+          const managerData = response.data.data.userList.map(
+            (manager: any) => ({
+              ...manager,
+              image: `${Urls.Image_url}${manager.profileImage}`,
+              phoneNumber: manager.phoneNumber,
+              email: manager.email,
+              password: manager.password,
+              status: manager.active,
+              role: formatRoleName(manager.role),
+            }),
+          );
 
           setSellers(managerData);
           setTotalPages(response.data.data.pagination?.totalPages || 1);
@@ -97,8 +113,8 @@ const EmployeeTable: React.FC = () => {
       });
   };
 
-     const handleUpdateSuccess = () => {
-    fetchSellers(currentPage, itemsPerPage, searchTerm); 
+  const handleUpdateSuccess = () => {
+    fetchSellers(currentPage, itemsPerPage, searchTerm);
     setIsModalOpen(false);
   };
 
@@ -110,7 +126,7 @@ const EmployeeTable: React.FC = () => {
     const delayDebounce = setTimeout(() => {
       fetchSellers(currentPage, itemsPerPage, searchTerm);
     }, 400); // Add debounce delay
-  
+
     return () => clearTimeout(delayDebounce);
   }, [currentPage, itemsPerPage, searchTerm]);
 
@@ -142,7 +158,7 @@ const EmployeeTable: React.FC = () => {
     setItemsPerPage(parseInt(e.target.value, 10));
   };
 
-    // Handle adding/updating theatres
+  // Handle adding/updating theatres
   const handleFormSubmitSuccess = (updatedManager: TManager) => {
     if (selectedManagerId) {
       // Update existing theatre in the list
@@ -155,9 +171,8 @@ const EmployeeTable: React.FC = () => {
     }
     setIsModalOpen(false);
     setSelectedManagerId(null);
-     fetchSellers(currentPage, itemsPerPage, searchTerm);
+    fetchSellers(currentPage, itemsPerPage, searchTerm);
   };
-  
 
   const toggleStatus = (id: string, currentStatus: boolean) => {
     const updatedStatus = !currentStatus;
@@ -178,9 +193,7 @@ const EmployeeTable: React.FC = () => {
       .then((response) => {
         if (response.data.status) {
           // Update the status locally after a successful API response
-          toast.success(
-            'Employee status changed successfully!',
-          );
+          toast.success('Employee status changed successfully!');
           setSellers((prevSellers) =>
             prevSellers.map((seller) =>
               seller._id === id ? { ...seller, status: updatedStatus } : seller,
@@ -199,16 +212,15 @@ const EmployeeTable: React.FC = () => {
 
   const filteredManagers = sellers.filter((manager) => {
     const lowerSearchTerm = searchTerm.toLowerCase();
-     const isActiveString = manager.status ? "active" : "inactive";
+    const isActiveString = manager.status ? 'active' : 'inactive';
     return (
       manager.name?.toLowerCase().includes(lowerSearchTerm) ||
       manager.email?.toLowerCase().includes(lowerSearchTerm) ||
-         manager.role?.toLowerCase().includes(lowerSearchTerm) ||
+      manager.role?.toLowerCase().includes(lowerSearchTerm) ||
       manager.phoneNumber?.toLowerCase().includes(lowerSearchTerm) ||
-         isActiveString.includes(lowerSearchTerm)
+      isActiveString.includes(lowerSearchTerm)
     );
   });
-  
 
   const renderSortIcon = (key: keyof TManager) => {
     if (sortConfig.key === key) {
@@ -221,33 +233,30 @@ const EmployeeTable: React.FC = () => {
     return null;
   };
 
+  const MySwal = withReactContent(Swal);
 
-    const MySwal = withReactContent(Swal);
-    
-    const handleDelete = (employeeId: string) => {
-      MySwal.fire({
-        title: 'Are you sure?',
-        text: 'Do you really want to delete this employee? This action cannot be undone.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true,
-        position: 'center', // Ensure modal is centered
-        customClass: {
-          confirmButton: 'swal2-confirm-custom',
-          cancelButton: 'swal2-cancel-custom',
-        },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          deleteEmployee(employeeId);
-        }
-      });
-    };
-  
-    const deleteEmployee = (id: string) => {
-  
-  
+  const handleDelete = (employeeId: string) => {
+    MySwal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to delete this employee? This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      position: 'center', // Ensure modal is centered
+      customClass: {
+        confirmButton: 'swal2-confirm-custom',
+        cancelButton: 'swal2-cancel-custom',
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteEmployee(employeeId);
+      }
+    });
+  };
+
+  const deleteEmployee = (id: string) => {
     axios
       .post(
         `${Urls.deleteEmployee}`,
@@ -256,54 +265,46 @@ const EmployeeTable: React.FC = () => {
           headers: {
             Authorization: `Bearer ${currentUser.token}`,
           },
-        }
+        },
       )
       .then((response) => {
         if (response.data.status) {
-  
-          
-           setSellers((prevEmpp) =>
-              prevEmpp.filter((emp) => emp._id !== id),
-            );
-  
+          setSellers((prevEmpp) => prevEmpp.filter((emp) => emp._id !== id));
+
           // Show success toast
           toast.success('Employee deleted successfully!');
         } else {
           // Show error toast if the status is false
-          toast.error('Failed to delete the city.');
+          toast.error('Failed to delete the employee.');
         }
       })
       .catch((error: any) => {
-          console.error('Error:', error);
-  
-    const errorMessage =
-      error?.response?.data?.message ||
-       'Oops! Something went wrong while deleting the employee. Please try again later.';
-  
-    toast.error(errorMessage);
+        console.error('Error:', error);
+
+        const errorMessage = error?.response?.data?.message;
+
+        toast.error(errorMessage);
       });
   };
-  
-    // const filteredCities = cityy.filter((city) =>
-    //   `${city.name}`.toLowerCase().includes(searchTerm.toLowerCase()),
-    // );
+
+  // const filteredCities = cityy.filter((city) =>
+  //   `${city.name}`.toLowerCase().includes(searchTerm.toLowerCase()),
+  // );
 
   const handleModalFormSubmit = () => {
     fetchSellers(currentPage, itemsPerPage, searchTerm);
   };
 
-  
   const handleManagerClick = (id: string) => {
     navigate(`/employee-detail/${id}`);
   };
 
-  
-   const handleCloseModal = () => {
-     setIsModalOpen(false); // Close the modal
-     setSelectedManagerId(null); // Reset the movie ID
-   };
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Close the modal
+    setSelectedManagerId(null); // Reset the movie ID
+  };
 
-     // Open the modal with selected theatre data for updating
+  // Open the modal with selected theatre data for updating
   const handleEdit = (theatre: TManager) => {
     setSelectedManagerId(theatre);
     setIsModalOpen(true);
@@ -360,9 +361,7 @@ const EmployeeTable: React.FC = () => {
               >
                 Status {renderSortIcon('status')}
               </th>
-             <th
-                className="min-w-[120px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center"
-              >
+              <th className="min-w-[120px] py-4 px-4 font-bold text-black dark:text-white cursor-pointer text-center">
                 Actions
               </th>
             </tr>
@@ -372,9 +371,7 @@ const EmployeeTable: React.FC = () => {
               ? Array(5)
                   .fill(0)
                   .map((_, index) => (
-                    <tr key={index} 
-                 
-                    >
+                    <tr key={index}>
                       <td className="py-4 px-4">
                         <div className="animate-pulse flex space-x-4">
                           <div className="rounded-full bg-slate-200 dark:bg-slate-300 h-10 w-10"></div>
@@ -438,15 +435,18 @@ const EmployeeTable: React.FC = () => {
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
                       <p className="text-black dark:text-white">
-                      {new Date(manager.createdAt).toISOString().slice(0, 10)}
+                        {new Date(manager.createdAt).toISOString().slice(0, 10)}
                       </p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
                       <button
-                       onClick={(e) => {
-                        e.stopPropagation();
-                        toggleStatus(manager._id,manager.status ? true : false);
-                      }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStatus(
+                            manager._id,
+                            manager.status ? true : false,
+                          );
+                        }}
                         className={`inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium ${
                           manager.status
                             ? 'bg-success text-success'
@@ -456,27 +456,27 @@ const EmployeeTable: React.FC = () => {
                         {manager.status ? 'Active' : 'Inactive'}
                       </button>
                     </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center"> 
-                     <button
-                                          
-                                              onClick={(e) => {
-                                                e.stopPropagation(); // Prevents the event from bubbling up to the row
-                                                handleEdit(manager);
-                                              }}
-                                              className="p-2 text-sm font-medium rounded-md focus:outline-none hover:text-[#472DA9]"
-                                            >
-                                              <FontAwesomeIcon icon={faEdit} />
-                                            </button>
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents the event from bubbling up to the row
+                          handleEdit(manager);
+                        }}
+                        className="p-2 text-sm font-medium rounded-md focus:outline-none hover:text-[#472DA9]"
+                      >
+                        <FontAwesomeIcon icon={faEdit} />
+                      </button>
 
-                                              <button
-                                                                                                                                       onClick={(e) =>{
-                                                                                                                                          e.stopPropagation();
-                                                                                                                                        handleDelete(manager._id)}}
-                                                                                                                                       className="p-2 text-sm font-medium rounded-md hover:text-[#d43232] focus:outline-none "
-                                                                                                                                     >
-                                                                                                                                       <FontAwesomeIcon icon={faTrashAlt} />
-                                                                                                                                     </button>
-                                            </td>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(manager._id);
+                        }}
+                        className="p-2 text-sm font-medium rounded-md hover:text-[#d43232] focus:outline-none "
+                      >
+                        <FontAwesomeIcon icon={faTrashAlt} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
           </tbody>
@@ -489,7 +489,6 @@ const EmployeeTable: React.FC = () => {
           />
         )}
 
-       
         <div className="flex items-center justify-between mt-4">
           <div>
             <label htmlFor="itemsPerPage" className="mr-2">

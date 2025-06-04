@@ -1,6 +1,9 @@
 import React from 'react';
 import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { motion } from 'framer-motion';
+
 // import { State } from '../types';
 export interface State {
   _id: string;
@@ -10,6 +13,7 @@ export interface State {
   cities: string[];
 }
 import Urls from '../../networking/app_urls';
+import { Plus } from 'lucide-react';
 
 interface StateCardProps {
   state: State;
@@ -25,10 +29,10 @@ const StateCard: React.FC<StateCardProps> = ({
   onClick,
 }) => {
   return (
-    <div className="bg-white group rounded-xl cursor-pointer overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl border border-gray-100">
+    <div className="bg-[#f1f5f9] group rounded-xl cursor-pointer overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl border border-black/10">
       <div onClick={onClick} className="relative h-48 overflow-hidden">
         <img
-          src={`${Urls.Image_url}${state.stateImage}`}
+          src={`../../../public//Image/Fallback Image/78787.jpg`}
           alt={`${state.name} landscape`}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 group-hover:scale-105"
           onError={(e: any) => {
@@ -37,7 +41,7 @@ const StateCard: React.FC<StateCardProps> = ({
               '../../../public/Image/Fallback Image/default-fallback-image.png'; // Your fallback image path
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
         <div className="absolute bottom-0 left-0 p-4 w-full">
           <h2 className="text-white text-2xl font-bold tracking-tight">
             {state.name}
@@ -48,12 +52,15 @@ const StateCard: React.FC<StateCardProps> = ({
       <div className="p-3">
         <div className="flex justify-between items-center mb-4">
           <div className="">
-            <button
+            <motion.button
               onClick={onClick}
-              className="text-sm text-blue-600 hover:underline focus:outline-none"
+              whileHover={{ scale: 1., }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center gap-2 rounded-md bg-transparent px-4 py-1 text-black font-medium focus:outline-none focus:ring-2 focus:ring-neutral-400 transition-all duration-300"
             >
-              + Add City
-            </button>
+              <Plus className="w-4 h-4" strokeWidth={2.5} />
+              <span>Add City</span>
+            </motion.button>
           </div>
           <div className="flex space-x-2">
             {/* <button
@@ -72,7 +79,7 @@ const StateCard: React.FC<StateCardProps> = ({
             </button>
           </div>
         </div>
-{/* 
+        {/* 
         <h3 className="text-sm font-medium text-gray-500">Cities</h3>
 
         <ul className="space-y-1">
