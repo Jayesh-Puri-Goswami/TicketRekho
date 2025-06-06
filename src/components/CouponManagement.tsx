@@ -10,6 +10,7 @@ import {
   Users,
   DollarSign,
   UserPlus,
+  IndianRupee,
 } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
@@ -66,9 +67,15 @@ const CouponManagement: React.FC = () => {
       })
       .catch((error) => {
         console.error('Error fetching coupons:', error);
-        toast.error(error.response?.data?.message || 'Error fetching coupons', {
-          className: 'z-[99999]',
-        });
+        toast.error(
+          error?.response?.data?.message ||
+            error?.message ||
+            'Oops! Something went wrong while fetching coupons. Please try again later.',
+          {
+            className: 'z-[99999]',
+          },
+        );
+
         setLoading(false);
       });
   };
@@ -213,7 +220,7 @@ const CouponManagement: React.FC = () => {
           show={showModal}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           <AnimatePresence>
             {loading
               ? Array(8)
@@ -242,9 +249,7 @@ const CouponManagement: React.FC = () => {
                     transition={{ duration: 0.2, delay: index * 0.05 }}
                     className="bg-white rounded-xl shadow-md overflow-hidden"
                   >
-                    <div
-                      className="p-6"
-                    >
+                    <div className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="text-lg font-bold text-transparent bg-clip-text bg-indigo-purple">
@@ -265,7 +270,7 @@ const CouponManagement: React.FC = () => {
 
                       <div className="space-y-3 mb-4">
                         <div className="flex items-center text-sm text-gray-600">
-                          <DollarSign
+                          <IndianRupee
                             size={16}
                             className="text-indigo-500 mr-2"
                           />
@@ -286,7 +291,7 @@ const CouponManagement: React.FC = () => {
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
                           <Users size={16} className="text-indigo-500 mr-2" />
-                          <span>Applicable to: {coupon.applicableTo}</span>
+                          <span>Applicable to: <span className='capitalize font-bold' >{coupon.applicableTo}</span></span>
                         </div>
                       </div>
 

@@ -13,6 +13,7 @@ import { Loader, Users } from "lucide-react"
 import EditManagerModal from "../components/Modals/EditManagerModal"
 import { useSelector, useDispatch } from "react-redux"
 import { triggerReload } from "../redux/manager/managerSlice"
+import ViewManagerModal from "../components/Modals/ViewManagerProfile"
 
 const ManagerPage: React.FC = () => {
   const dispatch = useDispatch()
@@ -124,6 +125,9 @@ const ManagerPage: React.FC = () => {
             />
 
             <EditManagerModal isOpen={!!editManagerId} manager={editManager} onClose={handleEditModalClose} />
+
+
+            {/* <ViewManagerModal isOpen={!!editManagerId} manager={editManager} onClose={handleEditModalClose} /> */}
 
             {loading && managers.length > 0 && (
               <div className="text-center py-4">

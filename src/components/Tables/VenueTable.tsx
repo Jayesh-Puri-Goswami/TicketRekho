@@ -16,6 +16,7 @@ import VenueForm from '../VenueForm';
 import CreateVenueNameForm from '../CreateVenueNameForm';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import EditButton from '../Buttons/EditButton';
 
 interface Venue {
   _id: string;
@@ -354,8 +355,8 @@ const VenueTable: React.FC = () => {
                       </p>
                     </td>
 
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
-                      <button
+                    <td className="border-b border-[#eee] py-5 px-8 dark:border-strokedark text-center flex items-center justify-center">
+                      {/* <button
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleStatus(
@@ -370,10 +371,33 @@ const VenueTable: React.FC = () => {
                         }`}
                       >
                         {venue.isActive ? 'Active' : 'Inactive'}
+                      </button> */}
+                      <button
+                       onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStatus(
+                            venue._id,
+                            venue.isActive ? true : false,
+                          );
+                        }}
+                        className="flex items-center cursor-pointer focus:outline-none"
+                      >
+                        <div className="relative w-11 h-6">
+                          <div
+                            className={`w-full h-full rounded-full transition-colors duration-300 ${
+                              venue.isActive ? 'bg-indigo-500' : 'bg-slate-500'
+                            }`}
+                          ></div>
+                          <div
+                            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform ${
+                              venue.isActive ? 'translate-x-5' : ''
+                            }`}
+                          ></div>
+                        </div>
                       </button>
                     </td>
 
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
+                    <td className="border-b border-[#eee] py- px-0 dark:border-strokedark text-center">
                       {/* <div className="flex gap-2"> */}
                       {venue.isActive ? (
                         '-'
@@ -387,6 +411,7 @@ const VenueTable: React.FC = () => {
                         >
                           <FontAwesomeIcon icon={faTrashAlt} />
                         </button>
+                   
                       )}
                       {/* </div> */}
                     </td>

@@ -1,79 +1,96 @@
-export type ManagerCategory = "Event Employee" | "Theatre Manager" | "Event Manager" | "Theatre Employee"
-export type ManagerStatus = "Active" | "Inactive"
+export type ManagerCategory =
+  | 'Event Employee'
+  | 'Theatre Manager'
+  | 'Event Manager'
+  | 'Theatre Employee'
+  | 'theatreManager'
+  | 'eventManager'
+  | 'eventEmployee'
+  | 'theatreEmployee'
+export type ManagerStatus = 'Active' | 'Inactive';
 
 export interface StateData {
-  _id: string
-  name: string
-  stateImage: string
-  createdAt: string
-  updatedAt: string
-  __v: number
+  _id: string;
+  name: string;
+  stateImage: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface CityData {
-  _id: string
-  name: string
-  cityImage: string
-  state: string | StateData
-  createdAt: string
-  updatedAt: string
-  __v: number
+  _id: string;
+  name: string;
+  cityImage: string;
+  state: string | StateData;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface Theatre {
+  _id: string;
+  name: string;
+  location: string;
+  isGrabABite: boolean;
+  isActive: boolean;
 }
 
 export interface Manager {
-  _id: string
-  name: string
-  email: string
-  phoneNumber: string
-  stateId: string | StateData
-  cityId: string | CityData
-  profileImage: string
-  bankAccountNumber: string
-  ifscCode: string
-  address: string
-  city: string
-  pincode: string
-  role: ManagerCategory
-  managerId: string | null
-  otp: string
-  otpVerified: boolean
-  expiryTime: string | null
-  permissions: string
-  fcmToken: string
-  deviceId: string
-  active: boolean
-  createdAt: string
-  updatedAt: string
-  __v: number
-  password?: string
+  _id: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  stateId: string | StateData;
+  cityId: string | CityData;
+  profileImage: string;
+  bankAccountNumber: string;
+  ifscCode: string;
+  address: string;
+  city: string;
+  pincode: string;
+  role: ManagerCategory;
+  managerId: string | null;
+  otp: string;
+  otpVerified: boolean;
+  expiryTime: string | null;
+  permissions: string;
+  fcmToken: string;
+  deviceId: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  password?: string;
   // Additional fields for theatre managers
-  theatreName?: string
-  location?: string
-  isActive?: boolean
-  isGrabABite?: boolean
+  theatre ? : Theatre
+  theatreName?: string;
+  location?: string;
+  isActive?: boolean;
+  isGrabABite?: boolean;
 }
 
 export interface ManagerFormData {
-  name: string
-  email: string
-  phoneNumber: string
-  password: string
-  role: string
-  active: boolean
-  stateId: string
-  cityId: string
-  address: string
-  bankAccountNumber: string
-  ifscCode: string
-  profileImage?: File | null
+  name: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  role: string;
+  active: boolean;
+  stateId: string;
+  cityId: string;
+  address: string;
+  bankAccountNumber: string;
+  ifscCode: string;
+  profileImage?: File | null;
   // Theatre manager specific fields
-  theatreName?: string
-  location?: string
-  isActive?: boolean
-  isGrabABite?: boolean
+  theatreName?: string;
+  location?: string;
+  isActive?: boolean;
+  isGrabABite?: boolean;
 }
 
 export interface ModalFormProps {
-  onSubmitSuccess?: (data: any) => void
-  setLoadingAfterAdd?: (loading: boolean) => void
+  onSubmitSuccess?: (data: any) => void;
+  setLoadingAfterAdd?: (loading: boolean) => void;
 }

@@ -4,7 +4,15 @@ import axios from 'axios';
 import urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Mail, Phone, Lock, Check, AlertCircleIcon } from 'lucide-react';
+import {
+  X,
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Check,
+  AlertCircleIcon,
+} from 'lucide-react';
 import clsx from 'clsx';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -104,8 +112,8 @@ const EditEmployeeModal: React.FC<ModalFormProps> = ({
       });
 
       setSuccess(true);
-      toast.success('Employee updated successfully!',{
-        className : 'z-[99999]'
+      toast.success('Employee updated successfully!', {
+        className: 'z-[99999]',
       });
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
@@ -116,10 +124,19 @@ const EditEmployeeModal: React.FC<ModalFormProps> = ({
       }, 1000);
     } catch (err: any) {
       console.error('API Error:', err.response?.data || err.message);
-      toast.error('Oops! There was an error updating the Employee. Please try again.',{
-        className : 'z-[99999]'
-      });
-      setError(err.response?.data?.message || 'Failed to update Employee. Please try again.');
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          'Oops! There was an error updating the Employee. Please try again.',
+        {
+          className: 'z-[99999]',
+        },
+      );
+
+      setError(
+        err.response?.data?.message ||
+          'Failed to update Employee. Please try again.',
+      );
     } finally {
       setLoading(false);
     }
@@ -359,14 +376,20 @@ const EditEmployeeModal: React.FC<ModalFormProps> = ({
                                 ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
                                 : 'border-slate-300 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:text-white',
                             )}
-                            {...register('role', { required: 'Role is required' })}
+                            {...register('role', {
+                              required: 'Role is required',
+                            })}
                             defaultValue={managerData?.role || ''}
                           >
                             <option value="" disabled>
                               Select a role
                             </option>
-                            <option value="theatreEmployee">Theatre Employee</option>
-                            <option value="eventEmployee">Event Employee</option>
+                            <option value="theatreEmployee">
+                              Theatre Employee
+                            </option>
+                            <option value="eventEmployee">
+                              Event Employee
+                            </option>
                           </select>
                           {errors.role && (
                             <span className="text-red-500 text-sm mt-1">
@@ -434,7 +457,8 @@ const EditEmployeeModal: React.FC<ModalFormProps> = ({
                       disabled={loading}
                       className="w-full sm:w-auto relative overflow-hidden rounded-md py-2.5 px-6 font-medium text-white disabled:opacity-70"
                       style={{
-                        background: 'linear-gradient(to right, #6366F1, #8B5CF6)',
+                        background:
+                          'linear-gradient(to right, #6366F1, #8B5CF6)',
                       }}
                     >
                       {loading ? (

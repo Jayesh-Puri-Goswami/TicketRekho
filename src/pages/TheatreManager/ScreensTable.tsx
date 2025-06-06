@@ -16,6 +16,7 @@ import AddScreenModal from './AddScreenModal';
 import UpdateScreenModal from './UpdateScreenModal';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import EditButton from '../../components/Buttons/EditButton';
 
 interface TManager {
   _id: string;
@@ -159,7 +160,16 @@ const ScreensTable: React.FC = () => {
               toast.success('Screen deleted successfully!');
             }
           })
-          .catch(() => toast.error('Failed to delete screen.'));
+          .catch((error: any) =>
+            toast.error(
+              error?.response?.data?.message ||
+                error?.message ||
+                'Oops! Something went wrong. Please try again later.',
+              {
+                className: 'z-[99999]',
+              },
+            ),
+          );
       }
     });
   };
@@ -251,8 +261,8 @@ const ScreensTable: React.FC = () => {
                     <td className="px-6 py-5 text-center">
                       {screen.screenType}
                     </td>
-                    <td className="px-6 py-5 text-center">
-                      <button
+                    <td className="px-6 py-8 text-center flex justify-center items-center ">
+                      {/* <button
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleStatus(screen._id, screen.isActive);
@@ -264,11 +274,31 @@ const ScreensTable: React.FC = () => {
                         }`}
                       >
                         {screen.isActive ? 'Active' : 'Inactive'}
+                      </button> */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStatus(screen._id, screen.isActive);
+                        }}
+                        className="flex items-center cursor-pointer focus:outline-none"
+                      >
+                        <div className="relative w-11 h-6">
+                          <div
+                            className={`w-full h-full rounded-full transition-colors duration-300 ${
+                              screen.isActive ? 'bg-indigo-500' : 'bg-slate-500'
+                            }`}
+                          ></div>
+                          <div
+                            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform ${
+                              screen.isActive ? 'translate-x-5' : ''
+                            }`}
+                          ></div>
+                        </div>
                       </button>
                     </td>
                     <td className="px-6 py-5 text-center">
                       <div className="flex justify-center gap-3">
-                        <button
+                        {/* <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEdit(screen);
@@ -276,7 +306,16 @@ const ScreensTable: React.FC = () => {
                           className="text-indigo-500 hover:text-indigo-700"
                         >
                           <FontAwesomeIcon icon={faEdit} />
-                        </button>
+                        </button> */}
+
+                        <EditButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(screen);
+                          }}
+                          icon={faEdit}
+                        />
+
                         {!screen.isActive && (
                           <button
                             onClick={(e) => {

@@ -230,12 +230,15 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
       setIsOpen(false);
       if (onSubmitSuccess) onSubmitSuccess();
     } catch (error: any) {
-      const errorMessage =
+      toast.error(
         error?.response?.data?.message ||
-        'Failed to add movie. Please try again.';
-      toast.error(errorMessage, {
-        className: 'z-[999999]',
-      });
+          error?.message ||
+          'Failed to add movie. Please try again',
+        {
+          className: 'z-[99999]',
+        },
+      );
+
       setLoading(false);
     } finally {
       setLoading(false);
@@ -540,74 +543,81 @@ const MovieModalForm: React.FC<MovieModalFormProps> = ({ onSubmitSuccess }) => {
                   <div className="space-y-4">
                     <FormField label="Cast Members" name="cast">
                       <div className="space-y-4">
-                        {cast.map((member, index) => (
-                          <div
-                            key={index}
-                            className="border border-slate-200 rounded-lg p-4 space-y-3"
-                          >
-                            <div className="flex gap-2">
-                              <div className="relative flex-1">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                  <Cast className="h-4 w-4 text-slate-400" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                          {cast.map((member, index) => (
+                            <div
+                              key={index}
+                              className="border border-slate-200 rounded-lg p-4 space-y-3"
+                            >
+                              <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <Cast className="h-4 w-4 text-slate-400" />
+                                  </div>
+                                  <input
+                                    type="text"
+                                    value={member.name}
+                                    onChange={(e) =>
+                                      setCast(
+                                        cast.map((c, i) =>
+                                          i === index
+                                            ? { ...c, name: e.target.value }
+                                            : c,
+                                        ),
+                                      )
+                                    }
+                                    className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
+                                    placeholder="Actor name"
+                                  />
                                 </div>
                                 <input
                                   type="text"
-                                  value={member.name}
+                                  value={member.role}
                                   onChange={(e) =>
                                     setCast(
                                       cast.map((c, i) =>
                                         i === index
-                                          ? { ...c, name: e.target.value }
+                                          ? { ...c, role: e.target.value }
                                           : c,
                                       ),
                                     )
                                   }
-                                  className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                                  placeholder="Actor name"
+                                  className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
+                                  placeholder="Role"
+                                />
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  type="button"
+                                  onClick={() =>
+                                    setCast(cast.filter((_, i) => i !== index))
+                                  }
+                                  className="px-3 py-2 bg-red-500 text-white rounded-md"
+                                >
+                                  <X size={16} />
+                                </motion.button>
+                              </div>
+
+                              {/* Individual Cast Image Upload */}
+                              <div className="space-y-2">
+                                <label className="block text-sm font-medium text-slate-700">
+                                  Cast Image
+                                </label>
+                                <ImageUploader
+                                  onImageChange={(file: File | null) =>
+                                    handleCastImageChange(index, file)
+                                  }
+                                  selectedImage={member.image}
+                                  // existingImage={
+                                  //   Urls.Image_url + cast[index].castImage
+                                  // }
                                 />
                               </div>
-                              <input
-                                type="text"
-                                value={member.role}
-                                onChange={(e) =>
-                                  setCast(
-                                    cast.map((c, i) =>
-                                      i === index
-                                        ? { ...c, role: e.target.value }
-                                        : c,
-                                    ),
-                                  )
-                                }
-                                className="flex-1 rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Role"
-                              />
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                type="button"
-                                onClick={() =>
-                                  setCast(cast.filter((_, i) => i !== index))
-                                }
-                                className="px-3 py-2 bg-red-500 text-white rounded-md"
-                              >
-                                <X size={16} />
-                              </motion.button>
                             </div>
+                          ))}
+                        </div>
 
-                            {/* Individual Cast Image Upload */}
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-slate-700">
-                                Cast Image
-                              </label>
-                              <ImageUploader
-                                onImageChange={(file: File | null) =>
-                                  handleCastImageChange(index, file)
-                                }
-                                selectedImage={member.image}
-                              />
-                            </div>
-                          </div>
-                        ))}
+                        {/* Add Cast Member Button */}
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}

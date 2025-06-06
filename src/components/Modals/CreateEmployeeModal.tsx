@@ -403,12 +403,24 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
                             <option value="" disabled>
                               Select a role
                             </option>
-                            <option value="theatreEmployee">
+                            {/* <option value="theatreEmployee">
                               Theatre Employee
                             </option>
                             <option value="eventEmployee">
                               Event Employee
-                            </option>
+                            </option> */}
+                            {/* here */}
+
+                            {currentUser?.role?.toLowerCase() ===
+                            'theatremanager' ? (
+                              <option value="theatreEmployee">
+                                Theatre Employee 
+                              </option>
+                            ) : (
+                              <option value="eventEmployee">
+                                Event Employee 
+                              </option>
+                            )}
                           </select>
                           {errors.role && (
                             <span className="text-red-500 text-sm mt-1">

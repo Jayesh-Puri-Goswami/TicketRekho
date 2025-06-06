@@ -161,7 +161,7 @@ useEffect(() => {
       })
       .catch((error) => {
         toast.error(
-         'An error occured.',{
+          `${error?.response?.message ||'An error occured.'}`,{
         className : 'z-[99999]'
       }
         );

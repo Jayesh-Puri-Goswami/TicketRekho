@@ -258,9 +258,9 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
     if (invalidSeats.length > 0) {
       // console.log("Validation failed. The following seat types have invalid prices:");
       invalidSeats.forEach((seat) => {
-        toast.error(`- ${seat.seatType} should have a price greater than 0`,{
-        className : 'z-[99999]'
-      });
+        toast.error(`- ${seat.seatType} should have a price greater than 0`, {
+          className: 'z-[99999]',
+        });
       });
       setError('Price should be greater than 0.');
       return;
@@ -284,11 +284,15 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
           'Content-Type': 'application/json',
         },
       });
+
+      console.log(response.data.length);
+
       //  console.log('Success:', response.data);
       toast.success(
-        'Showtime added successfully! Your new showtime is now available.',{
-        className : 'z-[99999]'
-      }
+        'Showtime added successfully! Your new showtime is now available.',
+        {
+          className: 'z-[99999]',
+        },
       );
       // setTimeout(() => setSuccess(false), 5000);
       if (onSubmitSuccess) {
@@ -297,12 +301,15 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
 
       setIsOpen(false);
       clearFormState();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
       toast.error(
-        'Oops! Something went wrong while adding the showtime. Please try again later.',{
-        className : 'z-[99999]'
-      }
+        error?.response?.data?.message ||
+          error?.message ||
+          'Oops! Something went wrong while adding the showtime. Please try again later.',
+        {
+          className: 'z-[99999]',
+        },
       );
     }
   };
@@ -429,8 +436,6 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
               </div>
             </div>
 
-
-
             {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
              
               <div className="mb-4.5">
@@ -458,8 +463,8 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
                 </select>
               </div> */}
 
-              {/* City Selection */}
-              {/* <div className="mb-4.5">
+            {/* City Selection */}
+            {/* <div className="mb-4.5">
                 <label className="mb-2.5 block text-black dark:text-white">
                   Select City
                 </label>
@@ -527,7 +532,7 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
                 </label>
                 <input
                   type="datetime-local"
-                  disabled= {true}
+                  disabled={true}
                   min={minDateTime}
                   max={maxDateTime}
                   value={endTime}
@@ -543,7 +548,7 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
               {/* Ticket Name Column */}
               <div>
                 <label className="mb-2.5 block text-black dark:text-white">
-                  { seatTypes.length !== 0 ? "Ticket Name"  : null }
+                  {seatTypes.length !== 0 ? 'Ticket Name' : null}
                 </label>
                 {seatTypes.map((member, index) => (
                   <input
@@ -560,7 +565,7 @@ const ShowTimeModalForm: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
               {/* Price Column */}
               <div>
                 <label className="mb-2.5 block text-black dark:text-white">
-                  { seatTypes.length !== 0 ? "Price"  : null }
+                  {seatTypes.length !== 0 ? 'Price' : null}
                 </label>
                 {seatTypes.map((member, index) => (
                   <input

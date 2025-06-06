@@ -4,7 +4,16 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import Urls from '../../networking/app_urls';
 import toast from 'react-hot-toast';
-import { X, Calendar, Film, Languages, Tag, User, MapPin, Image as ImageIcon } from 'lucide-react';
+import {
+  X,
+  Calendar,
+  Film,
+  Languages,
+  Tag,
+  User,
+  MapPin,
+  Image as ImageIcon,
+} from 'lucide-react';
 import ImageUploader from '../Utils/ImageUploader';
 import FormField from '../Utils/FormField';
 
@@ -48,9 +57,9 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
         setStates(response.data.data || []);
       } catch (error) {
         console.error('Error fetching states:', error);
-        toast.error('Failed to load states.',{
-        className : 'z-[99999]'
-      });
+        toast.error('Failed to load states.', {
+          className: 'z-[99999]',
+        });
       }
     };
 
@@ -75,7 +84,7 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
           headers: {
             Authorization: `Bearer ${currentUser?.token || ''}`,
           },
-        }
+        },
       );
       setCities(response.data.data || []);
       setSelectedCityId('');
@@ -83,8 +92,8 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
       setSelectedVenueId('');
     } catch (error) {
       console.error('Error fetching cities:', error);
-      toast.error('Failed to load cities.',{
-        className : 'z-[99999]'
+      toast.error('Failed to load cities.', {
+        className: 'z-[99999]',
       });
     }
   };
@@ -102,14 +111,14 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
           headers: {
             Authorization: `Bearer ${currentUser?.token || ''}`,
           },
-        }
+        },
       );
       setVenues(response.data.data || []);
       setSelectedVenueId('');
     } catch (error) {
       console.error('Error fetching venues:', error);
-      toast.error('Failed to load venues.',{
-        className : 'z-[99999]'
+      toast.error('Failed to load venues.', {
+        className: 'z-[99999]',
       });
     }
   };
@@ -128,7 +137,9 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
     setSelectedVenueId(event.target.value);
   };
 
-  const handleEventTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleEventTypeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const eventType = event.target.value;
     setEventType(eventType);
     fetchVenues(eventType);
@@ -177,110 +188,110 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
     setLoading(true);
 
     if (!name.trim()) {
-      toast.error('Please enter the event name.',{
-        className : 'z-[99999]'
+      toast.error('Please enter the event name.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!description.trim()) {
-      toast.error('Please enter the event description.',{
-        className : 'z-[99999]'
+      toast.error('Please enter the event description.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!eventType) {
-      toast.error('Please select the event type.',{
-        className : 'z-[99999]'
+      toast.error('Please select the event type.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!artist.trim()) {
-      toast.error('Please enter the artist name.',{
-        className : 'z-[99999]'
+      toast.error('Please enter the artist name.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!eventDate) {
-      toast.error('Please select the event date.',{
-        className : 'z-[99999]'
+      toast.error('Please select the event date.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
-    if (genres.length === 0 || genres.some(g => !g.trim())) {
-      toast.error('Please add at least one valid genre.',{
-        className : 'z-[99999]'
+    if (genres.length === 0 || genres.some((g) => !g.trim())) {
+      toast.error('Please add at least one valid genre.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
-    if (languages.length === 0 || languages.some(l => !l.trim())) {
-      toast.error('Please add at least one valid language.',{
-        className : 'z-[99999]'
+    if (languages.length === 0 || languages.some((l) => !l.trim())) {
+      toast.error('Please add at least one valid language.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!eventImage) {
-      toast.error('Please upload the event image.',{
-        className : 'z-[99999]'
+      toast.error('Please upload the event image.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!bannerImage) {
-      toast.error('Please upload the banner image.',{
-        className : 'z-[99999]'
+      toast.error('Please upload the banner image.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!advImage) {
-      toast.error('Please upload the advertisement image.',{
-        className : 'z-[99999]'
+      toast.error('Please upload the advertisement image.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!eventCategory) {
-      toast.error('Please select the event category.',{
-        className : 'z-[99999]'
+      toast.error('Please select the event category.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
     if (!selectedVenueId) {
-      toast.error('Please select the venue.',{
-        className : 'z-[99999]'
+      toast.error('Please select the venue.', {
+        className: 'z-[99999]',
       });
       setLoading(false);
       return;
     }
-    if (!address.trim()) {
-      toast.error('Please enter the address.',{
-        className : 'z-[99999]'
-      });
-      setLoading(false);
-      return;
-    }
-    if (!selectedStateId) {
-      toast.error('Please select the state.',{
-        className : 'z-[99999]'
-      });
-      setLoading(false);
-      return;
-    }
-    if (!selectedCityId) {
-      toast.error('Please select the city.',{
-        className : 'z-[99999]'
-      });
-      setLoading(false);
-      return;
-    }
+    // if (!address.trim()) {
+    //   toast.error('Please enter the address.',{
+    //     className : 'z-[99999]'
+    //   });
+    //   setLoading(false);
+    //   return;
+    // }
+    // if (!selectedStateId) {
+    //   toast.error('Please select the state.',{
+    //     className : 'z-[99999]'
+    //   });
+    //   setLoading(false);
+    //   return;
+    // }
+    // if (!selectedCityId) {
+    //   toast.error('Please select the city.',{
+    //     className : 'z-[99999]'
+    //   });
+    //   setLoading(false);
+    //   return;
+    // }
 
     const formData = new FormData();
     formData.append('name', name);
@@ -291,9 +302,9 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
     formData.append('eventImage', eventImage);
     formData.append('bannerImage', bannerImage);
     formData.append('advImage', advImage);
-    formData.append('address', address);
-    formData.append('state', selectedStateId);
-    formData.append('city', selectedCityId);
+    // formData.append('address', address);
+    // formData.append('state', selectedStateId);
+    // formData.append('city', selectedCityId);
     formData.append('venue', selectedVenueId);
     genres.forEach((genre) => formData.append('genre[]', genre));
     languages.forEach((language) => formData.append('language[]', language));
@@ -309,9 +320,12 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
         },
       });
 
-      toast.success('Event added successfully! Your new event is now available.',{
-        className : 'z-[99999]'
-      });
+      toast.success(
+        'Event added successfully! Your new event is now available.',
+        {
+          className: 'z-[99999]',
+        },
+      );
       clearFormState();
       setIsOpen(false);
       if (onSubmitSuccess) onSubmitSuccess();
@@ -319,8 +333,8 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
       const errorMessage =
         error?.response?.data?.message ||
         'Oops! Something went wrong while adding the event. Please try again later.';
-      toast.error(errorMessage,{
-        className : 'z-[99999]'
+      toast.error(errorMessage, {
+        className: 'z-[99999]',
       });
     } finally {
       setLoading(false);
@@ -329,24 +343,24 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
 
   const modalVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    visible: {
+      opacity: 1,
+      y: 0,
       scale: 1,
-      transition: { type: 'spring', damping: 25, stiffness: 300 }
+      transition: { type: 'spring', damping: 25, stiffness: 300 },
     },
-    exit: { 
+    exit: {
       opacity: 0,
       y: 20,
       scale: 0.95,
-      transition: { duration: 0.2 }
-    }
+      transition: { duration: 0.2 },
+    },
   };
 
   const handleBackdropClick = () => {
     setIsOpen(false);
     clearFormState();
-  }
+  };
 
   return (
     <>
@@ -361,13 +375,13 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
 
       <AnimatePresence>
         {isOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
             onClick={handleBackdropClick}
           >
             <motion.div
               className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               variants={modalVariants}
               initial="hidden"
               animate="visible"
@@ -436,7 +450,9 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                             onChange={handleEventTypeChange}
                             className="w-full rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                           >
-                            <option value="" disabled>Select Event Type</option>
+                            <option value="" disabled>
+                              Select Event Type
+                            </option>
                             <option value="nonSitting">Non Sitting</option>
                             <option value="sitting">Sitting</option>
                           </select>
@@ -516,7 +532,13 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                                 <input
                                   type="text"
                                   value={genre}
-                                  onChange={(e) => setGenres(genres.map((g, i) => i === index ? e.target.value : g))}
+                                  onChange={(e) =>
+                                    setGenres(
+                                      genres.map((g, i) =>
+                                        i === index ? e.target.value : g,
+                                      ),
+                                    )
+                                  }
                                   className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                                   placeholder="Enter genre"
                                 />
@@ -525,7 +547,11 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 type="button"
-                                onClick={() => setGenres(genres.filter((_, i) => i !== index))}
+                                onClick={() =>
+                                  setGenres(
+                                    genres.filter((_, i) => i !== index),
+                                  )
+                                }
                                 className="px-3 py-2 bg-red-500 text-white rounded-md"
                               >
                                 <X size={16} />
@@ -555,7 +581,13 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                                 <input
                                   type="text"
                                   value={language}
-                                  onChange={(e) => setLanguages(languages.map((l, i) => i === index ? e.target.value : l))}
+                                  onChange={(e) =>
+                                    setLanguages(
+                                      languages.map((l, i) =>
+                                        i === index ? e.target.value : l,
+                                      ),
+                                    )
+                                  }
                                   className="w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                                   placeholder="Enter language"
                                 />
@@ -564,7 +596,11 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 type="button"
-                                onClick={() => setLanguages(languages.filter((_, i) => i !== index))}
+                                onClick={() =>
+                                  setLanguages(
+                                    languages.filter((_, i) => i !== index),
+                                  )
+                                }
                                 className="px-3 py-2 bg-red-500 text-white rounded-md"
                               >
                                 <X size={16} />
@@ -583,7 +619,7 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                         </div>
                       </FormField>
 
-                      <FormField label="Address" name="address">
+                      {/* <FormField label="Address" name="address">
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <MapPin className="h-4 w-4 text-slate-400" />
@@ -596,9 +632,9 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                             placeholder="Enter address"
                           />
                         </div>
-                      </FormField>
+                      </FormField> */}
 
-                      <div className="grid grid-cols-2 gap-4">
+                      {/* <div className="grid grid-cols-2 gap-4">
                         <FormField label="State" name="state">
                           <select
                             value={selectedStateId}
@@ -628,7 +664,7 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                             ))}
                           </select>
                         </FormField>
-                      </div>
+                      </div> */}
 
                       <FormField label="Venue" name="venue">
                         <select
@@ -636,7 +672,9 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                           onChange={handleVenueChange}
                           className="w-full rounded-md border py-2.5 px-4 text-sm outline-none transition-colors border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                         >
-                          <option value="" disabled>Select Venue</option>
+                          <option value="" disabled>
+                            Select Venue
+                          </option>
                           {venues.map((venue) => (
                             <option key={venue._id} value={venue._id}>
                               {venue.name}
@@ -649,21 +687,30 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
 
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField label="Event Image (104 × 123 px)" name="eventImage">
+                      <FormField
+                        label="Event Image (104 × 123 px)"
+                        name="eventImage"
+                      >
                         <ImageUploader
                           onImageChange={(file: any) => setEventImage(file)}
                           selectedImage={eventImage}
                         />
                       </FormField>
 
-                      <FormField label="Banner Image (345 × 153 px)" name="bannerImage">
+                      <FormField
+                        label="Banner Image (345 × 153 px)"
+                        name="bannerImage"
+                      >
                         <ImageUploader
                           onImageChange={(file: any) => setBannerImage(file)}
                           selectedImage={bannerImage}
                         />
                       </FormField>
 
-                      <FormField label="Advertisement Image (306 × 485 px)" name="advImage">
+                      <FormField
+                        label="Advertisement Image (306 × 485 px)"
+                        name="advImage"
+                      >
                         <ImageUploader
                           onImageChange={(file: any) => setAdvImage(file)}
                           selectedImage={advImage}
@@ -672,7 +719,7 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                     </div>
 
                     <div className="flex flex-wrap gap-4">
-                      <label className="flex items-center space-x-2">
+                      {/* <label className="flex items-center space-x-2">
                         <input
                           type="checkbox"
                           checked={isBanner}
@@ -680,8 +727,28 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                           className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
                         />
                         <span className="text-sm text-slate-700">Banner</span>
+                      </label> */}
+                      <label
+                        htmlFor="banner"
+                        className="flex items-center cursor-pointer"
+                      >
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            id="banner"
+                            className="sr-only peer"
+                            checked={isBanner}
+                            onChange={(e) => setIsBanner(e.target.checked)}
+                          />
+                          <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                          <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                          Banner
+                        </span>
                       </label>
-                      <label className="flex items-center space-x-2">
+
+                      {/* <label className="flex items-center space-x-2">
                         <input
                           type="checkbox"
                           checked={isAds}
@@ -689,6 +756,25 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                           className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
                         />
                         <span className="text-sm text-slate-700">Ads</span>
+                      </label> */}
+                      <label
+                        htmlFor="Advertisement"
+                        className="flex items-center cursor-pointer"
+                      >
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            id="Advertisement"
+                            className="sr-only peer"
+                            checked={isAds}
+                            onChange={(e) => setIsAds(e.target.checked)}
+                          />
+                          <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors duration-300"></div>
+                          <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                          Advertisement
+                        </span>
                       </label>
                     </div>
                   </div>
@@ -710,14 +796,31 @@ const EventModalForm: React.FC<EventModalFormProps> = ({ onSubmitSuccess }) => {
                       disabled={loading}
                       className="w-full sm:w-auto relative overflow-hidden rounded-md py-2.5 px-6 font-medium text-white disabled:opacity-70"
                       style={{
-                        background: 'linear-gradient(to right, #6366F1, #8B5CF6)',
+                        background:
+                          'linear-gradient(to right, #6366F1, #8B5CF6)',
                       }}
                     >
                       {loading ? (
                         <span className="flex items-center justify-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
                           Processing...
                         </span>

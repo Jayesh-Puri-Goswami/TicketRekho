@@ -29,7 +29,6 @@ import { motion } from 'framer-motion';
 import CouponForm from '../../components/CouponForm';
 import { Loader } from 'lucide-react';
 
-
 // Types
 interface Movie {
   _id: number;
@@ -47,7 +46,6 @@ interface Event {
   eventImage: string;
   eventDate: string;
 }
-
 
 interface Advertisement {
   id: number;
@@ -207,7 +205,6 @@ const ECommerce: React.FC = () => {
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
   const [showModal, setShowModal] = useState(false);
 
-
   const [latestEvents, setLatestEvents] = useState<Event[]>([
     {
       _id: 0,
@@ -328,8 +325,7 @@ const ECommerce: React.FC = () => {
             total: {
               show: true,
               label: 'Total Managers',
-              formatter: () =>
-                managerData.active + managerData.inactive,
+              formatter: () => managerData.active + managerData.inactive,
             },
           },
         },
@@ -367,7 +363,7 @@ const ECommerce: React.FC = () => {
     setCouponClicked(true);
     setTimeout(() => setCouponClicked(false), 300);
     // Navigate('/coupon');
-    setShowModal(true)
+    setShowModal(true);
   };
 
   const handleCouponsRefreshClick = () => {
@@ -375,20 +371,21 @@ const ECommerce: React.FC = () => {
       setLoadingCoupons(true);
       setCouponsRefreshClicked(true);
       fetchData();
-      setShowModal(false)
+      setShowModal(false);
     } catch (error) {
       console.error('Error refreshing coupons:', error);
     }
   };
 
-
-   if (loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader size={48} className="text-indigo-600 animate-spin mb-4" />
-        <h2 className="text-xl font-medium text-gray-700">Loading Dashboard...</h2>
+        <h2 className="text-xl font-medium text-gray-700">
+          Loading Dashboard...
+        </h2>
       </div>
-    )
+    );
   }
   if (error)
     return <div className="text-center text-red-500 mt-10">Error: {error}</div>;
@@ -402,7 +399,7 @@ const ECommerce: React.FC = () => {
       </div> */}
       {/* <Breadcrumb pageName="Dashboard" /> */}
 
-      <motion.div  className="p-4 md:p-6 lg:p-8">
+      <motion.div className="p-4 md:p-6 lg:p-8">
         {/* <h2 className="text-2xl font-semibold mb-6 text-gray-700">Dashboard</h2> */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
           {adminCards.map((item, index) => (
@@ -437,8 +434,11 @@ const ECommerce: React.FC = () => {
                   640: {
                     slidesPerView: 2,
                   },
-                  1024: {
-                    slidesPerView: 2,
+                  900: {
+                    slidesPerView: 3,
+                  },
+                  1100: {
+                    slidesPerView: 4,
                   },
                 }}
                 className="movie-swiper"
@@ -452,7 +452,7 @@ const ECommerce: React.FC = () => {
                       <img
                         src={`${Urls.Image_url}${movie.movieImage}`}
                         alt={movie.name}
-                        className="w-full h-48 lg:object-cover md:object-cover object-center"
+                        className="w-full h-48 aspect-square"
                         onError={(e: any) => {
                           e.target.onerror = null;
                           e.target.src =
@@ -588,9 +588,13 @@ const ECommerce: React.FC = () => {
                           OFF
                         </span> */}
                         {coupon.discountType === 'percentage' ? (
-                          <span className='text-[#9264c9] font-semibold'>{coupon.discountValue}% OFF</span>
+                          <span className="text-[#9264c9] font-semibold">
+                            {coupon.discountValue}% OFF
+                          </span>
                         ) : (
-                          <span className='text-[#9264c9] font-semibold'>₹{coupon.discountValue} OFF</span>
+                          <span className="text-[#9264c9] font-semibold">
+                            ₹{coupon.discountValue} OFF
+                          </span>
                         )}
                         <span className="text-gray-500">
                           Valid until:{' '}
@@ -627,8 +631,11 @@ const ECommerce: React.FC = () => {
                   640: {
                     slidesPerView: 2,
                   },
-                  1024: {
-                    slidesPerView: 2,
+                  900: {
+                    slidesPerView: 3,
+                  },
+                  1100: {
+                    slidesPerView: 4,
                   },
                 }}
                 className="movie-swiper"
@@ -637,7 +644,11 @@ const ECommerce: React.FC = () => {
                   <SwiperSlide key={event._id}>
                     <div
                       className="bg-gray-100 cursor-pointer rounded-lg overflow-hidden"
-                      onClick={() => Navigate(`/event-realtime-sitting-seat-status/${event._id}`)}
+                      onClick={() =>
+                        Navigate(
+                          `/event-realtime-sitting-seat-status/${event._id}`,
+                        )
+                      }
                     >
                       <img
                         src={`${Urls.Image_url}${event?.eventImage}`}
@@ -672,7 +683,6 @@ const ECommerce: React.FC = () => {
             </div>
           </div>
         </div>
-
 
         <CouponForm
           onSubmitSuccess={handleCouponsRefreshClick}

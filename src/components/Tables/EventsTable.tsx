@@ -19,6 +19,8 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { Loader } from 'lucide-react';
 
+import { motion } from 'framer-motion';
+
 interface Events {
   _id: string;
   name: string;
@@ -609,7 +611,7 @@ const EventsTable: React.FC = () => {
                         ₹{Number(event.totalEarnings).toLocaleString()}
                       </td>
                       <td className="px-6 text-base py-4">
-                        <button
+                        {/* <button
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleStatus(event.id, event.isActive);
@@ -621,6 +623,28 @@ const EventsTable: React.FC = () => {
                           }`}
                         >
                           {event.isActive ? 'Released' : 'Unreleased'}
+                        </button> */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleStatus(event.id, event.isActive);
+                          }}
+                          className="flex items-center cursor-pointer focus:outline-none"
+                        >
+                          <div className="relative w-11 h-6">
+                            <div
+                              className={`w-full h-full rounded-full transition-colors duration-300 ${
+                                event.isActive
+                                  ? 'bg-indigo-500'
+                                  : 'bg-slate-500'
+                              }`}
+                            ></div>
+                            <div
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform ${
+                                event.isActive ? 'translate-x-5' : ''
+                              }`}
+                            ></div>
+                          </div>
                         </button>
                       </td>
                       <td className="px-6 py-4">
@@ -650,7 +674,7 @@ const EventsTable: React.FC = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(event.id);
-                            }}
+                              }}
                               className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
                               title="Delete"
                             >

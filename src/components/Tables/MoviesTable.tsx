@@ -18,6 +18,10 @@ import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { Loader } from 'lucide-react';
+import EditButton from '../Buttons/EditButton';
+import StatusToggle from '../Buttons/ToggleSwitch';
+
+import { motion } from 'framer-motion';
 
 interface Movies {
   _id: string;
@@ -587,11 +591,13 @@ const MoviesTable: React.FC = () => {
                               id={`status-toggle-${movie.id}`}
                               className="sr-only peer"
                               checked={movie.isActive}
-                              readOnly // prevents uncontrolled warning, as we're handling externally
+                              readOnly
                             />
                             <div
                               className={`w-11 h-6 rounded-full transition-colors duration-300 ${
-                                movie.isActive ? 'bg-green-500' : 'bg-red-500'
+                                movie.isActive
+                                  ? 'bg-indigo-purple'
+                                  : 'bg-slate-500'
                               }`}
                             ></div>
                             <div
@@ -604,36 +610,31 @@ const MoviesTable: React.FC = () => {
                             className={`ml-3 text-xs font-semibold transition-colors ${
                               movie.isActive
                                 ? 'text-green-700 dark:text-green-200'
-                                : 'text-red-700 dark:text-red-200'
+                                : 'text-slate-700 dark:text-red-200'
                             }`}
                           >
-                            {movie.isActive ? 'Active' : 'Inactive'}
+                            {/* {movie.isActive ? 'Active' : 'Inactive'} */}
                           </span>
                         </label>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center gap-3">
-                          <button
+                      <td className="px-6 py-8 flex">
+                        <div className="flex items-center justify-center gap-3">
+                          <EditButton
+                            icon={faEdit}
+                            title="Edit"
+                            label="Edit"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEditClick(movie.id);
                             }}
-                            className="group flex items-center gap-1 px-3 py-1 rounded-full border border-indigo-500 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-800/30 transition-all duration-200 text-xs font-medium"
-                            title="Edit Movie"
-                          >
-                            <FontAwesomeIcon
-                              icon={faEdit}
-                              className="text-indigo-500 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition"
-                            />
-                            <span className="group-hover:underline">Edit</span>
-                          </button>
+                          />
                           {!movie.isActive && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(movie.id);
                               }}
-                              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
+                              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition transition-opacity duration-300"
                               title="Delete"
                             >
                               <FontAwesomeIcon icon={faTrashAlt} />

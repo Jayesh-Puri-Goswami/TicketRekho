@@ -208,10 +208,10 @@ const TermsGrid: React.FC = () => {
                         </div>
                         <div>
                           <h3 className="text-xl font-bold capitalize">
-                            {term.type.replace('-', ' ')}
+                            {term.type == 'Privacy Policy' ? 'App' : term.type.replace('-', ' ')}
                           </h3>
                           <p className="text-white/80 text-sm">
-                            Terms & Conditions
+                             {term.type == 'Privacy Policy' ? 'Privacy Policy' : 'Terms & Conditions'}
                           </p>
                         </div>
                       </div>

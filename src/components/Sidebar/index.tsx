@@ -244,17 +244,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         animate={{ x: sidebarOpen ? 0 : '-100%' }}
         exit={{ x: '-100%' }}
         transition={{ type: 'tween', ease: 'easeInOut', duration: 0.3 }}
-        className={`fixed left-0 top-0 z-[999] flex h-screen w-72 flex-col overflow-hidden bg-gradient-to-t from-indigo-500/90 to-purple-500/90 backdrop-blur-lg dark:from-indigo-600/90 dark:to-purple-600/90 lg:static lg:translate-x-0  lg:z-auto`}
+        className={`fixed left-0 top-0 z-[999] flex h-screen w-72 flex-col overflow-hidden bg-gradient-to-t from-indigo-500/90 to-purple-500/90 backdrop-blur-lg dark:from-indigo-600/90 dark:to-purple-600/90 lg:static lg:translate-x-0  lg:z-auto `}
       >
         {/* Header */}
-        <div className="relative flex items-center justify-between px-6 py-6 ">
+        <div className="relative flex items-center justify-center px-6 py-6 ">
           <NavLink to={redirectTo} className="flex items-center space-x-3">
             <motion.img
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               src="../../../public/Image/Logo/appiconMasked.png"
               alt="TicketRekho Logo"
-              className="h-16 w-[120px] drop-shadow-lg"
+              className="h-[4.5rem] w-[120px] drop-shadow-lg"
               onError={(e: any) => {
                 e.target.onerror = null;
                 e.target.src =
@@ -268,7 +268,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             onClick={() => setSidebarOpen(!sidebarOpen)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="lg:hidden p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-all duration-200"
+            className="lg:hidden absolute z-[999] left-[15rem] p-2 px-[0.85rem] rounded-full bg-white/20 text-white hover:bg-white/30 transition-all duration-200"
           >
             <FontAwesomeIcon icon={faTimes} className="text-lg" />
           </motion.button>

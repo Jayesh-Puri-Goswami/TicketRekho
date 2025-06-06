@@ -150,11 +150,16 @@ const RolePermission = () => {
           className: 'z-[99999]',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update failed:', error);
-      toast.error('Failed to update permissions.', {
-        className: 'z-[99999]',
-      });
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          'Oops! Something went wrong with permission. Please try again later.',
+        {
+          className: 'z-[99999]',
+        },
+      );
     }
   };
 
@@ -201,7 +206,7 @@ const RolePermission = () => {
                   Select Role
                 </option>
                 {roles.map((role) => (
-                  <option key={role._id} value={role._id}  >
+                  <option key={role._id} value={role._id}>
                     {formatRoleName(role.role)}
                   </option>
                 ))}
@@ -212,48 +217,51 @@ const RolePermission = () => {
                 <ChevronDown size={20} />
               </div>
             </div>
-          </div>  
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-            {permissions.map((perm, index) => (
-              <motion.label
-                key={perm.name}
-                className="permission-label"
-                whileHover={{ scale: 1.01 }}
-              >
-                <input
-                  type="checkbox"
-                  checked={perm.status}
-                  onChange={() => togglePermission(index)}
-                  className="hidden peer"
-                  disabled
-                />
-                <div className="custom-checkbox">
-                  {perm.status && (
-                    <svg
-                      width="12px"
-                      height="12px"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <polyline
-                        points="3.7 14.3 9.6 19 20.3 5"
-                        stroke="#fff"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <span className="permission-name">
-                  {perm.name}
-                  <span className="custom-tooltip">
-                    {tooltipMap[perm.name]}
-                  </span>
-                </span>
-              </motion.label>
-            ))}
+            {permissions.map(
+              (perm, index) =>
+                perm.status && (
+                  <motion.label
+                    key={perm.name}
+                    className="permission-label"
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={perm.status}
+                      onChange={() => togglePermission(index)}
+                      className="hidden peer"
+                      disabled
+                    />
+                    <div className="custom-checkbox">
+                      {perm.status && (
+                        <svg
+                          width="12px"
+                          height="12px"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <polyline
+                            points="3.7 14.3 9.6 19 20.3 5"
+                            stroke="#fff"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="permission-name">
+                      {perm.name}
+                      <span className="custom-tooltip">
+                        {tooltipMap[perm.name]}
+                      </span>
+                    </span>
+                  </motion.label>
+                ),
+            )}
           </div>
 
           <div className="flex justify-end gap-3 mt-6">

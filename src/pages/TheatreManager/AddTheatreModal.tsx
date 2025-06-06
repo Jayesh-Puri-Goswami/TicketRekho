@@ -150,8 +150,15 @@ const AddTheatreModal = () => {
       })
       toast.success("Theatre Manager created successfully!")
       closeModal()
-    } catch (error) {
-      toast.error("Failed to create Theatre Manager. Please try again.")
+    } catch (error : any) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          'Oops! Something went wrong. Please try again later.',
+        {
+          className: 'z-[99999]',
+        },
+      );
     } finally {
       setLoading(false)
     }

@@ -119,6 +119,8 @@ const CreateVenueNameForm: React.FC<ModalformProps> = ({
     } catch (error: any) {
      console.error('Error:', error);
 
+     
+
   const errorMessage =
     error?.response?.data?.message ||
     'Oops! Something went wrong while adding the venue name. Please try again later.';

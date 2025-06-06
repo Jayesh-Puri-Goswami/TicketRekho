@@ -340,8 +340,8 @@ const GrabABitesTable: React.FC = () => {
                         {manager.price}
                       </p>
                     </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
-                      <button
+                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center flex justify-center items-center">
+                      {/* <button
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleStatus(manager._id,manager.status ? true : false);
@@ -353,6 +353,26 @@ const GrabABitesTable: React.FC = () => {
                         }`}
                       >
                         {manager.status ? 'Active' : 'Inactive'}
+                      </button> */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStatus(manager._id,manager.status ? true : false);
+                        }}
+                        className="flex items-center cursor-pointer focus:outline-none"
+                      >
+                        <div className="relative w-11 h-6">
+                          <div
+                            className={`w-full h-full rounded-full transition-colors duration-300 ${
+                              manager.status ? 'bg-indigo-500' : 'bg-slate-500'
+                            }`}
+                          ></div>
+                          <div
+                            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform ${
+                              manager.status ? 'translate-x-5' : ''
+                            }`}
+                          ></div>
+                        </div>
                       </button>
                     </td>
                    

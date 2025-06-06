@@ -16,6 +16,7 @@ import {
   ImageIcon,
   Banknote,
   Map,
+  User2,
 } from 'lucide-react';
 import type { Manager } from '../../types/manager';
 import FormField from '../Utils/FormField';
@@ -99,13 +100,15 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
       bankAccountNumber: '',
       ifscCode: '',
       active: true,
-      theatreName: '',
-      location: '',
-      isActive: true,
-      isGrabABite: true,
+      theatreName: manager?.theatre?.name,
+      location: manager?.theatre?.location,
+      isActive: manager?.theatre?.isActive,
+      isGrabABite: manager?.theatre?.isGrabABite,
       role: '',
     },
   });
+
+  console.log(manager);
 
   const selectedRole = watch('role');
 
@@ -212,6 +215,9 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
     setCities([]);
   };
 
+  console.log(manager?.theatre);
+  
+
   const onSubmit = async (data: EditManagerFormData) => {
     if (!manager) return;
 
@@ -242,16 +248,16 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
       // }
 
       // Add theatre-specific fields only for theatre managers
-      if (manager.role === 'Theatre Manager') {
-        formData.append('theatreName', data.theatreName || '');
-        formData.append('location', data.location || '');
-        formData.append('isActive', String(data.isActive));
-        formData.append('isGrabABite', String(data.isGrabABite));
+      if (manager.theatre) {
+        formData.append('theatreName', manager?.theatre?.name || '');
+        formData.append('location', manager?.theatre?.location || '');
+        formData.append('isActive', String(manager?.theatre?.isActive));
+        formData.append('isGrabABite', String(manager?.theatre?.isGrabABite));
       }
 
       // Determine API endpoint based on manager role
       const url =
-        manager.role === 'Theatre Manager'
+        manager.role === 'theatreManager'
           ? app_urls.editTheatreMangerProfile
           : app_urls.editEventMangerProfile;
 
@@ -277,10 +283,10 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
           active: data.active,
           role: data.role,
           ...(manager.role === 'Theatre Manager' && {
-            theatreName: data.theatreName,
-            location: data.location,
-            isActive: data.isActive,
-            isGrabABite: data.isGrabABite,
+            theatreName: manager?.theatre?.name,
+            location: manager?.theatre?.location,
+            isActive: manager?.theatre?.isActive,
+            isGrabABite: manager?.theatre?.isGrabABite,
           }),
         };
 
@@ -702,7 +708,7 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
                     </FormField>
 
                     {/* Theatre Manager Specific Fields */}
-                    {isTheatreManager && (
+                    {/* {isTheatreManager && (
                       <>
                         <FormField
                           label="Theatre Name"
@@ -716,6 +722,7 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
                             <input
                               type="text"
                               id="theatreName"
+                              disabled
                               className={clsx(
                                 'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors',
                                 errors.theatreName
@@ -744,6 +751,7 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
                             <input
                               type="text"
                               id="location"
+                              disabled
                               className={clsx(
                                 'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors',
                                 errors.location
@@ -768,14 +776,15 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
                           <div className="flex items-center gap-3">
                             <label
                               htmlFor="isActive"
-                              className="flex items-center cursor-pointer"
+                              className="flex items-center cursor-not-allowed"
                             >
                               <div className="relative">
                                 <input
                                   type="checkbox"
                                   id="isActive"
-                                  className="sr-only peer"
+                                  className="sr-only peer cursor-not-allowed"
                                   {...register('isActive')}
+                                  disabled
                                 />
                                 <div className="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors duration-300"></div>
                                 <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 peer-checked:translate-x-5"></div>
@@ -801,8 +810,9 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
                                 <input
                                   type="checkbox"
                                   id="isGrabABite"
-                                  className="sr-only peer"
+                                  className="sr-only peer "
                                   {...register('isGrabABite')}
+                                  disabled
                                 />
                                 <div className="w-11 h-6 bg-slate-300 rounded-full transition-colors duration-300"></div>
                                 <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300"></div>
@@ -814,35 +824,58 @@ const EditManagerModal: React.FC<EditManagerModalProps> = ({
                           </div>
                         </FormField>
                       </>
-                    )}
+                    )} */}
 
-                    <div className="mt-6 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                      <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Current Manager Info
+                    <div className="mt-6 p-5 rounded-2xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-sm">
+                      <h5 className="text-sm font-semibold text-slate-800 dark:text-white mb-4 tracking-wide flex gap-5 items-center">
+                        <User2 size={20} /> Current Manager Info
                       </h5>
-                      <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                        <p>
-                          <span className="font-medium">Role:</span>{' '}
-                          {manager.role}
-                        </p>
-                        <p>
-                          <span className="font-medium">Status:</span>{' '}
-                          {manager.active ? 'Active' : 'Inactive'}
-                        </p>
-                        <p>
-                          <span className="font-medium">Joined:</span>{' '}
-                          {new Date(manager.createdAt).toLocaleDateString()}
-                        </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm text-slate-600 dark:text-slate-300">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-700 dark:text-slate-200">
+                            Role:
+                          </span>
+                          <span>{manager.role}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-700 dark:text-slate-200">
+                            Status:
+                          </span>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                              manager.active
+                                ? 'bg-green-100 text-green-700 dark:bg-green-800/20 dark:text-green-300'
+                                : 'bg-red-100 text-red-700 dark:bg-red-800/20 dark:text-red-300'
+                            }`}
+                          >
+                            {manager.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-700 dark:text-slate-200">
+                            Joined:
+                          </span>
+                          <span>
+                            {new Date(manager.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+
                         {isTheatreManager && (
                           <>
-                            <p>
-                              <span className="font-medium">Theatre:</span>{' '}
-                              {manager.theatreName || 'N/A'}
-                            </p>
-                            <p>
-                              <span className="font-medium">Location:</span>{' '}
-                              {manager.location || 'N/A'}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-slate-700 dark:text-slate-200">
+                                Theatre:
+                              </span>
+                              <span>{manager.theatreName || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-slate-700 dark:text-slate-200">
+                                Location:
+                              </span>
+                              <span>{manager.location || 'N/A'}</span>
+                            </div>
                           </>
                         )}
                       </div>

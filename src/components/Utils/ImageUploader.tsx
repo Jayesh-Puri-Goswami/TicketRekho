@@ -98,7 +98,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange, selectedIm
           <img
             src={previewUrl}
             alt="Profile preview"
-            className="w-full h-40 object-cover rounded-lg"
+            className="w-full h-40 object-contain rounded-lg"
           />
           <motion.button
             whileHover={{ scale: 1.1 }}

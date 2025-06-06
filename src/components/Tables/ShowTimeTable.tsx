@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -42,6 +41,7 @@ const useDebounce = (value: string, delay: number): string => {
   }, [value, delay]);
   return debouncedValue;
 };
+
 const ShowTimeTable: React.FC = () => {
   const [showtime, setShowtimes] = useState<ShowTime[]>([]);
   const [filteredShowtimes, setFilteredShowtimes] = useState<ShowTime[]>([]);
@@ -50,7 +50,7 @@ const ShowTimeTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [totalPages, setTotalPages] = useState(1);
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof ShowTime | null;
+    key: keyof ShowTime | string;
     direction: string;
   }>({
     key: null,
@@ -102,9 +102,11 @@ const ShowTimeTable: React.FC = () => {
             endTime: formatUTCDate(s.endTime),
           }));
           setShowtimes(mapped);
+          setFilteredShowtimes(mapped); // Initialize filteredShowtimes with fetched data
           setTotalPages(response.data.data.pagination?.totalPages || 1);
         } else {
           setShowtimes([]);
+          setFilteredShowtimes([]);
           setTotalPages(1);
         }
       })
@@ -146,21 +148,54 @@ const ShowTimeTable: React.FC = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleSort = (key: keyof ShowTime) => {
+  const handleSort = (key: keyof ShowTime | string) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
       direction = 'descending';
     }
     const sorted = [...filteredShowtimes].sort((a, b) => {
-      const aValue = a[key]!;
-      const bValue = b[key]!;
+      let aValue: any;
+      let bValue: any;
+
+      // Handle nested object properties
+      switch (key) {
+        case 'movie':
+          aValue = a.movie.name;
+          bValue = b.movie.name;
+          break;
+        case 'theatre':
+          aValue = a.theatre.name;
+          bValue = b.theatre.name;
+          break;
+        case 'screen':
+          aValue = a.screen.name;
+          bValue = b.screen.name;
+          break;
+        case 'state':
+          aValue = a.state.name;
+          bValue = b.state.name;
+          break;
+        case 'city':
+          aValue = a.city.name;
+          bValue = b.city.name;
+          break;
+        case 'isActive':
+          aValue = a.isActive ? 1 : 0;
+          bValue = b.isActive ? 1 : 0;
+          break;
+        default:
+          aValue = a[key as keyof ShowTime];
+          bValue = b[key as keyof ShowTime];
+      }
+
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return direction === 'ascending'
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
-      if (aValue < bValue) return direction === 'ascending' ? -1 : 1;
-      if (aValue > bValue) return direction === 'ascending' ? 1 : -1;
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return direction === 'ascending' ? aValue - bValue : bValue - aValue;
+      }
       return 0;
     });
     setFilteredShowtimes(sorted);
@@ -182,6 +217,11 @@ const ShowTimeTable: React.FC = () => {
               s._id === id ? { ...s, isActive: !currentStatus } : s,
             ),
           );
+          setFilteredShowtimes((prev) =>
+            prev.map((s) =>
+              s._id === id ? { ...s, isActive: !currentStatus } : s,
+            ),
+          );
         }
       })
       .catch(() => toast.error('Failed to update status.'));
@@ -195,6 +235,10 @@ const ShowTimeTable: React.FC = () => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        confirmButton: 'swal2-confirm-custom',
+        cancelButton: 'swal2-cancel-custom',
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         axios
@@ -206,6 +250,7 @@ const ShowTimeTable: React.FC = () => {
           .then((res) => {
             if (res.data.status) {
               setShowtimes((prev) => prev.filter((s) => s._id !== id));
+              setFilteredShowtimes((prev) => prev.filter((s) => s._id !== id));
               toast.success('Showtime deleted successfully!');
               fetchShowtimes(currentPage, itemsPerPage, debouncedSearchTerm);
             }
@@ -229,7 +274,7 @@ const ShowTimeTable: React.FC = () => {
     navigate(`/showtime-realtime-seat-status/${id}`);
   };
 
-  const renderSortIcon = (key: keyof ShowTime) => {
+  const renderSortIcon = (key: keyof ShowTime | string) => {
     if (sortConfig.key === key) {
       return sortConfig.direction === 'ascending' ? (
         <FontAwesomeIcon icon={faArrowUp} className="ml-1" />
@@ -255,13 +300,13 @@ const ShowTimeTable: React.FC = () => {
           value={searchTerm}
           onChange={handleSearch}
         />
-        {roleName !== 'admin' && (
+        {roleName !== 'admin' ? (
           <ShowTimeModalForm
             onSubmitSuccess={() =>
-              fetchManagers(currentPage, itemsPerPage, debouncedSearchTerm)
+              fetchShowtimes(currentPage, itemsPerPage, debouncedSearchTerm)
             }
           />
-        )}
+        ) : <></>}
       </div>
 
       <div className="overflow-x-auto">
@@ -324,14 +369,14 @@ const ShowTimeTable: React.FC = () => {
                   </td>
                 </tr>
               ))
-            ) : showtime.length === 0 ? (
+            ) : filteredShowtimes.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
                   No showtimes found matching your search.
                 </td>
               </tr>
             ) : (
-              showtime.map((s, i) => (
+              paginated.map((s, i) => (
                 <tr
                   key={i}
                   onClick={() => handleMovieTicketClick(s._id)}
@@ -355,19 +400,26 @@ const ShowTimeTable: React.FC = () => {
                   <td className="px-6 py-5 text-base text-center">
                     ₹{Number(s.totalEarnings).toLocaleString()}
                   </td>
-                  <td className="px-6 py-5 text-base text-center">
+                  <td className="px-6 py-5 text-base text-center flex justify-center items-center">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleStatus(s._id, s.isActive);
                       }}
-                      className={`inline-flex items-center justify-center rounded-full text-xs font-semibold px-3 py-1 transition ${
-                        s.isActive
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-800 dark:text-white'
-                          : 'bg-rose-100 text-rose-700 dark:bg-rose-800 dark:text-white'
-                      }`}
+                      className="flex items-center cursor-pointer focus:outline-none"
                     >
-                      {s.isActive ? 'Released' : 'Unreleased'}
+                      <div className="relative w-11 h-6">
+                        <div
+                          className={`w-full h-full rounded-full transition-colors duration-300 ${
+                            s.isActive ? 'bg-indigo-500' : 'bg-slate-500'
+                          }`}
+                        ></div>
+                        <div
+                          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform ${
+                            s.isActive ? 'translate-x-5' : ''
+                          }`}
+                        ></div>
+                      </div>
                     </button>
                   </td>
                   <td className="px-6 py-5 text-center">
@@ -383,15 +435,15 @@ const ShowTimeTable: React.FC = () => {
                       </button>
                       {!s.isActive && (
                         <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(s._id);
-                        }}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <FontAwesomeIcon icon={faTrashAlt} />
-                      </button>
-                      ) }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(s._id);
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <FontAwesomeIcon icon={faTrashAlt} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -408,7 +460,7 @@ const ShowTimeTable: React.FC = () => {
           onSubmitSuccess={() => {
             setShowModal(false);
             setSelectedShowTime(null);
-            fetchManagers(currentPage, itemsPerPage, debouncedSearchTerm);
+            fetchShowtimes(currentPage, itemsPerPage, debouncedSearchTerm);
           }}
         />
       )}

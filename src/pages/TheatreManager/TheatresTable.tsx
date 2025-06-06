@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 import UpdateTheatreModal from './UpdateTheatreModal';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { Pizza, Soup, Utensils, UtensilsCrossed } from 'lucide-react';
 
 interface TManager {
   _id: string;
@@ -128,8 +129,16 @@ const TheatresTable: React.FC = () => {
               toast.error('Failed to delete!');
             }
           })
-          .catch((err) => {
-            toast.error('Error deleting!');
+          .catch((error: any) => {
+            toast.error(
+              error?.response?.data?.message ||
+                error?.message ||
+                'Oops! Something went wrong. Please try again later.',
+              {
+                className: 'z-[99999]',
+              },
+            );
+
             console.error(err);
           });
       }
@@ -257,8 +266,8 @@ const TheatresTable: React.FC = () => {
                         {t.isGrabABite ? 'Yes' : 'No'}
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-center">
-                      <button
+                    <td className="px-6 py-8 text-center flex justify-center items-center">
+                      {/* <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleToggleStatus(t._id, t.isActive);
@@ -270,6 +279,27 @@ const TheatresTable: React.FC = () => {
                         }`}
                       >
                         {t.isActive ? 'Active' : 'Inactive'}
+                      </button> */}
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleStatus(t._id, t.isActive);
+                        }}
+                        className="flex items-center cursor-pointer focus:outline-none"
+                      >
+                        <div className="relative w-11 h-6">
+                          <div
+                            className={`w-full h-full rounded-full transition-colors duration-300 ${
+                              t.isActive ? 'bg-indigo-500' : 'bg-slate-500'
+                            }`}
+                          ></div>
+                          <div
+                            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform ${
+                              t.isActive ? 'translate-x-5' : ''
+                            }`}
+                          ></div>
+                        </div>
                       </button>
                     </td>
                     <td className="px-6 py-5 text-center">
@@ -280,14 +310,17 @@ const TheatresTable: React.FC = () => {
                         >
                           <FontAwesomeIcon icon={faEdit} />
                         </button>
+
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/grabABites/${t._id}`);
                           }}
-                          className="text-amber-600 hover:text-amber-800"
+                          className="text-amber-600 hover:text-amber-800 "
+                          title="Grab A Bite"
                         >
-                          <FontAwesomeIcon icon={faHamburger} />
+                          {/* <FontAwesomeIcon icon={faHamburger} /> */}
+                          <Soup size={20} aria-label="Grab A Bite" />
                         </button>
                         {!t.isActive && (
                           <button

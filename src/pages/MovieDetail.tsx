@@ -9,6 +9,7 @@ import {
   User,
   Video,
   PlayCircle,
+  Loader,
 } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import axios from 'axios';
@@ -47,11 +48,7 @@ interface MovieData {
   totalRatings: number;
 }
 
-interface MovieDetailProps {
-  movieId: string;
-}
-
-const MovieDetail: React.FC<MovieDetailProps> = () => {
+const MovieDetail: React.FC = () => {
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
   const scale = useTransform(scrollY, [0, 300], [1, 1.1]);
@@ -102,13 +99,11 @@ const MovieDetail: React.FC<MovieDetailProps> = () => {
 
   if (isLoading || !movieData) {
     return (
-      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999]">
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full border-t-4 border-indigo-500 w-12 h-12 border-b-4 border-slate-200"></div>
-          <p className="text-lg text-slate-700 dark:text-slate-200 font-semibold">
-            Loading movie data...
-          </p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader size={48} className="text-indigo-600 animate-spin mb-4" />
+        <h2 className="text-xl font-medium text-gray-700">
+          Loading managers...
+        </h2>
       </div>
     );
   }

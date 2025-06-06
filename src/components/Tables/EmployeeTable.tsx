@@ -18,6 +18,9 @@ import { Manager } from 'socket.io-client';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
+import { motion } from 'framer-motion';
+import EditButton from '../Buttons/EditButton';
+
 interface TManager {
   _id: string;
   name: string;
@@ -194,6 +197,7 @@ const EmployeeTable: React.FC = () => {
         if (response.data.status) {
           // Update the status locally after a successful API response
           toast.success('Employee status changed successfully!');
+
           setSellers((prevSellers) =>
             prevSellers.map((seller) =>
               seller._id === id ? { ...seller, status: updatedStatus } : seller,
@@ -312,15 +316,17 @@ const EmployeeTable: React.FC = () => {
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div className="flex gap-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="mb-4 w-full p-2 border border-gray-300 rounded dark:bg-boxdark"
-          onChange={handleSearch}
-        />
-        <CreateEmployeeModal onSubmitSuccess={handleModalFormSubmit} />
-      </div>
+      {currentUser?.role !== 'admin' && (
+        <div className="flex gap-4">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="mb-4 w-full p-2 border border-gray-300 rounded dark:bg-boxdark"
+            onChange={handleSearch}
+          />
+          <CreateEmployeeModal onSubmitSuccess={handleModalFormSubmit} />
+        </div>
+      )}
       <div className="max-w-full overflow-x-auto">
         <table className="w-full table-auto">
           <thead>
@@ -442,22 +448,26 @@ const EmployeeTable: React.FC = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleStatus(
-                            manager._id,
-                            manager.status ? true : false,
-                          );
+                          toggleStatus(manager._id, manager.status);
                         }}
-                        className={`inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium ${
-                          manager.status
-                            ? 'bg-success text-success'
-                            : 'bg-danger text-danger'
-                        }`}
+                        className="flex items-center cursor-pointer focus:outline-none"
                       >
-                        {manager.status ? 'Active' : 'Inactive'}
+                        <div className="relative w-11 h-6">
+                          <div
+                            className={`w-full h-full rounded-full transition-colors duration-300 ${
+                              manager.status ? 'bg-indigo-500' : 'bg-slate-500'
+                            }`}
+                          ></div>
+                          <div
+                            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 transform ${
+                              manager.status ? 'translate-x-5' : ''
+                            }`}
+                          ></div>
+                        </div>
                       </button>
                     </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center">
-                      <button
+                    <td className="border-b flex flex-col md:flex-row justify-center items-center gap-2 border-[#eee] py-5 px-4 dark:border-strokedark text-center">
+                      {/* <button
                         onClick={(e) => {
                           e.stopPropagation(); // Prevents the event from bubbling up to the row
                           handleEdit(manager);
@@ -465,17 +475,28 @@ const EmployeeTable: React.FC = () => {
                         className="p-2 text-sm font-medium rounded-md focus:outline-none hover:text-[#472DA9]"
                       >
                         <FontAwesomeIcon icon={faEdit} />
-                      </button>
+                      </button> */}
 
-                      <button
+                      <EditButton
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(manager._id);
+                          e.stopPropagation(); // Prevents the event from bubbling up to the row
+                          handleEdit(manager);
                         }}
-                        className="p-2 text-sm font-medium rounded-md hover:text-[#d43232] focus:outline-none "
-                      >
-                        <FontAwesomeIcon icon={faTrashAlt} />
-                      </button>
+                        title="Edit"
+                        icon={faEdit}
+                      />
+
+                      {!manager.status && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(manager._id);
+                          }}
+                          className="p-2 text-sm font-medium rounded-md hover:text-[#d43232] focus:outline-none "
+                        >
+                          <FontAwesomeIcon icon={faTrashAlt} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

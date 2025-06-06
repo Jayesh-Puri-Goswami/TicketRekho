@@ -784,7 +784,7 @@ const UpdateEvent: React.FC<{
                       <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 peer-checked:translate-x-5"></div>
                     </div>
                     <span className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-200">
-                      Ads
+                      Advertisement
                     </span>
                   </label>
                 </div>

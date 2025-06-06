@@ -1,479 +1,1117 @@
-'use client';
-
 import type React from 'react';
-
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Camera,
   Upload,
-  Scan,
-  Calendar,
-  MapPin,
-  Clock,
-  User,
-  Ticket,
-  ChevronDown,
-  X,
+  RotateCcw,
   CheckCircle,
   AlertCircle,
+  Scan,
+  X,
+  Ticket,
 } from 'lucide-react';
-// import { Button } from "../../components/ui/button"
-// import { Card, CardContent } from "../../components/ui/card"
-// import { Badge } from "../../components/ui/badge"
+import QrScanner from 'qr-scanner';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
-interface MovieTicket {
-  id: string;
-  movieTitle: string;
-  theater: string;
-  date: string;
-  time: string;
-  seat: string;
-  price: string;
-  genre: string;
-  duration: string;
-  rating: string;
-  poster: string;
+import Urls from '../../networking/app_urls'
+
+// Mock URLs - replace with your actual URLs
+// const Urls = {
+//   getUserEventBookingTicketDetail: '/api/event/booking/details',
+//   scanEventQRCode: '/api/event/scan',
+//   Image_url: 'https://your-image-base-url.com/',
+//   getUserMovieBookingTicketDetail: '/api/movie/booking/details',
+//   scanMovieQRCode: '/api/movie/scan',
+// };
+
+interface QrData {
+  userId: string;
+  bookingId: string;
+  appUserId: string;
+  email: string;
+  showtimeId: string;
 }
 
-const mockTickets: MovieTicket[] = [
-  {
-    id: 'TKT001',
-    movieTitle: 'Avengers: Endgame',
-    theater: 'AMC Times Square',
-    date: '2024-01-15',
-    time: '7:30 PM',
-    seat: 'A12',
-    price: '$15.99',
-    genre: 'Action/Adventure',
-    duration: '181 min',
-    rating: 'PG-13',
-    poster: '/placeholder.svg?height=300&width=200',
-  },
-  {
-    id: 'TKT002',
-    movieTitle: 'The Dark Knight',
-    theater: 'Regal Cinema',
-    date: '2024-01-20',
-    time: '9:00 PM',
-    seat: 'B8',
-    price: '$12.50',
-    genre: 'Action/Crime',
-    duration: '152 min',
-    rating: 'PG-13',
-    poster: '/placeholder.svg?height=300&width=200',
-  },
-];
+interface MovieTicket {
+  movieName: string;
+  theaterName: string;
+  showtime: string;
+  seatNumbers: string[];
+  totalAmount: number;
+  bookingDate: string;
+}
 
-export default function QRScannerMovie() {
-  const [isScanning, setIsScanning] = useState(false);
-  const [scannedTicket, setScannedTicket] = useState<MovieTicket | null>(null);
-  const [scanStatus, setScanStatus] = useState<
-    'idle' | 'scanning' | 'success' | 'error'
-  >('idle');
-  const [showDropdown, setShowDropdown] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+interface GrabABiteItem {
+  grabABiteId: {
+    _id: string;
+    userId: string;
+    eventId: string;
+    movieId: string;
+    name: string;
+    foodType: string;
+    grabImage: string;
+    description: string;
+    price: number;
+    status: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  qty: number;
+  _id: string;
+}
 
-  const startScanning = async () => {
-    setIsScanning(true);
-    setScanStatus('scanning');
+const QRScanner: React.FC = () => {
+  const [qrData, setQrData] = useState<QrData | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState<'environment' | 'user'>(
+    'environment',
+  );
+  const [grabABiteList, setGrabABiteList] = useState<GrabABiteItem[]>([]);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const scannerRef = useRef<QrScanner | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [seatData, setSeatData] = useState()
+
+  // Mock current user - replace with your actual user selector
+  const currentUser = { token: 'your-auth-token' };
+
+  const startCameraScanner = async () => {
+    setIsCameraActive(true);
+    setErrorMessage(null);
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: { facingMode: cameraFacing },
       });
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+
+        const scanner = new QrScanner(
+          videoRef.current,
+          async (result) => {
+            try {
+              const parsedData: QrData = JSON.parse(result.data);
+              setQrData(parsedData);
+              setIsCameraActive(false);
+              scannerRef.current?.stop();
+
+              await fetchGrabABiteList(parsedData.bookingId);
+            } catch (error) {
+              console.error('Failed to parse QR data:', error);
+              setErrorMessage('Invalid QR Code. Please try again.');
+            }
+          },
+          {
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+          },
+        );
+
+        await scanner.start();
+        scannerRef.current = scanner;
       }
-
-      // Simulate QR code detection after 3 seconds
-      setTimeout(() => {
-        const randomTicket =
-          mockTickets[Math.floor(Math.random() * mockTickets.length)];
-        setScannedTicket(randomTicket);
-        setScanStatus('success');
-        setIsScanning(false);
-
-        // Stop camera
-        stream.getTracks().forEach((track) => track.stop());
-      }, 3000);
     } catch (error) {
       console.error('Camera access denied:', error);
-      setScanStatus('error');
-      setIsScanning(false);
+      setErrorMessage(
+        'Camera access denied. Please allow permissions in your browser settings.',
+      );
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const stopCameraScanner = () => {
+    scannerRef.current?.stop();
+    scannerRef.current?.destroy();
+    scannerRef.current = null;
+    setIsCameraActive(false);
+  };
+
+  const switchCamera = () => {
+    setCameraFacing((prev) =>
+      prev === 'environment' ? 'user' : 'environment',
+    );
+    stopCameraScanner();
+    setTimeout(() => startCameraScanner(), 100);
+  };
+
+  const scanImageFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setScanStatus('scanning');
-      // Simulate QR code processing
-      setTimeout(() => {
-        const randomTicket =
-          mockTickets[Math.floor(Math.random() * mockTickets.length)];
-        setScannedTicket(randomTicket);
-        setScanStatus('success');
-      }, 2000);
+    if (!file) return;
+
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const result = await QrScanner.scanImage(file);
+      const parsedData: QrData = JSON.parse(result);
+
+      console.log('Parsed QR Data:', parsedData);
+      setQrData(parsedData);
+
+      await fetchGrabABiteList(parsedData.bookingId);
+    } catch (error) {
+      console.error('Error scanning image:', error);
+      setErrorMessage('Invalid QR Code in image. Please try again.');
+    }
+  };
+
+  const fetchGrabABiteList = async (bookingId: string) => {
+    try {
+      const response = await axios.post(
+        Urls.scanMovieQRCode,
+        { bookingId : bookingId },
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
+        },
+      );
+
+      if (response.data) {
+        setGrabABiteList(response.data);
+        setSeatData(response.data.data)
+        console.log(response.data);
+        
+      }
+    } catch (error) {
+      console.error('Failed to fetch grabABiteList:', error);
+      setErrorMessage('Failed to fetch Grab a Bite list. Please try again.');
+    }
+  };
+
+  const sendGameUserId = async () => {
+    if (!qrData) return;
+
+    setIsSending(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    try {
+      const response = await axios.post(
+        Urls.scanEventQRCode,
+        {
+          bookingId: qrData.bookingId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
+        },
+      );
+
+      setSuccessMessage(response.data.message);
+      setSeatData(response.data)
+    } catch (error: any) {
+      console.error('Failed to send Booking ID:', error);
+      setErrorMessage(
+        error.response?.data?.message ||
+          'Failed to verify ticket. Please try again.',
+      );
+    } finally {
+      setIsSending(false);
     }
   };
 
   const resetScanner = () => {
-    setScannedTicket(null);
-    setScanStatus('idle');
-    setIsScanning(false);
-    setShowDropdown(false);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    setQrData(null);
+    setGrabABiteList([]);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    stopCameraScanner();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen rounded-xl bg-gradient-to-br from-indigo-500/5 to-purple-500/5 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-4xl mx-auto mt-10"
+      >
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 mb-4">
-            <Scan className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent mb-2">
-            Movie Ticket Scanner
+          <h1 className="text-4xl font-bold text-slate-800 mb-2">
+            Event QR Scanner
           </h1>
           <p className="text-slate-600">
-            Scan your QR code to view ticket details
+            Scan QR codes to verify event tickets
           </p>
         </motion.div>
 
-        <AnimatePresence mode="wait">
-          {!scannedTicket ? (
-            <motion.div
-              key="scanner"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="space-y-6"
-            >
-              {/* Scanner Interface */}
-              <div className="overflow-hidden border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-                <div className="p-8">
-                  <div className="relative">
-                    {isScanning ? (
-                      <div className="relative aspect-square max-w-md mx-auto rounded-2xl overflow-hidden bg-black">
-                        <video
-                          ref={videoRef}
-                          autoPlay
-                          playsInline
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 border-4 border-white/30 rounded-2xl">
-                          <div className="absolute inset-4 border-2 border-dashed border-white/50 rounded-xl flex items-center justify-center">
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1] }}
-                              transition={{
-                                duration: 2,
-                                repeat: Number.POSITIVE_INFINITY,
-                              }}
-                              className="w-32 h-32 border-4 border-white rounded-lg"
-                            />
-                          </div>
-                        </div>
-                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                          {/* <Badge variant="secondary" className="bg-white/90 text-slate-800"> */}
-                          <motion.div
-                            animate={{ opacity: [1, 0.5, 1] }}
-                            transition={{
-                              duration: 1.5,
-                              repeat: Number.POSITIVE_INFINITY,
-                            }}
-                            className="flex items-center gap-2"
-                          >
-                            <div className="w-2 h-2 bg-green-500 rounded-full" />
-                            Scanning...
-                          </motion.div>
-                          {/* </Badge> */}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="aspect-square max-w-md mx-auto rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-slate-50 to-white">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center mb-6">
-                          <Camera className="w-12 h-12 text-white" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-slate-800 mb-2">
-                          Ready to Scan
-                        </h3>
-                        <p className="text-slate-600 text-center mb-6">
-                          Position your QR code within the frame to scan
-                        </p>
+        {/* Main Scanner Card */}
+        <motion.div layout className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <AnimatePresence mode="wait">
+            {!isCameraActive ? (
+              <motion.div
+                key="scanner-controls"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={startCameraScanner}
+                  className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-indigo-purple text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Camera className="w-5 h-5" />
+                  Scan QR Code with Camera
+                </motion.button>
 
-                        {scanStatus === 'error' && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-2 text-red-600 mb-4"
-                          >
-                            <AlertCircle className="w-5 h-5" />
-                            <span className="text-sm">
-                              Camera access denied
-                            </span>
-                          </motion.div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-gradient-to-r from-slate-600 to-slate-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Upload className="w-5 h-5" />
+                  Upload QR Code Image
+                </motion.button>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                    <button
-                      onClick={startScanning}
-                      disabled={isScanning}
-                      className="flex-1 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                    >
-                      <Camera className="w-5 h-5 mr-2" />
-                      {isScanning ? 'Scanning...' : 'Start Camera'}
-                    </button>
-
-                    <div className="relative">
-                      <button
-                        onClick={() => setShowDropdown(!showDropdown)}
-                        variant="outline"
-                        className="flex-1 sm:flex-none h-12 px-6 border-2 border-slate-200 hover:border-indigo-300 rounded-xl font-medium transition-all duration-200"
-                      >
-                        <Upload className="w-5 h-5 mr-2" />
-                        Upload Image
-                        <ChevronDown
-                          className={`w-4 h-4 ml-2 transition-transform duration-200 ${
-                            showDropdown ? 'rotate-180' : ''
-                          }`}
-                        />
-                      </button>
-
-                      <AnimatePresence>
-                        {showDropdown && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                            className="absolute top-full mt-2 right-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-10 min-w-48"
-                          >
-                            <button
-                              onClick={() => fileInputRef.current?.click()}
-                              className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors duration-150 flex items-center gap-3"
-                            >
-                              <Upload className="w-4 h-4 text-slate-500" />
-                              <span className="text-sm font-medium">
-                                Choose from device
-                              </span>
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={scanImageFile}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="camera-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <div className="relative w-full h-80 bg-slate-900 rounded-xl overflow-hidden">
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
                   />
-                </div>
-              </div>
 
-              {/* Status Messages */}
-              <AnimatePresence>
-                {scanStatus === 'scanning' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="text-center"
-                  >
-                    <div className="inline-flex items-center gap-3 px-6 py-3 bg-blue-50 text-blue-700 rounded-full">
+                  {/* Scanner Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Number.POSITIVE_INFINITY,
+                      }}
+                      className="w-48 h-48 border-4 border-white rounded-2xl relative"
+                    >
+                      <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-lg"></div>
+                      <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-lg"></div>
+                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-lg"></div>
+                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-emerald-400 rounded-br-lg"></div>
+
                       <motion.div
-                        animate={{ rotate: 360 }}
+                        animate={{ y: [0, 180, 0] }}
                         transition={{
-                          duration: 1,
+                          duration: 2,
                           repeat: Number.POSITIVE_INFINITY,
-                          ease: 'linear',
+                          ease: 'easeInOut',
                         }}
-                        className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full"
+                        className="absolute top-4 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent"
                       />
-                      Processing QR code...
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ) : (
+                    </motion.div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={switchCamera}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-600 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Switch Camera
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={stopCameraScanner}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Stop Scanning
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* QR Data Display */}
+        <AnimatePresence>
+          {qrData && (
             <motion.div
-              key="ticket"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="space-y-6"
+              className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6"
             >
-              {/* Success Message */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center"
-              >
-                <div className="inline-flex items-center gap-3 px-6 py-3 bg-green-50 text-green-700 rounded-full mb-6">
-                  <CheckCircle className="w-5 h-5" />
-                  QR Code scanned successfully!
-                </div>
-              </motion.div>
-
-              {/* Ticket Details */}
-              <div className="overflow-hidden border-0 shadow-xl bg-white">
-                <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
-                <div className="p-0">
-                  <div className="grid md:grid-cols-3 gap-0">
-                    {/* Movie Poster */}
-                    <div className="md:col-span-1 p-6 bg-gradient-to-br from-slate-50 to-white">
-                      <div className="aspect-[3/4] rounded-xl overflow-hidden shadow-lg">
-                        <img
-                          src={scannedTicket.poster || '/placeholder.svg'}
-                          alt={scannedTicket.movieTitle}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Ticket Information */}
-                    <div className="md:col-span-2 p-6 space-y-6">
-                      <div>
-                        <h2 className="text-2xl font-bold text-slate-800 mb-2">
-                          {scannedTicket.movieTitle}
-                        </h2>
-                        <div className="flex flex-wrap gap-2">
-                          <div
-                            variant="secondary"
-                            className="bg-indigo-100 p-3 rounded-lg text-indigo-700"
-                          >
-                            {scannedTicket.genre}
-                          </div>
-                          <div
-                            variant="secondary"
-                            className="bg-purple-100 p-3 rounded-lg text-purple-700"
-                          >
-                            {scannedTicket.rating}
-                          </div>
-                          <div
-                            variant="secondary"
-                            className="bg-slate-100 p-3 rounded-lg text-slate-700"
-                          >
-                            {scannedTicket.duration}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                              <MapPin className="w-5 h-5 text-indigo-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-slate-500">Theater</p>
-                              <p className="font-medium text-slate-800">
-                                {scannedTicket.theater}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                              <Calendar className="w-5 h-5 text-purple-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-slate-500">Date</p>
-                              <p className="font-medium text-slate-800">
-                                {formatDate(scannedTicket.date)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                              <Clock className="w-5 h-5 text-green-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-slate-500">
-                                Show Time
-                              </p>
-                              <p className="font-medium text-slate-800">
-                                {scannedTicket.time}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                              <User className="w-5 h-5 text-orange-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-slate-500">Seat</p>
-                              <p className="font-medium text-slate-800">
-                                {scannedTicket.seat}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                        <div className="flex items-center gap-3">
-                          <Ticket className="w-5 h-5 text-slate-500" />
-                          <span className="text-sm text-slate-500">
-                            Ticket ID: {scannedTicket.id}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-slate-500">Total Price</p>
-                          <p className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-                            {scannedTicket.price}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 mb-2">
+                <Ticket className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-semibold text-emerald-800">
+                  Event Ticket Scanned
+                </h3>
               </div>
+              <p className="text-emerald-700">
+                Booking ID:{' '}
+                <span className="font-mono font-bold">{qrData.bookingId}</span>
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={resetScanner}
-                  variant="outline"
-                  className="flex-1 h-12 border-2 border-slate-200 hover:border-indigo-300 rounded-xl font-medium transition-all duration-200"
-                >
-                  <X className="w-5 h-5 mr-2" />
-                  Scan Another Ticket
-                </button>
-                <button className="flex-1 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
-                  <Ticket className="w-5 h-5 mr-2" />
-                  Save Ticket
-                </button>
+        {/* Grab a Bite List */}
+        <AnimatePresence>
+          {grabABiteList.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white rounded-xl shadow-lg p-6 mb-6"
+            >
+              <h3 className="text-xl font-bold text-slate-800 mb-4">
+                Food & Beverages
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left py-3 px-4 font-semibold text-slate-700">
+                        Item
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-700">
+                        Description
+                      </th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700">
+                        Qty
+                      </th>
+                      <th className="text-right py-3 px-4 font-semibold text-slate-700">
+                        Price
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {grabABiteList.map((item, index) => (
+                      <motion.tr
+                        key={item._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="border-b border-slate-100 hover:bg-slate-50"
+                      >
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            {item.grabABiteId.grabImage && (
+                              <img
+                                src={`${Urls.Image_url}${item.grabABiteId.grabImage}`}
+                                alt={item.grabABiteId.name}
+                                className="w-12 h-12 object-cover rounded-lg"
+                              />
+                            )}
+                            <div>
+                              <p className="font-semibold text-slate-800">
+                                {item.grabABiteId.name}
+                              </p>
+                              <p className="text-sm text-slate-600">
+                                {item.grabABiteId.foodType}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-slate-600">
+                          {item.grabABiteId.description}
+                        </td>
+                        <td className="py-3 px-4 text-center font-semibold">
+                          {item.qty}
+                        </td>
+                        <td className="py-3 px-4 text-right font-semibold text-green-600">
+                          ${item.grabABiteId.price}
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+
+        {/* Messages */}
+        <AnimatePresence>
+          {errorMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6"
+            >
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+                <p className="text-red-800 font-medium">{errorMessage}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className={`border rounded-xl p-4 mb-6 ${
+                successMessage === 'QR code scanned successfully.'
+                  ? 'bg-green-50 border-green-200'
+                  : 'bg-red-50 border-red-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {successMessage === 'QR code scanned successfully.' ? (
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                )}
+                <p
+                  className={`font-medium ${
+                    successMessage === 'QR code scanned successfully.'
+                      ? 'text-green-800'
+                      : 'text-red-800'
+                  }`}
+                >
+                  {successMessage}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Action Buttons */}
+        <AnimatePresence>
+          {qrData && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex gap-4"
+            >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={sendGameUserId}
+                disabled={isSending}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold rounded-xl shadow-lg transition-all duration-300 ${
+                  isSending
+                    ? 'bg-slate-400 text-white cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl'
+                }`}
+              >
+                {isSending ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: 'linear',
+                      }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                    />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Verify Ticket
+                  </>
+                )}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={resetScanner}
+                className="flex-1 flex items-center justify-center gap-2 py-4 px-6 bg-indigo-purple text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Scan className="w-5 h-5" />
+                Scan Another
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
-}
+};
+
+const MovieQRScanner: React.FC = () => {
+  const [qrData, setQrData] = useState<QrData | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState<'environment' | 'user'>(
+    'environment',
+  );
+  const [movieTicket, setMovieTicket] = useState<MovieTicket | null>(null);
+  const [grabABiteList, setGrabABiteList] = useState<GrabABiteItem[]>([]);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const scannerRef = useRef<QrScanner | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [bookingId, setBookingId] = useState('');
+
+  // Mock current user - replace with your actual user selector
+  const currentUser = useSelector((state: any) => state.user.currentUser?.data);
+
+  const startCameraScanner = async () => {
+    setIsCameraActive(true);
+    setErrorMessage(null);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: cameraFacing },
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+
+        const scanner = new QrScanner(
+          videoRef.current,
+          async (result) => {
+            try {
+              const parsedData: QrData = JSON.parse(result.data);
+              setQrData(parsedData);
+              setIsCameraActive(false);
+              scannerRef.current?.stop();
+
+              await fetchMovieTicketDetails(parsedData.bookingId);
+              // await fetchGrabABiteList(parsedData.bookingId);
+            } catch (error) {
+              console.error('Failed to parse QR data:', error);
+              setErrorMessage('Invalid QR Code. Please try again.');
+            }
+          },
+          {
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+          },
+        );
+
+        await scanner.start();
+        scannerRef.current = scanner;
+      }
+    } catch (error) {
+      console.error('Camera access denied:', error);
+      setErrorMessage(
+        'Camera access denied. Please allow permissions in your browser settings.',
+      );
+    }
+  };
+
+  const stopCameraScanner = () => {
+    scannerRef.current?.stop();
+    scannerRef.current?.destroy();
+    scannerRef.current = null;
+    setIsCameraActive(false);
+  };
+
+  const switchCamera = () => {
+    setCameraFacing((prev) =>
+      prev === 'environment' ? 'user' : 'environment',
+    );
+    stopCameraScanner();
+    setTimeout(() => startCameraScanner(), 100);
+  };
+
+  const scanImageFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const result = await QrScanner.scanImage(file);
+      const parsedData: QrData = JSON.parse(result);
+
+      console.log('Parsed QR Data:', parsedData);
+      setQrData(parsedData);
+
+      await fetchMovieTicketDetails(parsedData.bookingId);
+      // await fetchGrabABiteList(parsedData.bookingId)
+    } catch (error) {
+      console.error('Error scanning image:', error);
+      setErrorMessage('Invalid QR Code in image. Please try again.');
+    }
+  };
+
+  const fetchMovieTicketDetails = async (bookingId: string) => {
+    try {
+      const response = await axios.post(
+        Urls.scanMovieQRCode,
+        {
+          bookingId: bookingId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
+        },
+      );
+
+      if (response.data) {
+        setMovieTicket(response.data.data);
+        console.log(`This`);
+        
+        console.log(response.data.data);
+      }
+    } catch (error : any) {
+      console.error('Failed to fetch movie ticket details:', error);
+      setErrorMessage(
+        error?.response?.data?.message || 'Failed to fetch movie ticket details. Please try again.'
+      );
+    }
+  };
+
+
+  const verifyMovieTicket = async () => {
+    if (!qrData) return;
+
+    setIsSending(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    try {
+      const response = await axios.post(
+        Urls.scanMovieQRCode,
+        {
+          bookingId: qrData.bookingId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
+        },
+      );
+
+      setSuccessMessage(response.data.message);
+      console.log(response.data.data);
+      
+    } catch (error: any) {
+      console.error('Failed to verify movie ticket:', error);
+      setErrorMessage(
+        error.response?.data?.message ||
+          'Failed to verify movie ticket. Please try again.',
+      );
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const resetScanner = () => {
+    setQrData(null);
+    setMovieTicket(null);
+    setGrabABiteList([]);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    stopCameraScanner();
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500/5 to-purple-500/5 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-4xl mx-auto mt-10"
+      >
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-4xl font-bold text-slate-800 mb-2">
+            Movie Ticket Scanner
+          </h1>
+          <p className="text-slate-600">
+            Scan QR codes to verify movie tickets
+          </p>
+        </motion.div>
+
+        {/* Main Scanner Card */}
+        <motion.div layout className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <AnimatePresence mode="wait">
+            {!isCameraActive ? (
+              <motion.div
+                key="scanner-controls"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={startCameraScanner}
+                  className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-indigo-purple text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Camera className="w-5 h-5" />
+                  Scan QR Code with Camera
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-gradient-to-r from-slate-600 to-slate-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Upload className="w-5 h-5" />
+                  Upload QR Code Image
+                </motion.button>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={scanImageFile}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="camera-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <div className="relative w-full h-80 bg-slate-900 rounded-xl overflow-hidden">
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
+                  />
+
+                  {/* Scanner Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Number.POSITIVE_INFINITY,
+                      }}
+                      className="w-48 h-48 border-4 border-white rounded-2xl relative"
+                    >
+                      <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-400 rounded-tl-lg"></div>
+                      <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-400 rounded-tr-lg"></div>
+                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-400 rounded-bl-lg"></div>
+                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-400 rounded-br-lg"></div>
+
+                      <motion.div
+                        animate={{ y: [0, 180, 0] }}
+                        transition={{
+                          duration: 2,
+                          repeat: Number.POSITIVE_INFINITY,
+                          ease: 'easeInOut',
+                        }}
+                        className="absolute top-4 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent"
+                      />
+                    </motion.div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={switchCamera}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-600 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Switch Camera
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={stopCameraScanner}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Stop Scanning
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* QR Data Display */}
+        <AnimatePresence>
+          {qrData && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Scan className="w-5 h-5 text-blue-600" />
+                <h3 className="font-semibold text-blue-800">QR Code Scanned</h3>
+              </div>
+
+              <p className="text-blue-700">
+                Booking Email:{' '}
+                <span className="font-mono font-bold">{qrData.email}</span>
+              </p>
+              
+
+              <p className="text-blue-700 pt-3">
+                Booking ID:{' '}
+                <span className="font-mono font-bold">{qrData.bookingId}</span>
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Movie Ticket Details */}
+        <AnimatePresence>
+          {movieTicket && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white rounded-xl shadow-lg p-6 mb-6"
+            >
+              <h3 className="text-xl font-bold text-slate-800 mb-4">
+                Movie Ticket Details
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-slate-600">Movie</p>
+                  <p className="font-semibold text-slate-800">
+                    {movieTicket.movieName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Theater</p>
+                  <p className="font-semibold text-slate-800">
+                    {movieTicket.theaterName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Showtime</p>
+                  <p className="font-semibold text-slate-800">
+                    {movieTicket.showtime}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Seats</p>
+                  <p className="font-semibold text-slate-800">
+                    {movieTicket?.seatNumbers?.join(', ')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Total Amount</p>
+                  <p className="font-semibold text-green-600">
+                    ${movieTicket.totalAmount}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Booking Date</p>
+                  <p className="font-semibold text-slate-800">
+                    {movieTicket.bookingDate}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Grab a Bite List */}
+        <AnimatePresence>
+          {grabABiteList.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white rounded-xl shadow-lg p-6 mb-6"
+            >
+              <h3 className="text-xl font-bold text-slate-800 mb-4">
+                Food & Beverages
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left py-3 px-4 font-semibold text-slate-700">
+                        Item
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-700">
+                        Description
+                      </th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700">
+                        Qty
+                      </th>
+                      <th className="text-right py-3 px-4 font-semibold text-slate-700">
+                        Price
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {grabABiteList.map((item, index) => (
+                      <motion.tr
+                        key={item._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="border-b border-slate-100 hover:bg-slate-50"
+                      >
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            {item.grabABiteId.grabImage && (
+                              <img
+                                src={`${Urls.Image_url}${item.grabABiteId.grabImage}`}
+                                alt={item.grabABiteId.name}
+                                className="w-12 h-12 object-cover rounded-lg"
+                              />
+                            )}
+                            <div>
+                              <p className="font-semibold text-slate-800">
+                                {item.grabABiteId.name}
+                              </p>
+                              <p className="text-sm text-slate-600">
+                                {item.grabABiteId.foodType}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-slate-600">
+                          {item.grabABiteId.description}
+                        </td>
+                        <td className="py-3 px-4 text-center font-semibold">
+                          {item.qty}
+                        </td>
+                        <td className="py-3 px-4 text-right font-semibold text-green-600">
+                          ${item.grabABiteId.price}
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Messages */}
+        <AnimatePresence>
+          {errorMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6"
+            >
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+                <p className="text-red-800 font-medium">{errorMessage}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6"
+            >
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <p className="text-green-800 font-medium">{successMessage}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Action Buttons */}
+        <AnimatePresence>
+          {qrData && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex gap-4"
+            >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={verifyMovieTicket}
+                disabled={isSending}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold rounded-xl shadow-lg transition-all duration-300 ${
+                  isSending
+                    ? 'bg-slate-400 text-white cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl'
+                }`}
+              >
+                {isSending ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: 'linear',
+                      }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                    />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Verify Ticket
+                  </>
+                )}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={resetScanner}
+                className="flex-1 flex items-center justify-center gap-2 py-4 px-6 bg-indigo-purple text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Scan className="w-5 h-5" />
+                Scan Another
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  );
+};
+
+export { QRScanner, MovieQRScanner };
+export default MovieQRScanner;

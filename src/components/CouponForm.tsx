@@ -74,21 +74,24 @@ const CouponForm: React.FC<ModalformProps> = ({ coupon, onSubmitSuccess, onCance
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm()
+  } = useForm()  
 
   useEffect(() => {
     if (coupon) {
+      const formattedDate = new Date(coupon.expirationDate).toISOString().split("T")[0];
       reset({
         code: coupon.code,
         discountType: coupon.discountType,
         discountValue: coupon.discountValue,
         applicableTo: coupon.applicableTo,
-        expirationDate: coupon.expirationDate,
+        expirationDate: formattedDate,
         description: coupon.description,
       })
       setOpen(true)
     }
   }, [coupon, reset])
+
+  
 
   useEffect(() => {
     if (show) {
@@ -189,6 +192,8 @@ const CouponForm: React.FC<ModalformProps> = ({ coupon, onSubmitSuccess, onCance
       transition: { duration: 0.2 },
     },
   }
+
+
 
   return (
     <AnimatePresence>

@@ -42,8 +42,8 @@ import MoviesTicket from './pages/TheatreManager/moviesTickets';
 import EventTicket from './pages/TheatreManager/eventTickets';
 import EventGrabABites from './pages/TheatreManager/eventGrabABites';
 import ShowTime from './pages/ShowTime';
-import QRScanner from './pages/Seller/QRScanner';
-import MovieQRScanner from './pages/MovieQRScanner';
+// import QRScanner from './pages/Seller/QRScanner';
+import QRScannerMovie, {QRScanner} from './pages/QR/QRScannerMovie';
 import ProfileManager from './pages/ProfileManager';
 import SellerMDetails from './pages/Manager/SellerMDetails';
 import SellerDash from './pages/Seller/SellerDash';
@@ -245,7 +245,7 @@ function App() {
             element={
               <>
                 <PageTitle title="Movies Detail" />
-                <MovieDetail />
+                <MovieDetail   />
               </>
             }
           />
@@ -318,7 +318,9 @@ function App() {
             element={
               <>
                 <PageTitle title="Scan QR" />
-                <MovieQRScanner />
+                {/* <MovieQRScanner /> */}
+                <QRScannerMovie />
+
               </>
             }
           />
