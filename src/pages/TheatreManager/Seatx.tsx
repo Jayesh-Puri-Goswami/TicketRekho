@@ -71,11 +71,11 @@ const Seatx: React.FC = () => {
 
           // Determine the number of rows and columns from the fetched data
           setNumRows(sortedRows.length)
-          const maxColumns = Math.max(...sortedRows.map((row) => row.seats.length))
+          const maxColumns = Math.max(...sortedRows.map((row : any) => row.seats.length))
           setNumColumns(maxColumns)
 
           // Set row types from fetched data
-          setRowTypes(sortedRows.map((row) => row.type))
+          setRowTypes(sortedRows.map((row : any) => row.type))
         }
       } catch (error) {
         console.error("Error fetching seat:", error)
