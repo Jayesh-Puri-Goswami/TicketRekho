@@ -1,10 +1,10 @@
-const Bash_url = 'https://testing.ticketrekho.com/api';
-const Image_url = 'https://testing.ticketrekho.com/api/uploads/';
-const Socket_url = 'https://testing.ticketrekho.com';
+// const Bash_url = 'https://testing.ticketrekho.com/api';
+// const Image_url = 'https://testing.ticketrekho.com/api/uploads/';
+// const Socket_url = 'https://testing.ticketrekho.com';
 
-// const Bash_url = 'http://localhost:4100/api';
-// const Image_url = 'http://localhost:4100/api/uploads/';
-// const Socket_url = 'http://localhost:4100';
+const Bash_url = 'http://localhost:4100/api';
+const Image_url = 'http://localhost:4100/api/uploads/';
+const Socket_url = 'http://localhost:4100';
 
 // Admin API's
 const loginUrl = `${Bash_url}/admin/adminLogin`;
@@ -89,15 +89,19 @@ const getManagers = `${Bash_url}/admin/getSubUserList`;
 const createManager = `${Bash_url}/admin/subUserSignup`;
 const getSubUserProfileDetails = `${Bash_url}/admin/getSubUserProfileDetails`;
 
+const getTheatreManagerList = `${Bash_url}/admin/getTheatreManagerList`;
+const getEventManagerList = `${Bash_url}/admin/getEventManagerList`;
+
+const getTheatreDetailByManager = `${Bash_url}/subUser/getTheatreDetailByManager`;
+
 // theatre managers
 const getTheatreManager = `${Bash_url}/admin/getTheatreManagerList`;
 const CreateTManager = `${Bash_url}/admin/theatreManagerSignup`;
-const createTheatreManager = `${Bash_url}/admin/createTheatreManager`
-
+const createTheatreManager = `${Bash_url}/admin/createTheatreManager`;
 
 // event managers
 const getEventManager = `${Bash_url}/admin/getEventManagerList`;
-const createEventManager = `${Bash_url}/admin/createEventManager` 
+const createEventManager = `${Bash_url}/admin/createEventManager`;
 
 const updateProfile = `${Bash_url}/subUser/updateProfile`;
 const editTheatreMangerProfile = `${Bash_url}/admin/editTheatreMangerProfile`;
@@ -119,12 +123,17 @@ const changeMovieStatus = `${Bash_url}/admin/changeMovieStatus`;
 // for theatre managers
 const getTheatres = `${Bash_url}/subUser/getTheatres`;
 const getActiveTheatres = `${Bash_url}/subUser/getActiveTheatres`;
+const getAllTheatresList = `${Bash_url}/admin/getAllTheatresList`;
 const addTheatre = `${Bash_url}/subUser/addTheatre`;
 const deleteTheatre = `${Bash_url}/subUser/deleteTheatre`;
 const changeTheatreStatus = `${Bash_url}/subUser/changeTheatreStatus`;
 const updateTheatre = `${Bash_url}/subUser/updateTheatre`;
 const getScreensDetailWithTheatre = `${Bash_url}/subUser/getScreensDetailWithTheatre`;
 const getTheatreDetail = `${Bash_url}/subUser/getTheatreDetail`;
+
+// for revenue and analytics
+const getSingleTheatreRevenueReport = `${Bash_url}/admin/getSingleTheatreRevenueReport`;
+const getAllTheatreRevenueReports = `${Bash_url}/admin/getAllTheatreRevenueReports`;
 
 // screens
 const getScreens = `${Bash_url}/subUser/getScreens`;
@@ -187,6 +196,8 @@ const addTicketsForSitting = `${Bash_url}/subUser/addTicketsForSitting`;
 const addEventSeatLayout = `${Bash_url}/subUser/addEventSeatLayout`;
 const eventSeatLayoutForAdmin = `${Bash_url}/subUser/eventSeatLayoutForAdmin`;
 const displayVenueDetail = `${Bash_url}/subUser/displayVenueDetail`;
+
+const getVenueByManager = `${Bash_url}/subUser/getVenueByManager`;
 
 const displayNonSittingTickets = `${Bash_url}/subUser/displayNonSittingTickets`;
 const displaysittingTickets = `${Bash_url}/subUser/displaysittingTickets`;
@@ -301,7 +312,9 @@ export default {
   getMovies,
   createMovie,
   updateMovie,
-
+  getTheatreManagerList,
+  getEventManagerList,
+  getTheatreDetailByManager,
   getManagers,
   createManager,
   createTheatreManager,
@@ -311,6 +324,9 @@ export default {
   editTheatreMangerProfile,
   getSubUserProfileDetails,
   getTheatres,
+  getSingleTheatreRevenueReport,
+  getAllTheatreRevenueReports,
+  getAllTheatresList,
   getActiveTheatres,
   addTheatre,
   deleteTheatre,
@@ -365,6 +381,7 @@ export default {
   displayVenueList,
   deleteVenue,
   changeVenueStatus,
+  getVenueByManager,
   createVenue,
   createVenueName,
   addTicketsForNonSitting,
@@ -395,7 +412,7 @@ export default {
   theatreManagerDashboard,
   editMangerProfile,
 
-    createEmployee,
+  createEmployee,
   updateEmployee,
   getEmployeeListBymanagerId,
   deleteEmployee,

@@ -50,7 +50,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange, selectedIm
       'image/png': [],
       'image/jpg': [],
     },
-    maxSize: 5242880, // 5MB
+    maxSize: 15728640, // 15MB
     maxFiles: 1,
   });
 
@@ -86,7 +86,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange, selectedIm
             )}
           </p>
           <p className="mt-1 text-xs text-center text-slate-500 dark:text-slate-400">
-            PNG, JPG, JPEG (max 5MB)
+            PNG, JPG, JPEG (max 15MB)
           </p>
         </motion.div>
       ) : (

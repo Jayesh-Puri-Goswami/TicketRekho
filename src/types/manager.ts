@@ -93,4 +93,5 @@ export interface ManagerFormData {
 export interface ModalFormProps {
   onSubmitSuccess?: (data: any) => void;
   setLoadingAfterAdd?: (loading: boolean) => void;
+  role? : string
 }

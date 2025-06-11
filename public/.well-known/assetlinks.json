@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ticket.rekho",
+      "sha256_cert_fingerprints": [
+        "B2:E4:2D:A8:94:ED:0B:A2:56:46:D4:C6:20:6A:BC:DB:FB:04:31:E6:46:02:CB:EA:39:2B:65:ED:CF:99:C1:96"
+      ]
+    }
+  }
+]

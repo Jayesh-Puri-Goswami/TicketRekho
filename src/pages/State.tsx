@@ -78,9 +78,12 @@ const State: React.FC = () => {
       setReload((prev) => !prev);
     } catch (err: any) {
       console.error(err);
-      toast.error('Something went wrong while adding the state.');
+      toast.error(
+        err.response?.data?.message ||
+          'Something went wrong while adding the state.',
+      );
       setErrorMessage(
-        err?.response?.message || 'Failed to add state. Please try again.',
+        err.response?.data?.message || 'Failed to add state. Please try again.',
       );
     } finally {
       setLoading(false);
@@ -89,7 +92,7 @@ const State: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-270">
-      <Breadcrumb pageName="States" />
+      <Breadcrumb pageName="Location" />
 
       <div className="flex flex-col gap-9 mb-9">
         <div className="rounded-xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -114,11 +117,11 @@ const State: React.FC = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-800 flex items-center">
                 <Building2 size={28} className="mr-2 text-indigo-600" />
-                States & City Management
+                States Management
               </h1>
               <p className="text-gray-600 mt-1">
-                Manage the states of your application. You can add, edit, or
-                delete states as needed.
+                Manage the states of your application. You can add or delete
+                states as needed.
               </p>
             </div>
           </motion.div>
@@ -138,11 +141,13 @@ const State: React.FC = () => {
                     <option value="" disabled>
                       Choose a State
                     </option>
-                    {stateNames.map((stateName) => (
-                      <option key={stateName} value={stateName}>
-                        {stateName}
-                      </option>
-                    ))}
+                    {[...stateNames]
+                      .sort((a, b) => a.localeCompare(b))
+                      .map((stateName) => (
+                        <option key={stateName} value={stateName}>
+                          {stateName}
+                        </option>
+                      ))}
                   </select>
 
                   {/* Custom dropdown icon */}

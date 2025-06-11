@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+// import { useSelector } from 'react-redux';
 
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
@@ -19,7 +19,7 @@ import Banner from './pages/Banner';
 import State from './pages/State';
 import City from './pages/City';
 import Manager from './pages/Manager';
-import ManagerDetails from './pages/ManagerDetails';
+// import ManagerDetails from './pages/ManagerDetails';
 import SellerDetails from './pages/SellerDetails';
 import User from './pages/User';
 import UserDetails from './pages/UserDetails';
@@ -32,7 +32,7 @@ import Support from './pages/Support';
 import Commission from './pages/Commission';
 import Ads from './pages/Ads';
 import Events from './pages/Events';
-import EventManage from './pages/EventManage';
+// import EventManage from './pages/EventManage';
 import Venue from './pages/Venue';
 import EventReport from './pages/EventReport';
 import TheatreReport from './pages/TheatreReport';
@@ -57,22 +57,30 @@ import GrabABites from './pages/TheatreManager/grabABites';
 import ShowTimeRealTimeSeatStatus from './pages/TheatreManager/ShowTimeRealTimeSeatStatus';
 import EventRealTimeSittingSeatStatus from './pages/TheatreManager/EventRealTimeSittingSeatStatus';
 import EventRealTimeNonSittingSeatStatus from './pages/TheatreManager/EventRealTimeNonSittingSeatStatus';
-import ViewManagerProfile from './components/Modals/ViewManagerProfile';
+// import ViewManagerProfile from './components/Modals/ViewManagerProfile';
 import Employee from './pages/Employee';
 import EmployeeDetails from './pages/EmployeeDetails';
 import MovieDetail from './pages/MovieDetail';
 import Swal from 'sweetalert2';
+import TheaterRevenueAdmin from './pages/TheaterRevenueAdmin';
+import EventDetail from './pages/EventDetails';
+import TheaterOwner from './pages/TheaterOwner';
+import EventOrganizer from './pages/EventOrganizer';
+import TheaterOwnerDetail from './pages/theaterOwnerDetail';
+import EventOrganizerDetail from './pages/EventOrganizerDetail';
+
+// import assetlinks from './pages/assetlinks'
 
 function App() {
   const [loading, setLoading] = useState(true);
   const { pathname } = useLocation();
-  const currentUser = useSelector((state: any) => state.user.currentUser?.data);
+  // const currentUser = useSelector((state: any) => state.user.currentUser?.data);
 
   // console.log(currentUser);
 
   useEffect(() => {
     const tabKey = 'app-tab-open';
-    const warningId = 'single-tab-warning';
+    // const warningId = 'single-tab-warning';
 
     // if (localStorage.getItem(tabKey) === 'true') {
     //   // Block UI with a full-screen warning
@@ -344,6 +352,15 @@ function App() {
             }
           />
           <Route
+            path="/events/detail/:eventId"
+            element={
+              <>
+                <PageTitle title="Movies Detail" />
+                <EventDetail   />
+              </>
+            }
+          />
+          <Route
             path="/event-seat-layout/:id"
             element={
               <>
@@ -408,7 +425,7 @@ function App() {
           />
 
           <Route
-            path="/employees"
+            path="/staff-management"
             element={
               <>
                 <PageTitle title="Employees" />
@@ -426,12 +443,48 @@ function App() {
             }
           />
 
-          <Route
-            path="/managers"
+          {/* <Route
+            path="/client-management"
             element={
               <>
-                <PageTitle title="Managers" />
+                <PageTitle title="Client Management" />
                 <Manager />
+              </>
+            }
+          /> */}
+          <Route
+            path="/theater-owner"
+            element={
+              <>
+                <PageTitle title="Client Management" />
+                <TheaterOwner />
+              </>
+            }
+          />
+          <Route
+            path="/theater-owner-detail/:id"
+            element={
+              <>
+                <PageTitle title="Theater Management" />
+                <TheaterOwnerDetail />
+              </>
+            }
+          />
+          <Route
+            path="/event-organizer"
+            element={
+              <>
+                <PageTitle title="Client Management" />
+                <EventOrganizer />
+              </>
+            }
+          />
+          <Route
+            path="/event-organizer-detail/:id"
+            element={
+              <>
+                <PageTitle title="Theater Management" />
+                <EventOrganizerDetail  />
               </>
             }
           />
@@ -519,10 +572,10 @@ function App() {
             }
           />
           <Route
-            path="/state"
+            path="/Location"
             element={
               <>
-                <PageTitle title="States" />
+                <PageTitle title="Location" />
                 <State />
               </>
             }
@@ -600,6 +653,15 @@ function App() {
             }
           />
           <Route
+            path="/theater-revenue-admin"
+            element={
+              <>
+                <PageTitle title="Theater Revenue Admin" />
+                <TheaterRevenueAdmin />
+              </>
+            }
+          />
+          <Route
             path="/event-qr-code"
             element={
               <>
@@ -617,6 +679,15 @@ function App() {
               </>
             }
           />
+          {/* <Route
+            path=".well-known/assetlinks.json"
+            element={
+              <>
+                <PageTitle title="Seller Dashboard" />
+                <assetlinks/>
+              </>
+            }
+          /> */}
         </Route>
       </Routes>
     </>

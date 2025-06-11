@@ -1,4 +1,5 @@
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import TheaterPage from './TheaterPage';
 import TheatresTable from './TheatresTable';
 
 const Theatres = () => {
@@ -7,6 +8,9 @@ const Theatres = () => {
       <Breadcrumb pageName="Manage Theatres" />
 
       <TheatresTable />
+
+      {/* New UI */}
+      {/* <TheaterPage/> */}
     </div>
   );
 };

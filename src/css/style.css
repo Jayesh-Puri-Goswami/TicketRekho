@@ -117,7 +117,9 @@ span.flatpickr-weekday,
 }
 .flatpickr-day.inRange {
   @apply dark:!shadow-7;
-  box-shadow: -5px 0 0 #EFF4FB, 5px 0 0 #EFF4FB;
+  box-shadow:
+    -5px 0 0 #eff4fb,
+    5px 0 0 #eff4fb;
 }
 .flatpickr-day.inRange,
 .flatpickr-day.prevMonthDay.inRange,
@@ -218,7 +220,6 @@ span.flatpickr-weekday,
   height: 75%;
 }
 
-
 /* Small copy button */
 
 /* tooltip settings 👇 */
@@ -277,7 +278,8 @@ span.flatpickr-weekday,
   padding: var(--tooltip-padding-y) var(--tooltip-padding-x);
   border-radius: var(--toolptip-border-radius);
   pointer-events: none;
-  transition: all var(--tooltip-transition-duration) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: all var(--tooltip-transition-duration)
+    cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .tooltip::before {
@@ -285,7 +287,7 @@ span.flatpickr-weekday,
 }
 
 .tooltip::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: calc(var(--tooltip-padding-y) / 2 * -1);
   width: var(--tooltip-padding-y);
@@ -355,10 +357,9 @@ span.flatpickr-weekday,
   max-width: 600px;
   padding: 20px;
   position: relative !important;
-  left: 7.5rem;  /* move right */
-  top: 2.5rem;   /* move down */
+  left: 7.5rem; /* move right */
+  top: 2.5rem; /* move down */
 }
-
 
 /* Optional custom button styles */
 .swal2-confirm-custom {
@@ -379,10 +380,13 @@ span.flatpickr-weekday,
 }
 
 .sidebarGradient {
-  background: #AC5ACB;
-  background-image: linear-gradient(180deg,rgba(172, 90, 203, 1) 0%, rgba(134, 83, 195, 1) 100%);
+  background: #ac5acb;
+  background-image: linear-gradient(
+    180deg,
+    rgba(172, 90, 203, 1) 0%,
+    rgba(134, 83, 195, 1) 100%
+  );
 }
-
 
 /* Tailwind override or global styles (e.g., index.css) */
 @keyframes shimmer {
@@ -398,7 +402,7 @@ span.flatpickr-weekday,
 }
 
 .shimmer::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: -100%;
@@ -412,7 +416,6 @@ span.flatpickr-weekday,
   );
   animation: shimmer 1.5s infinite;
 }
-
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -440,7 +443,6 @@ span.flatpickr-weekday,
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 100, 255, 0.5) transparent;
 }
-
 
 .line-clamp-2 {
   display: -webkit-box;
@@ -486,7 +488,6 @@ span.flatpickr-weekday,
   animation: shimmerCard 1.6s infinite linear;
 }
 
-
 .permission-label {
   position: relative;
   display: flex;
@@ -510,8 +511,12 @@ span.flatpickr-weekday,
 }
 
 input:checked + .custom-checkbox {
-  background-image: linear-gradient(to right, #6366F1, #8B5CF6); /* indigo-purple */
-  border-color: linear-gradient(to right, #6366F1, #8B5CF6);
+  background-image: linear-gradient(
+    to right,
+    #6366f1,
+    #8b5cf6
+  ); /* indigo-purple */
+  border-color: linear-gradient(to right, #6366f1, #8b5cf6);
 }
 
 .permission-name {
@@ -531,7 +536,7 @@ input:checked + .custom-checkbox {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%) translateY(-10px);
-  background-image: linear-gradient(to right, #6366F1, #8B5CF6);
+  background-image: linear-gradient(to right, #6366f1, #8b5cf6);
   color: white;
   font-size: 0.75rem;
   padding: 0.15rem 0.5rem;
@@ -539,11 +544,37 @@ input:checked + .custom-checkbox {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   z-index: 500;
 }
 
-.go2072408551{
+.go2072408551 {
   z-index: 999999 !important;
 }
+
+.screens-swiper .swiper-button-next,
+.screens-swiper .swiper-button-prev {
+  color: white;
+  background: linear-gradient(to right, #6365f153, #8a5cf649);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+}
+
+.screens-swiper .swiper-button-next:after,
+.screens-swiper .swiper-button-prev:after {
+  font-size: 18px;
+}
+
+.screens-swiper .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.screens-swiper .swiper-pagination-bullet-active {
+  background: white;
+}
+
 

@@ -396,7 +396,7 @@ const MoviesTable: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+    <div className="p-6  dark:bg-gray-900 rounded-xl shadow-sm">
       {/* Tabs */}
       {/* <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 mb-6">
         {['movies'].map((tab) => (
@@ -484,7 +484,7 @@ const MoviesTable: React.FC = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto bg-white rounded-xl p-5">
         {activeTab === 'movies' && (
           <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
             <thead className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800">

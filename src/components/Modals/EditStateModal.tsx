@@ -13,7 +13,7 @@ interface State {
 interface EditStateModalProps {
   state: State | null;
   onClose: () => void;
-  onSubmit: (updatedState: State, stateImageFile: File | null) => void;
+  onSubmit?: (updatedState: State, stateImageFile: File | null) => void;
 }
 
 const EditStateModal: React.FC<EditStateModalProps> = ({

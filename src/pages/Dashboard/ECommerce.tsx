@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  // faFilm,
+  // faCalendarAlt,
+  // faUsers,
+  // faUserTie,
+  faUserCheck,
+  faUserGroup,
+  faTheaterMasks,
+  faClock,
+  faMapMarkedAlt,
+  faCalendarCheck,
+  faTicketAlt,
+  faTicket,
   faFilm,
-  faCalendarAlt,
-  faUsers,
-  faUserTie,
-  faHeadset,
-  faQuestionCircle,
-  faTreeCity,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Urls from '../../networking/app_urls';
@@ -24,7 +30,7 @@ import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import ReactApexChart from 'react-apexcharts';
+// import ReactApexChart from 'react-apexcharts';
 import { motion } from 'framer-motion';
 import CouponForm from '../../components/CouponForm';
 import { Loader } from 'lucide-react';
@@ -47,12 +53,12 @@ interface Event {
   eventDate: string;
 }
 
-interface Advertisement {
-  id: number;
-  name: string;
-  image: string;
-  type: 'Movie' | 'Event';
-}
+// interface Advertisement {
+//   id: number;
+//   name: string;
+//   image: string;
+//   type: 'Movie' | 'Event';
+// }
 
 interface Coupon {
   _id: string;
@@ -67,59 +73,59 @@ interface Coupon {
 
 // Sample data
 
-const advertisements: Advertisement[] = [
-  {
-    id: 1,
-    name: 'Summer Blockbuster',
-    image: '/placeholder.svg?height=100&width=200',
-    type: 'Movie',
-  },
-  {
-    id: 2,
-    name: 'Music Festival',
-    image: '/placeholder.svg?height=100&width=200',
-    type: 'Event',
-  },
-  {
-    id: 3,
-    name: 'New Release Promo',
-    image: '/placeholder.svg?height=100&width=200',
-    type: 'Movie',
-  },
-  {
-    id: 4,
-    name: 'Comedy Night',
-    image: '/placeholder.svg?height=100&width=200',
-    type: 'Event',
-  },
-  {
-    id: 5,
-    name: 'Holiday Special',
-    image: '/placeholder.svg?height=100&width=200',
-    type: 'Movie',
-  },
-  {
-    id: 6,
-    name: 'Weekend Marathon',
-    image: '/placeholder.svg?height=100&width=200',
-    type: 'Movie',
-  },
-];
+// const advertisements: Advertisement[] = [
+//   {
+//     id: 1,
+//     name: 'Summer Blockbuster',
+//     image: '/placeholder.svg?height=100&width=200',
+//     type: 'Movie',
+//   },
+//   {
+//     id: 2,
+//     name: 'Music Festival',
+//     image: '/placeholder.svg?height=100&width=200',
+//     type: 'Event',
+//   },
+//   {
+//     id: 3,
+//     name: 'New Release Promo',
+//     image: '/placeholder.svg?height=100&width=200',
+//     type: 'Movie',
+//   },
+//   {
+//     id: 4,
+//     name: 'Comedy Night',
+//     image: '/placeholder.svg?height=100&width=200',
+//     type: 'Event',
+//   },
+//   {
+//     id: 5,
+//     name: 'Holiday Special',
+//     image: '/placeholder.svg?height=100&width=200',
+//     type: 'Movie',
+//   },
+//   {
+//     id: 6,
+//     name: 'Weekend Marathon',
+//     image: '/placeholder.svg?height=100&width=200',
+//     type: 'Movie',
+//   },
+// ];
 
-const managerChartData = {
-  active: 0,
-  inactive: 12,
-};
+// const managerChartData = {
+//   active: 0,
+//   inactive: 12,
+// };
 
-const AdvertisementSkeleton = () => (
-  <div className="flex items-center p-3 mb-3 bg-[#ffffff] rounded-lg animate-pulse">
-    <div className="w-16 h-16 bg-[#f4eefa] rounded-md mr-3"></div>
-    <div className="flex-1">
-      <div className="h-5 bg-[#f4eefa] rounded w-3/4 mb-2"></div>
-      <div className="h-4 bg-[#f4eefa] rounded w-1/4"></div>
-    </div>
-  </div>
-);
+// const AdvertisementSkeleton = () => (
+//   <div className="flex items-center p-3 mb-3 bg-[#ffffff] rounded-lg animate-pulse">
+//     <div className="w-16 h-16 bg-[#f4eefa] rounded-md mr-3"></div>
+//     <div className="flex-1">
+//       <div className="h-5 bg-[#f4eefa] rounded w-3/4 mb-2"></div>
+//       <div className="h-4 bg-[#f4eefa] rounded w-1/4"></div>
+//     </div>
+//   </div>
+// );
 
 const CouponSkeleton = () => (
   <div className="p-3 mb-3 bg-[#ffffff] rounded-lg animate-pulse">
@@ -143,7 +149,6 @@ const colorConfig = [
   'red',
   'indigo',
   'teal',
-  'orange',
   'cyan',
   'pink',
   'emerald',
@@ -163,7 +168,7 @@ const CardDataStats: React.FC<{
     >
       <div className="flex items-center gap-4">
         <div
-          className={`w-14 h-14 text-xl flex items-center justify-center rounded-full bg-${color}-100 text-${color}-600`}
+          className={`w-14 h-14 text-xl flex items-center justify-center rounded-full bg-${color}-100 text-${color || 'rose'}-600`}
         >
           <FontAwesomeIcon icon={icon} />
         </div>
@@ -205,15 +210,7 @@ const ECommerce: React.FC = () => {
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
   const [showModal, setShowModal] = useState(false);
 
-  const [latestEvents, setLatestEvents] = useState<Event[]>([
-    {
-      _id: 0,
-      name: '',
-      movieImage: '',
-      releaseDate: '',
-      description: '',
-    },
-  ]);
+  const [latestEvents, setLatestEvents] = useState<Event[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([
     {
       _id: 'NAN',
@@ -270,78 +267,103 @@ const ECommerce: React.FC = () => {
   }, []);
 
   const adminCards = [
+    
     {
-      title: 'Total Events',
-      total: data.totalEvent,
-      icon: faCalendarAlt,
-      path: '/events',
-    },
-    {
-      title: 'Total Movies',
-      total: data.totalMovie,
-      icon: faFilm,
+      title: 'Onboarded Clients',
+      total: '50', //data.totalMovie
+      icon: faUserCheck,
       path: '/movies',
     },
     {
-      title: 'Total Users',
-      total: data.totalUser,
-      icon: faUsers,
+      title: 'Onboarded Users',
+      total: '100000', //data.totalMovie
+      icon: faUserGroup,
+      path: '/movies',
+    },
+    {
+      title: 'Onboarded Theaters',
+      total: '250', //data.totalEvent
+      icon: faTheaterMasks,
+      path: '/events',
+    },
+    {
+      title: 'Onboarded Venus',
+      total: '250', //data.totalEvent
+      icon: faMapMarkedAlt,
+      path: '/events',
+    },
+    {
+      title: 'Running Showtimes',
+      total: '1000', //data.totalUser
+      icon: faClock,
       path: '/users',
     },
     {
-      title: 'Total Managers',
-      total: data.totalManager,
-      icon: faUserTie,
+      title: 'Running Events',
+      total: '1000', //data.totalUser
+      icon: faCalendarCheck,
+      path: '/users',
+    },
+    {
+      title: 'Daily Movie Ticket Sold ',
+      total: '50000' , //data.totalManager
+      icon: faFilm ,
+      path: '/managers',
+    },
+    {
+      title: 'Daily Event Ticket Sold ',
+      total: '50000' , // data.totalManager
+      icon: faTicket,
       path: '/managers',
     },
   ];
 
-  const chartOptions = {
-    chart: {
-      type: 'donut' as const,
-    },
-    // Set solid base colors for both slices
-    colors: ['#6366F1', '#e0e0e0'],
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shade: 'light',
-        type: 'horizontal', // left to right
-        shadeIntensity: 0.5,
-        gradientToColors: ['#8B5CF6', '#e0e0e0'], // second entry is same as base to disable gradient on second slice
-        inverseColors: false,
-        opacityFrom: 1,
-        opacityTo: 1,
-        stops: [0, 100],
-      },
-    },
-    labels: ['Active Managers', 'Inactive Managers'],
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '70%',
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: 'Total Managers',
-              formatter: () => managerData.active + managerData.inactive,
-            },
-          },
-        },
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    legend: {
-      position: 'bottom' as const,
-      offsetY: 0,
-      height: 40,
-    },
-  };
+  // const chartOptions = {
+  //   chart: {
+  //     type: 'donut' as const,
+  //   },
+  //   // Set solid base colors for both slices
+  //   colors: ['#6366F1', '#e0e0e0'],
+  //   fill: {
+  //     type: 'gradient',
+  //     gradient: {
+  //       shade: 'light',
+  //       type: 'horizontal', // left to right
+  //       shadeIntensity: 0.5,
+  //       gradientToColors: ['#8B5CF6', '#e0e0e0'], // second entry is same as base to disable gradient on second slice
+  //       inverseColors: false,
+  //       opacityFrom: 1,
+  //       opacityTo: 1,
+  //       stops: [0, 100],
+  //     },
+  //   },
+  //   labels: ['Active Managers', 'Inactive Managers'],
+  //   plotOptions: {
+  //     pie: {
+  //       donut: {
+  //         size: '70%',
+  //         labels: {
+  //           show: true,
+  //           total: {
+  //             show: true,
+  //             label: 'Total Managers',
+  //             formatter: () => managerData.active + managerData.inactive,
+  //           },
+  //         },
+  //       },
+  //     },
+  //   },
+  //   dataLabels: {
+  //     enabled: false,
+  //   },
+  //   legend: {
+  //     position: 'bottom' as const,
+  //     offsetY: 0,
+  //     height: 40,
+  //   },
+  // };
 
-  const chartSeries = [managerData.active, managerData.inactive];
+  // const chartSeries = [managerData.active, managerData.inactive];
 
   const Navigate = useNavigate();
 
@@ -415,8 +437,8 @@ const ECommerce: React.FC = () => {
         </div>
 
         {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Latest Movies Carousel - Spans 2 columns */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
           <div className="bg-white rounded-xl shadow-md p-5 md:col-span-2 overflow-hidden">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-indigo-purple">
@@ -449,16 +471,23 @@ const ECommerce: React.FC = () => {
                       className="bg-gray-100 cursor-pointer rounded-lg overflow-hidden"
                       onClick={() => Navigate(`/movies/detail/${movie._id}`)}
                     >
-                      <img
-                        src={`${Urls.Image_url}${movie.movieImage}`}
-                        alt={movie.name}
-                        className="w-full h-48 aspect-square"
-                        onError={(e: any) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            '/Image/Fallback Image/default-fallback-image.png';
-                        }}
-                      />
+                      <div className="relative w-full h-48 group">
+                        <img
+                          src={`${Urls.Image_url}${movie.movieImage}`}
+                          alt={movie.name}
+                          className="w-full h-full aspect-square"
+                          onError={(e: any) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              '/Image/Fallback Image/default-fallback-image.png';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 rounded"></div>
+
+                        <div className="absolute inset-0 flex items-end justify-center text-white text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 pb-3">
+                          Movie Detail
+                        </div>
+                      </div>
                       <div className="p-3">
                         <h3 className="font-medium text-gray-800">
                           {movie.name}
@@ -482,8 +511,7 @@ const ECommerce: React.FC = () => {
             </div>
           </div>
 
-          {/* Managers Chart */}
-          {/* <div className="bg-white rounded-xl shadow-md p-5 flex flex-col">
+          <div className="bg-white rounded-xl shadow-md p-5 flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-indigo-purple">
                 All Managers Status
@@ -497,8 +525,8 @@ const ECommerce: React.FC = () => {
                 height={300}
               />
             </div>
-          </div> */}
-          {/* Active Coupons Component */}
+          </div>
+
           <div className="bg-white rounded-xl shadow-md p-5">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-indigo-purple">
@@ -534,31 +562,6 @@ const ECommerce: React.FC = () => {
                   </svg>
                 </button>
 
-                {/* <button
-                  onClick={handleCouponsRefreshClick}
-                  className={`p-2 bg-slate-200 text-gray-700 rounded-md hover:bg-gray-300  `}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={24}
-                    height={24}
-                    className={` transition-transform ${
-                      couponRefreshClicked ? 'animate-spin' : 'rotate-360'
-                    }`}
-                  >
-                    <path
-                      d="M12.0789 2.25C7.2854 2.25 3.34478 5.913 2.96055 10.5833H2.00002C1.69614 10.5833 1.42229 10.7667 1.30655 11.0477C1.19081 11.3287 1.25606 11.6517 1.47178 11.8657L3.15159 13.5324C3.444 13.8225 3.91567 13.8225 4.20808 13.5324L5.88789 11.8657C6.10361 11.6517 6.16886 11.3287 6.05312 11.0477C5.93738 10.7667 5.66353 10.5833 5.35965 10.5833H4.4668C4.84652 6.75167 8.10479 3.75 12.0789 3.75C14.8484 3.75 17.2727 5.20845 18.6156 7.39279C18.8325 7.74565 19.2944 7.85585 19.6473 7.63892C20.0002 7.42199 20.1104 6.96007 19.8934 6.60721C18.2871 3.99427 15.3873 2.25 12.0789 2.25Z"
-                      fill="#1C274C"
-                    />
-                    <path
-                      opacity="0.5"
-                      d="M20.8412 10.4666C20.5491 10.1778 20.0789 10.1778 19.7868 10.4666L18.1005 12.1333C17.8842 12.3471 17.8185 12.6703 17.934 12.9517C18.0496 13.233 18.3236 13.4167 18.6278 13.4167H19.5269C19.1456 17.2462 15.876 20.25 11.8828 20.25C9.10034 20.25 6.66595 18.7903 5.31804 16.6061C5.10051 16.2536 4.63841 16.1442 4.28591 16.3618C3.93342 16.5793 3.82401 17.0414 4.04154 17.3939C5.65416 20.007 8.56414 21.75 11.8828 21.75C16.6907 21.75 20.6476 18.0892 21.0332 13.4167H22.0002C22.3044 13.4167 22.5784 13.233 22.694 12.9517C22.8096 12.6703 22.7438 12.3471 22.5275 12.1333L20.8412 10.4666Z"
-                      fill="#1C274C"
-                    />
-                  </svg>
-                </button> */}
               </div>
             </div>
             <div className="h-[250px] overflow-y-auto pr-2 scrollbar-thin">
@@ -580,13 +583,7 @@ const ECommerce: React.FC = () => {
                         </span>
                       </div>
                       <div className="mt-2 flex justify-between text-sm">
-                        {/* <span className="text-[#9264c9] font-semibold">
-                          {coupon.discountValue}
-                          {coupon.discountType === 'percentage'
-                            ? '%'
-                            : 'Flat'}{' '}
-                          OFF
-                        </span> */}
+                        
                         {coupon.discountType === 'percentage' ? (
                           <span className="text-[#9264c9] font-semibold">
                             {coupon.discountValue}% OFF
@@ -613,7 +610,7 @@ const ECommerce: React.FC = () => {
             </div>
           </div>
 
-          {/* Events  */}
+         
           <div className="bg-white rounded-xl shadow-md p-5 md:col-span-2 overflow-hidden">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-indigo-purple">
@@ -644,22 +641,25 @@ const ECommerce: React.FC = () => {
                   <SwiperSlide key={event._id}>
                     <div
                       className="bg-gray-100 cursor-pointer rounded-lg overflow-hidden"
-                      onClick={() =>
-                        Navigate(
-                          `/event-realtime-sitting-seat-status/${event._id}`,
-                        )
-                      }
+                      onClick={() => Navigate(`/events/detail/${event._id}`)}
                     >
-                      <img
-                        src={`${Urls.Image_url}${event?.eventImage}`}
-                        alt={event.name}
-                        className="w-full h-48 lg:object-cover md:object-cover object-center"
-                        onError={(e: any) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            '/Image/Fallback Image/default-fallback-image.png';
-                        }}
-                      />
+                      <div className="relative w-full h-48 group">
+                        <img
+                          src={`${Urls.Image_url}${event?.eventImage}`}
+                          alt={event.name}
+                          className="w-full h-48 lg:object-cover md:object-cover object-center"
+                          onError={(e: any) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              '/Image/Fallback Image/default-fallback-image.png';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black  to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 rounded"></div>
+
+                        <div className="absolute inset-0 flex items-end justify-center text-white text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 pb-3">
+                          Event Detail
+                        </div>
+                      </div>
                       <div className="p-3">
                         <h3 className="font-medium text-gray-800">
                           {event.name}
@@ -682,15 +682,15 @@ const ECommerce: React.FC = () => {
               </Swiper>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        <CouponForm
+        {/* <CouponForm
           onSubmitSuccess={handleCouponsRefreshClick}
           onCancel={() => {
             setShowModal(false);
           }}
           show={showModal}
-        />
+        /> */}
       </motion.div>
     </>
   );

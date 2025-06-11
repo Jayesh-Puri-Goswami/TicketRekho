@@ -14,6 +14,7 @@ import {
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import Urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 interface Venue {
   _id: string;
@@ -35,6 +36,10 @@ interface Event {
   ticketsSold: number;
   totalCapacity: number;
   createdAt: string;
+  eventImage : string;
+  name : string;
+  totalSeats : number;
+  eventCategory : string;
 }
 
 interface DashboardData {
@@ -60,6 +65,8 @@ const EventManagerDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const currentUser = useSelector((state: any) => state.user.currentUser?.data);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -295,9 +302,9 @@ const EventManagerDashboard: React.FC = () => {
       {/* Events Section */}
       <div className="my-6">
         <h2 className="text-xl font-semibold mb-4">Recent Events</h2>
-        {dashboardData?.eventList?.map((event) => {
+        {dashboardData?.eventList?.map((event : any) => {
           const venue = dashboardData.venueList.find(
-            (v) => v._id === event?.venue?._id,
+            (v : any) => v._id === event?.venue?._id,
           );
 
           const formattedDate = new Date(event.eventDate).toLocaleDateString(
@@ -314,19 +321,54 @@ const EventManagerDashboard: React.FC = () => {
               key={event?._id}
               className="flex bg-white rounded-xl shadow-md p-4 mb-4 hover:shadow-lg transition-shadow"
             >
-              <img
+              {/* <img
                 src={Urls.Image_url + event?.eventImage}
                 alt={event?.name}
-                className="w-20 h-20 object-cover rounded mr-4"
+                className="w-20 h-20 object-cover rounded mr-4 cursor-pointer transition-all duration-300 hover:scale-105  "
+                onClick={() =>
+                  navigate(`/event-realtime-sitting-seat-status/${event._id}`)
+                }
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src =
                     '/Image/Fallback Image/default-fallback-image.png';
                 }}
-              />
+              /> */}
+              <div
+                className="relative w-24 h-24 group cursor-pointer mr-3"
+                onClick={() =>
+                  navigate(`/events/detail/${event._id}`)
+                }
+              >
+                <img
+                  src={Urls.Image_url + event?.eventImage}
+                  alt={event?.name}
+                  className="w-full h-full object-cover rounded transition-all duration-300"
+                  onError={(e : any) => {
+                    e.target.onerror = null;
+                    e.target.src =
+                      '/Image/Fallback Image/default-fallback-image.png';
+                  }}
+                />
+
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 rounded" />
+
+                {/* Hover Text */}
+                <div className="absolute inset-0 flex items-end justify-center text-white text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  Show Event
+                </div>
+              </div>
               <div className="flex-1">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-semibold text-lg text-gray-800">
+                  <h3
+                    className="font-semibold text-lg text-gray-800 cursor-pointer transition-colors duration-300 hover:text-indigo-500"
+                    onClick={() =>
+                      navigate(
+                        `/events/detail/${event._id}`,
+                      )
+                    }
+                  >
                     {event.name}
                   </h3>
                   <span className="text-sm text-[#472da9] font-medium">

@@ -210,6 +210,10 @@ module.exports = {
         video: "url('../images/video/video.png')",
         'indigo-purple': 'linear-gradient(to right, #6366F1, #8B5CF6)', // light mode
         'indigo-purple-dark': 'linear-gradient(to right, #4F46E5, #7C3AED)', // dark mode
+        'indigo-purple-glass': 'linear-gradient(to right, #6365f153, #8a5cf649)', // dark mode
+      },
+      backdropBlur: {
+        xs: '2px',
       },
       content: {
         'icon-copy': 'url("../images/icon/icon-copy-alt.svg")',

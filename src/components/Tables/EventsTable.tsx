@@ -567,15 +567,9 @@ const EventsTable: React.FC = () => {
                     <tr
                       key={i}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150"
-                      onClick={() => {
-                        if (event.eventType === 'Sitting') {
-                          handleSittingClick(event.id);
-                        } else if (event.eventType === 'Non Sitting') {
-                          handleNonSittingClick(event.id);
-                        }
-                      }}
+                     
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 cursor-pointer" onClick={()=> navigate(`/events/detail/${event?.id}`)}>
                         <div className="flex items-center gap-3">
                           <img
                             src={event.eventImage}
@@ -591,13 +585,31 @@ const EventsTable: React.FC = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6  text-base py-4 text-gray-600 dark:text-gray-300">
+                      <td  onClick={() => {
+                        if (event.eventType === 'Sitting') {
+                          handleSittingClick(event.id);
+                        } else if (event.eventType === 'Non Sitting') {
+                          handleNonSittingClick(event.id);
+                        }
+                      }} className="px-6  text-base py-4 text-gray-600 dark:text-gray-300">
                         {event.city}
                       </td>
-                      <td className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
+                      <td  onClick={() => {
+                        if (event.eventType === 'Sitting') {
+                          handleSittingClick(event.id);
+                        } else if (event.eventType === 'Non Sitting') {
+                          handleNonSittingClick(event.id);
+                        }
+                      }} className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
                         {event.eventType}
                       </td>
-                      <td className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
+                      <td  onClick={() => {
+                        if (event.eventType === 'Sitting') {
+                          handleSittingClick(event.id);
+                        } else if (event.eventType === 'Non Sitting') {
+                          handleNonSittingClick(event.id);
+                        }
+                      }} className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
                         {new Date(event.eventDate).toLocaleString(undefined, {
                           year: 'numeric',
                           month: '2-digit',
@@ -607,10 +619,16 @@ const EventsTable: React.FC = () => {
                           hour12: false,
                         })}
                       </td>
-                      <td className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
+                      <td  onClick={() => {
+                        if (event.eventType === 'Sitting') {
+                          handleSittingClick(event.id);
+                        } else if (event.eventType === 'Non Sitting') {
+                          handleNonSittingClick(event.id);
+                        }
+                      }} className="px-6 text-base py-4 text-gray-600 dark:text-gray-300">
                         ₹{Number(event.totalEarnings).toLocaleString()}
                       </td>
-                      <td className="px-6 text-base py-4">
+                      <td  className="px-6 text-base py-4">
                         {/* <button
                           onClick={(e) => {
                             e.stopPropagation();

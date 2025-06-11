@@ -339,7 +339,6 @@ const SignIn: React.FC = () => {
                 />
                 <motion.div
                   className="absolute left-4 top-1/2 transform -translate-y-1/2"
-                  whileHover={{ scale: 1 }}
                 >
                   <Mail className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
                 </motion.div>
@@ -348,7 +347,6 @@ const SignIn: React.FC = () => {
 
             {/* Password Field */}
             <motion.div
-              whileHover={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
               <label className="block text-sm font-semibold text-gray-700 mb-3">

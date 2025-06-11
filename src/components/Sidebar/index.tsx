@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -11,24 +13,34 @@ import {
   faComments,
   faQrcode,
   faFileInvoice,
-  faMap,
   faUser,
   faFileContract,
   faBell,
-  faKey,
   faClock,
   faMapMarkerAlt,
   faFileAlt,
   faClipboardList,
   faQuestionCircle,
   faTimes,
+  faChartLine,
+  faHandHoldingDollar,
+  faChevronRight,
+  faKey,
 } from '@fortawesome/free-solid-svg-icons';
+
+interface SubMenuItem {
+  path: string;
+  label: string;
+  permission?: string;
+  subIcon?: any;
+}
 
 interface MenuItem {
   path: string;
   icon: any;
   label: string;
   permission?: string;
+  subItems?: SubMenuItem[];
 }
 
 interface SidebarProps {
@@ -39,6 +51,7 @@ interface SidebarProps {
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const currentUser = useSelector((state: any) => state.user.currentUser?.data);
   const permissions = currentUser?.permissions?.permissions || [];
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const hasPermission = (permissionName?: string) => {
     return permissionName
@@ -49,15 +62,23 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       : true;
   };
 
+  const toggleExpanded = (path: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(path)
+        ? prev.filter((item) => item !== path)
+        : [...prev, path],
+    );
+  };
+
   const UserMenuList: MenuItem[] = [
     ...(currentUser.role === 'admin'
       ? [
           { path: '/dashboard', icon: faGamepad, label: 'Dashboard' },
-          {
-            path: '/roles-permission',
-            icon: faKey,
-            label: 'Roles & Permissions',
-          },
+          // {
+          //   path: '/roles-permission',
+          //   icon: faKey,
+          //   label: 'Roles & Permissions',
+          // },
         ]
       : []),
     ...(['theatreManager', 'theatreEmployee'].includes(currentUser.role)
@@ -66,12 +87,29 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     ...(['eventManager', 'eventEmployee'].includes(currentUser.role)
       ? [{ path: '/event-dashboard', icon: faGamepad, label: 'Dashboard' }]
       : []),
-    { path: '/state', icon: faMap, label: 'States', permission: 'states' },
     {
-      path: '/managers',
+      path: '/location',
+      icon: faMapMarkerAlt,
+      label: 'Location',
+      permission: 'states',
+    },
+    {
+      path: '/client-management',
       icon: faUserTie,
-      label: 'Managers',
+      label: 'Client Management',
       permission: 'managers',
+      subItems: [
+        {
+          path: '/theater-owner',
+          subIcon: faTheaterMasks,
+          label: 'Theater Owner',
+        },
+        {
+          path: '/event-organizer',
+          subIcon: faTicketAlt,
+          label: 'Event Organizer',
+        },
+      ],
     },
     { path: '/users', icon: faUser, label: 'Users', permission: 'users' },
     {
@@ -105,7 +143,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       permission: 'manage theatre reports',
     },
     {
-      path: '/employees',
+      path: '/staff-management',
+      icon: faClipboardList,
+      label: 'Staff Management',
+      permission: 'employee management',
+    },
+    {
+      path: '/employee-management',
       icon: faClipboardList,
       label: 'Employee Management',
       permission: 'employee management',
@@ -147,6 +191,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       permission: 'notifications',
     },
     {
+      path: '/commission',
+      icon: faChartLine,
+      label: 'Commission Rate',
+      permission: 'commission rate',
+    },
+    {
+      path: '/theater-revenue-admin',
+      icon: faHandHoldingDollar,
+      label: 'Theater Revenue Report',
+      permission: 'theater revenue',
+    },
+    {
       path: '/enquiry',
       icon: faQuestionCircle,
       label: 'Enquiries',
@@ -177,25 +233,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true',
   );
 
-  // useEffect(() => {
-  //   const clickHandler = ({ target }: MouseEvent) => {
-  //     if (!sidebar.current || !trigger.current) return
-  //     if (!sidebarOpen || sidebar.current.contains(target) || trigger.current.contains(target)) return
-  //     setSidebarOpen(false)
-  //   }
-  //   document.addEventListener("click", clickHandler)
-  //   return () => document.removeEventListener("click", clickHandler)
-  // }, [sidebarOpen])
-
-  useEffect(() => {
-    const keyHandler = ({ keyCode }: KeyboardEvent) => {
-      if (!sidebarOpen || keyCode !== 27) return;
-      setSidebarOpen(false);
-    };
-    document.addEventListener('keydown', keyHandler);
-    return () => document.removeEventListener('keydown', keyHandler);
-  }, [sidebarOpen]);
-
   useEffect(() => {
     localStorage.setItem('sidebar-expanded', sidebarExpanded.toString());
     if (sidebarExpanded) {
@@ -209,11 +246,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     window.addEventListener('resize', () => {
       if (window.innerWidth >= 1000) {
         setSidebarOpen(true);
-      }else{
+      } else {
         setSidebarOpen(false);
       }
-    })
-  })
+    });
+  });
 
   let redirectTo = '/';
   if (currentUser?.role === 'admin') redirectTo = '/dashboard';
@@ -233,7 +270,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-40 bg-black/30 lg:hidden"
-            // onClick={() => setSidebarOpen(false)}
           />
         )}
       </AnimatePresence>
@@ -285,29 +321,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <NavLink
-                    to={item.path}
-                    className={({ isActive }) => {
-                      const baseClasses =
-                        'group relative flex items-center gap-4 px-4 py-2 text-white rounded-xl transition-all duration-200 overflow-hidden ';
-
-                      if (isActive) {
-                        return `${baseClasses} bg-white/25 backdrop-blur-sm  shadow-lg`;
-                      }
-
-                      return `${baseClasses} hover:bg-white/15  `;
-                    }}
-                  >
-                    {({ isActive }) => (
-                      <>
+                  {/* Main Menu Item */}
+                  {item.subItems ? (
+                    // Item with sub-items
+                    <div>
+                      <button
+                        onClick={() => toggleExpanded(item.path)}
+                        className="group relative flex items-center gap-4 px-4 py-2 text-white rounded-xl transition-all duration-200 overflow-hidden w-full hover:bg-white/15"
+                      >
                         {/* Icon */}
-                        <div
-                          className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
-                            isActive
-                              ? 'bg-white/30 text-white'
-                              : 'text-white/90 group-hover:bg-white/20 group-hover:text-white'
-                          }`}
-                        >
+                        <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-white/90 group-hover:bg-white/20 group-hover:text-white">
                           <FontAwesomeIcon
                             icon={item.icon}
                             className="text-sm"
@@ -315,32 +338,135 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         </div>
 
                         {/* Label */}
-                        <span
-                          className={`relative z-10 font-medium transition-all duration-200 ${
-                            isActive
-                              ? 'text-white'
-                              : 'text-white/90 group-hover:text-white'
-                          }`}
-                        >
+                        <span className="relative z-10 font-medium transition-all duration-200 text-white/90 group-hover:text-white flex-1 text-left">
                           {item.label}
                         </span>
 
-                        {/* Active indicator */}
-                        {isActive && (
-                          <motion.div
-                            layoutId="activeIndicator"
-                            className="absolute right-2 w-2 h-2 bg-white rounded-full shadow-lg"
-                            initial={false}
-                            transition={{
-                              type: 'spring',
-                              stiffness: 700,
-                              damping: 30,
-                            }}
+                        {/* Arrow */}
+                        <motion.div
+                          animate={{
+                            rotate: expandedItems.includes(item.path) ? 90 : 0,
+                          }}
+                          transition={{ duration: 0.2 }}
+                          className="relative z-10 text-white/70"
+                        >
+                          <FontAwesomeIcon
+                            icon={faChevronRight}
+                            className="text-xs"
                           />
+                        </motion.div>
+                      </button>
+
+                      {/* Sub Items */}
+                      <AnimatePresence>
+                        {expandedItems.includes(item.path) && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <ul className="ml-8 mt-1 space-y-1">
+                              {item.subItems
+                                .filter((subItem) =>
+                                  hasPermission(subItem.permission),
+                                )
+                                .map((subItem) => (
+                                  <motion.li
+                                    key={subItem.label}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    <NavLink
+                                      to={subItem.path}
+                                      className={({ isActive }) => {
+                                        const baseClasses =
+                                          'group relative flex items-center gap-3 px-4 py-2 text-white/80 rounded-lg transition-all duration-200 text-sm';
+
+                                        if (isActive) {
+                                          return `${baseClasses} bg-white/20 backdrop-blur-sm text-white`;
+                                        }
+
+                                        return `${baseClasses} hover:bg-white/10 hover:text-white`;
+                                      }}
+                                    >
+                                      <span className="relative z-10 flex items-center gap-5">
+                                        <FontAwesomeIcon
+                                          icon={subItem.subIcon}
+                                          className="text-sm"
+                                        />
+                                        {subItem.label}
+                                      </span>
+                                    </NavLink>
+                                  </motion.li>
+                                ))}
+                            </ul>
+                          </motion.div>
                         )}
-                      </>
-                    )}
-                  </NavLink>
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    // Regular item without sub-items
+                    <NavLink
+                      to={item.path}
+                      className={({ isActive }) => {
+                        const baseClasses =
+                          'group relative flex items-center gap-4 px-4 py-2 text-white rounded-xl transition-all duration-200 overflow-hidden ';
+
+                        if (isActive) {
+                          return `${baseClasses} bg-white/25 backdrop-blur-sm  shadow-lg`;
+                        }
+
+                        return `${baseClasses} hover:bg-white/15  `;
+                      }}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {/* Icon */}
+                          <div
+                            className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+                              isActive
+                                ? 'bg-white/30 text-white'
+                                : 'text-white/90 group-hover:bg-white/20 group-hover:text-white'
+                            }`}
+                          >
+                            <FontAwesomeIcon
+                              icon={item.icon}
+                              className="text-sm"
+                            />
+                          </div>
+
+                          {/* Label */}
+                          <span
+                            className={`relative z-10 font-medium transition-all duration-200 ${
+                              isActive
+                                ? 'text-white'
+                                : 'text-white/90 group-hover:text-white'
+                            }`}
+                          >
+                            {item.label}
+                          </span>
+
+                          {/* Active indicator */}
+                          {isActive && (
+                            <motion.div
+                              layoutId="activeIndicator"
+                              className="absolute right-2 w-2 h-2 bg-white rounded-full shadow-lg"
+                              initial={false}
+                              transition={{
+                                type: 'spring',
+                                stiffness: 700,
+                                damping: 30,
+                              }}
+                            />
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  )}
                 </motion.li>
               ),
             )}

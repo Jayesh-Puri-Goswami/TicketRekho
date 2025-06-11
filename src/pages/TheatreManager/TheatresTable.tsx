@@ -176,7 +176,7 @@ const TheatresTable: React.FC = () => {
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="rounded-sm  px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-1">
       <div className="flex gap-4 mb-4">
         <input
           type="text"
@@ -191,8 +191,8 @@ const TheatresTable: React.FC = () => {
         )} */}
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full bg-slate-100 text-sm text-left text-gray-700 dark:text-gray-200">
+      <div className="overflow-x-auto bg-white">
+        <table className="w-full bg-white text-sm text-left text-gray-700 dark:text-gray-200">
           <thead className="text-xs text-white uppercase bg-gradient-to-r from-indigo-500 to-purple-500">
             <tr>
               <th className="px-6 py-4 text-center rounded-tl-lg">

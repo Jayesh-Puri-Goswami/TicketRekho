@@ -22,7 +22,7 @@ const Header = (props: {
         WebkitBackdropFilter: 'blur(16px)',
       }}
     >
-      <div className="flex flex-grow items-center justify-between lg:justify-end px-4 py-2 md:px-6 2xl:px-11">
+      <div className="flex flex-grow items-center justify-between sm:justify-between lg:justify-end px-4 py-2 md:px-6 2xl:px-11">
         {/* Mobile Hamburger & Logo */}
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           <button

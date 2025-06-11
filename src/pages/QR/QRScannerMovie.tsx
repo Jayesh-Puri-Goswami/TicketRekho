@@ -10,6 +10,7 @@ import {
   Scan,
   X,
   Ticket,
+  IndianRupee,
 } from 'lucide-react';
 import QrScanner from 'qr-scanner';
 import axios from 'axios';
@@ -41,6 +42,10 @@ interface MovieTicket {
   seatNumbers: string[];
   totalAmount: number;
   bookingDate: string;
+  paymentType : string;
+  movieTicketPrice : number;
+  totalPrice : number;
+  seats : string[];
 }
 
 interface GrabABiteItem {
@@ -906,15 +911,15 @@ const MovieQRScanner: React.FC = () => {
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-slate-600">Movie</p>
+                  <p className="text-sm text-slate-600">paymentType</p>
                   <p className="font-semibold text-slate-800">
-                    {movieTicket.movieName}
+                    {movieTicket.paymentType}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600">Theater</p>
-                  <p className="font-semibold text-slate-800">
-                    {movieTicket.theaterName}
+                  <p className="text-sm text-slate-600">Movie Price</p>
+                  <p className="font-semibold text-green-600 ">
+                    ₹{movieTicket.movieTicketPrice}
                   </p>
                 </div>
                 <div>
@@ -926,13 +931,13 @@ const MovieQRScanner: React.FC = () => {
                 <div>
                   <p className="text-sm text-slate-600">Seats</p>
                   <p className="font-semibold text-slate-800">
-                    {movieTicket?.seatNumbers?.join(', ')}
+                    {movieTicket?.seats?.join(', ')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-600">Total Amount</p>
                   <p className="font-semibold text-green-600">
-                    ${movieTicket.totalAmount}
+                    ${movieTicket.totalPrice}
                   </p>
                 </div>
                 <div>

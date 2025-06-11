@@ -9,15 +9,15 @@ export interface State {
   _id: string;
   name: string;
   stateImage: string;
-  cityImage: string;
-  cities: string[];
+  cityImage ?: string;
+  cities ?: string[];
 }
 import Urls from '../../networking/app_urls';
 import { Plus } from 'lucide-react';
 
 interface StateCardProps {
   state: State;
-  onEdit: (id: any) => void;
+  onEdit ?: (id: any) => void;
   onDelete: (id: string) => void;
   onClick: (e: any) => void;
 }

@@ -57,7 +57,7 @@ interface ExtendedManagerFormData extends ManagerFormData {
   isGrabABite?: boolean;
 }
 
-const AddManagerModal: React.FC<ModalFormProps> = () => {
+const AddManagerModal: React.FC<ModalFormProps> = ({ role }) => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoadingPage] = useState(false);
@@ -116,7 +116,7 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
     setSelectedImage(null);
     setSelectedState('');
     setCities([]);
-    setError(null)
+    setError(null);
   };
 
   const onSubmit = async (data: ExtendedManagerFormData) => {
@@ -194,9 +194,9 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
         const errorMsg = response.data.message || 'Failed to create manager';
         dispatch(addManagerFailure(errorMsg));
       }
-      toast.success('Manager created successfully!',{
-        className : 'z-[99999]'
-      })
+      toast.success('Manager created successfully!', {
+        className: 'z-[99999]',
+      });
     } catch (error: any) {
       const message = error.response?.data?.message || 'Error creating manager';
       dispatch(addManagerFailure(message));
@@ -312,12 +312,12 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={openModal}
-        className="relative overflow-hidden rounded-md py-2.5 px-6 font-medium text-white"
+        className="relative overflow-hidden rounded-md py-3 px-6 font-medium text-white"
         style={{
           background: 'linear-gradient(to right, #6366F1, #8B5CF6)',
         }}
       >
-        Add Manager
+        Add
       </motion.button>
 
       <AnimatePresence>
@@ -472,6 +472,7 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
                         <FormField label="Role" name="role" error={errors.role}>
                           <select
                             id="role"
+                            defaultValue={role || ''} // 💥 This sets default based on variable
                             className={clsx(
                               'w-full rounded-md border py-2.5 px-4 text-sm outline-none transition-colors appearance-none bg-white dark:bg-slate-700',
                               errors.role
@@ -530,7 +531,7 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
 
                       {/* Banking Information - Show for both roles */}
                       <AnimatePresence>
-                        {(selectedRole === 'theatreManager' ||
+                        {(role === 'theatreManager' ||
                           selectedRole === 'eventManager') && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
@@ -604,7 +605,7 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
 
                       {/* Additional fields for Theatre Manager */}
                       <AnimatePresence>
-                        {selectedRole === 'theatreManager' && (
+                        {role === 'theatreManager' && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
@@ -925,21 +926,21 @@ const AddManagerModal: React.FC<ModalFormProps> = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-      {error && (
-        <motion.div
-          className="fixed top-10 right-10 bg-red-600/90 text-white px-4 py-3 rounded-md shadow-lg z-[10000]"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex items-center">
-            <AlertCircleIcon className="h-5 w-5 mr-2" />
-            <span>{error}</span>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        {error && (
+          <motion.div
+            className="fixed top-10 right-10 bg-red-600/90 text-white px-4 py-3 rounded-md shadow-lg z-[10000]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center">
+              <AlertCircleIcon className="h-5 w-5 mr-2" />
+              <span>{error}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

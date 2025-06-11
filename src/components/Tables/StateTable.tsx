@@ -5,13 +5,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowUp,
   faArrowDown,
-  faEdit,
-  faTrashAlt,
-  faCity,
+  // faEdit,
+  // faTrashAlt,
+  // faCity,
 } from '@fortawesome/free-solid-svg-icons';
 import Urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
-import EditStateModal from '../Modals/EditStateModal';
+// import EditStateModal from '../Modals/EditStateModal';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -21,6 +21,7 @@ interface states {
   _id: string;
   name: string;
   stateImage: string;
+  state : string;
 }
 
 const StateTable: React.FC<{ reload: boolean }> = ({ reload }) => {
@@ -234,7 +235,7 @@ const StateTable: React.FC<{ reload: boolean }> = ({ reload }) => {
       <div className="flex gap-4">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search by state name ..."
           className="w-full rounded-xl border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black dark:text-white dark:border-form-strokedark dark:bg-form-input transition focus:border-primary dark:focus:border-primary"
           onChange={handleSearch}
         />
@@ -438,13 +439,13 @@ const StateTable: React.FC<{ reload: boolean }> = ({ reload }) => {
               />
             ))}
       </div>
-      {isModalOpen && editState && (
+      {/* {isModalOpen && editState && (
         <EditStateModal
           state={editState}
           onClose={handleEditClose}
           onSubmit={handleEditSubmit}
         />
-      )}
+      )} */}
     </div>
   );
 };

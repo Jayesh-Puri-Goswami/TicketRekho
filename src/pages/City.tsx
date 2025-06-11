@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import {motion} from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import CityTable from '../components/Tables/CityTable';
@@ -68,24 +68,27 @@ const City: React.FC = () => {
       setFile(null);
       setPreviewImage(null);
       setReload((prev) => !prev);
-    } catch (error) {
+    } catch (error : any) {
       console.error('Error submitting city:', error);
-      toast.error('Something went wrong while adding the city.');
-      setErrorMessage('Failed to add city. Please try again.');
+      toast.error(error.response?.data?.message||'Something went wrong while adding the city.');
+      setErrorMessage(error.response?.data?.message||'Failed to add city. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   // Get all unique cities from statesData
-  const allCities = Array.from(
-    new Set(Object.values(statesData).flat())
-  ).sort();
+  const allCities: string[] =
+    stateName && stateName in statesData
+      ? [...statesData[stateName as keyof typeof statesData]].sort((a, b) =>
+          a.localeCompare(b),
+        )
+      : [];
 
   return (
     <div className="mx-auto max-w-270">
       <Breadcrumb
-        pageName={`${stateName} → City`}
+        pageName={`${stateName} / City`}
         parentName="States"
         parentPath="/state"
       />
@@ -112,7 +115,6 @@ const City: React.FC = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="p-6.5 space-y-6">
-              
               <div className="mb-8 relative">
                 <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                   Select State
@@ -124,14 +126,16 @@ const City: React.FC = () => {
                     className="w-full appearance-none rounded-xl border-[1.5px] border-stroke bg-transparent py-3 px-5 pr-12 text-black dark:text-white dark:border-form-strokedark dark:bg-form-input transition focus:border-primary dark:focus:border-primary"
                   >
                     <option value="" disabled>
-                      Choose a State
+                      Choose a City
                     </option>
-                     <option value="custom">Add Custom City</option>
-                    {allCities.map((cityName: string) => (
-                    <option key={cityName} value={cityName}>
-                      {cityName}
-                    </option>
-                  ))}
+                    <option value="custom">Add Custom City</option>
+                    {[...allCities]
+                      .sort((a, b) => a.localeCompare(b))
+                      .map((cityName: string) => (
+                        <option key={cityName} value={cityName}>
+                          {cityName}
+                        </option>
+                      ))}
                   </select>
 
                   {/* Custom dropdown icon */}
@@ -162,7 +166,9 @@ const City: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={loading || !city || (city === 'custom' && !customCity)}
+                disabled={
+                  loading || !city || (city === 'custom' && !customCity)
+                }
                 className={`w-full py-3 px-4 rounded-xl font-medium transition ${
                   city && (city !== 'custom' || customCity)
                     ? 'bg-indigo-purple hover:bg-indigo-purple-dark text-white'

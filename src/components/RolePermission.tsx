@@ -33,6 +33,8 @@ const RolePermission = () => {
       'support & feedback',
       'terms & conditions',
       'employee management',
+      'commission rate',
+      'theater revenue'
     ].map((name) => ({ name, status: false })),
   );
 
@@ -57,6 +59,8 @@ const RolePermission = () => {
     'support & feedback': 'Manage user support and feedback',
     'terms & conditions': 'Edit platform policies and terms',
     'employee management': 'Edit employee details and roles',
+    'commission rate': 'To set the rate of commission for managers',
+    'theater revenue': 'To get the theater revenue reports',
   };
 
   const fetchRoles = async () => {
@@ -222,7 +226,7 @@ const RolePermission = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
             {permissions.map(
               (perm, index) =>
-                perm.status && (
+                // perm.status && (
                   <motion.label
                     key={perm.name}
                     className="permission-label"
@@ -233,7 +237,7 @@ const RolePermission = () => {
                       checked={perm.status}
                       onChange={() => togglePermission(index)}
                       className="hidden peer"
-                      disabled
+                      // disabled
                     />
                     <div className="custom-checkbox">
                       {perm.status && (
@@ -260,7 +264,7 @@ const RolePermission = () => {
                       </span>
                     </span>
                   </motion.label>
-                ),
+                // ),
             )}
           </div>
 
@@ -271,12 +275,12 @@ const RolePermission = () => {
             >
               Cancel
             </button> */}
-            {/* <button
+            <button
               onClick={handleUpdate}
               className="px-6 py-2 bg-indigo-purple text-white hover:bg-indigo-purple-dark rounded"
             >
               Update
-            </button> */}
+            </button>
           </div>
         </motion.div>
       </div>
