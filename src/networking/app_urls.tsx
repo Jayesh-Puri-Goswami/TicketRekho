@@ -85,11 +85,16 @@ const sendNotificationsToSingleUser = `${Bash_url}/admin/sendNotificationsToSing
 const sendNotificationsToUsers = `${Bash_url}/admin/sendNotificationsToUsers`;
 
 // get Managers
+
+const createClient = `${Bash_url}/admin/createClient`;
+const updateClient = `${Bash_url}/admin/updateClient`;
+
 const getManagers = `${Bash_url}/admin/getSubUserList`;
 const createManager = `${Bash_url}/admin/subUserSignup`;
 const getSubUserProfileDetails = `${Bash_url}/admin/getSubUserProfileDetails`;
 
-const getTheatreManagerList = `${Bash_url}/admin/getTheatreManagerList`;
+const getTheatreOwnerList = `${Bash_url}/admin/getTheatreOwnerList`;
+const getEventOrganizerList = `${Bash_url}/admin/getEventOrganizerList`;
 const getEventManagerList = `${Bash_url}/admin/getEventManagerList`;
 
 const getTheatreDetailByManager = `${Bash_url}/subUser/getTheatreDetailByManager`;
@@ -302,6 +307,9 @@ export default {
 
   sendNotificationsToSingleUser,
   sendNotificationsToUsers,
+  // Client
+  createClient,
+  updateClient,
 
   getTheatreManager,
   CreateTManager,
@@ -312,7 +320,8 @@ export default {
   getMovies,
   createMovie,
   updateMovie,
-  getTheatreManagerList,
+  getTheatreOwnerList,
+  getEventOrganizerList,
   getEventManagerList,
   getTheatreDetailByManager,
   getManagers,

@@ -1,4 +1,3 @@
-'use client';
 
 import type React from 'react';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
@@ -58,6 +57,17 @@ const SignIn: React.FC = () => {
 
       const data = await res.json();
 
+      console.log(data.data);
+
+      localStorage.setItem('name', data.data.name);
+      localStorage.setItem('email', data.data.email);
+      localStorage.setItem('_id', data.data_id);
+      localStorage.setItem('role', data.data.role);
+      localStorage.setItem('token', data.data.token);
+      localStorage.setItem('phoneNumber', data.data.phoneNumber);
+      localStorage.setItem('profileImage', data.data.profileImage);
+      localStorage.setItem('active', data.data.active);
+
       if (res.ok) {
         const userRole = data.data.role;
         const status = data.data.active;
@@ -71,8 +81,8 @@ const SignIn: React.FC = () => {
           } else if (
             userRole === 'theatreManager' ||
             userRole === 'theatreEmployee' ||
-            userRole === "Theatre Manager" ||
-            userRole === "Theatre Employee"
+            userRole === 'Theatre Manager' ||
+            userRole === 'Theatre Employee'
           ) {
             console.log(userRole);
             navigate('/theatre-dashboard');
@@ -81,8 +91,19 @@ const SignIn: React.FC = () => {
             userRole === 'eventEmployee' ||
             userRole === 'Event Manager' ||
             userRole === 'Event Employee'
-          ) {
+          )
+           {
             navigate('/event-dashboard');
+          }
+           else if (
+            userRole === 'eventOrganizer'
+          ){
+            navigate('/event-organizer-dashboard')
+          }
+          else if (
+            userRole === 'theatreOwner'
+          ){
+            navigate('/theatre-owner-dashboard')
           }
         } else {
           setLoginStatus('accountInactive');
@@ -337,18 +358,14 @@ const SignIn: React.FC = () => {
                   required
                   whileFocus={{ scale: 1 }}
                 />
-                <motion.div
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2"
-                >
+                <motion.div className="absolute left-4 top-1/2 transform -translate-y-1/2">
                   <Mail className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
                 </motion.div>
               </div>
             </motion.div>
 
             {/* Password Field */}
-            <motion.div
-              transition={{ type: 'spring', stiffness: 300 }}
-            >
+            <motion.div transition={{ type: 'spring', stiffness: 300 }}>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 Password
               </label>

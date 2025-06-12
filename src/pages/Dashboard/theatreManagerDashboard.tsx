@@ -202,7 +202,7 @@ const TheatreManagerDashboard: React.FC = () => {
 
   return (
     <div className="p-6">
-      <Breadcrumb pageName="Theatre Manager Dashboard" />
+      <Breadcrumb pageName="Theatre Owner Dashboard" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-6">
         <CardDataStats
           title="Total ShowTimes"

@@ -145,7 +145,7 @@ const RolePermission = () => {
         if (selectedRole?.role === 'admin') {
           toast('Your permissions changed. Logging out...');
           setTimeout(() => {
-            localStorage.removeItem('persist:root');
+            // localStorage.removeItem('persist:root');
             window.location.href = '/login';
           }, 1000);
         }

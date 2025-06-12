@@ -11,7 +11,6 @@ const DropdownUser = () => {
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
 
   // console.log(currentUser);
-  
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -19,6 +18,15 @@ const DropdownUser = () => {
   const handleSignout = async () => {
     try {
       //  await fetch('api/auth/signout');
+      localStorage.removeItem('name');
+      localStorage.removeItem('email');
+      localStorage.removeItem('_id');
+      localStorage.removeItem('role');
+      localStorage.removeItem('token');
+      localStorage.removeItem('phoneNumber');
+      localStorage.removeItem('profileImage');
+      localStorage.removeItem('active');
+      localStorage.removeItem('persist:root');
       dispatch(signOut());
       navigate('/login', { replace: true });
     } catch (error) {
@@ -33,7 +41,7 @@ const DropdownUser = () => {
       ? '/manager-profile'
       : currentUser.role === 'eventManager'
       ? '/eventmanager-profile'
-      : '/eventmanager-profile'; 
+      : '/eventmanager-profile';
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -49,10 +57,10 @@ const DropdownUser = () => {
           <span className="block text-xs">{currentUser.role}</span>
         </span> */}
 
-        <span className="w-12 rounded-full flex items-center justify-center">
+        <span className="w-12 h-12 rounded-full flex items-center justify-center">
           {/* <img src={UserOne} alt="User" /> */}
           <img
-            className="w-15 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-1.5"
+            className="w-full h-full object-cover object-center rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-1.5"
             src={`${Urls.Image_url}${currentUser.profileImage}` || profile}
             onError={(e) => {
               e.currentTarget.src = profile;

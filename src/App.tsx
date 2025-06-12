@@ -68,6 +68,8 @@ import TheaterOwner from './pages/TheaterOwner';
 import EventOrganizer from './pages/EventOrganizer';
 import TheaterOwnerDetail from './pages/theaterOwnerDetail';
 import EventOrganizerDetail from './pages/EventOrganizerDetail';
+import TheaterOwnerDashboard from './pages/Dashboard/TheaterOwnerDashboard';
+import EventOrganizerDashboard from './pages/Dashboard/EventOrganizerDashboard';
 
 // import assetlinks from './pages/assetlinks'
 
@@ -166,6 +168,8 @@ function App() {
                   'theatreEmployee',
                   'Event Manager',
                   'Event Employee',
+                  'theatreOwner',
+                  'eventOrganizer'
                 ]}
               />
             </DefaultLayout>
@@ -196,6 +200,24 @@ function App() {
               <>
                 <PageTitle title="Theatre Dashboard" />
                 <TheatreManagerDashboard />
+              </>
+            }
+          />
+          <Route
+            path="/theatre-owner-dashboard"
+            element={
+              <>
+                <PageTitle title="Theatre Owner Dashboard" />
+                <TheaterOwnerDashboard />
+              </>
+            }
+          />
+          <Route
+            path="/event-organizer-dashboard"
+            element={
+              <>
+                <PageTitle title="Event Organizer Dashboard" />
+                <EventOrganizerDashboard />
               </>
             }
           />

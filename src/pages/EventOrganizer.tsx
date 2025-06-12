@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MoreVertical, Pencil, Lock, Ban } from 'lucide-react';
+import {
+  Calendar,
+  MoreVertical,
+  Pencil,
+  Lock,
+  Ban,
+  MapPin,
+  UsersRound,
+} from 'lucide-react';
 import DataTable, { DataTableColumn } from '../components/Tables/DataTable';
 import SearchBar from '../components/Utils/SearchBar';
 import Urls from '../networking/app_urls';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import AddManagerModal from '../components/Modals/AddManagerModal';
+import AddEventOrganizerModal from '../components/Modals/AddEventOrganizer';
+import Loader from '../components/Loader/Loader';
+import EditEventOrganizer from '../components/Modals/EditEventOrganizer';
 
 interface EventOrganizer {
   _id: string;
@@ -20,26 +30,32 @@ interface EventOrganizer {
   createdAt: string;
 }
 
-const ActionDropdown = ({ row }: { row: EventOrganizer }) => {
+const ActionDropdown = ({ row, setEditModalOpen, setEditEventOrganizerId }: { 
+  row: EventOrganizer, 
+  setEditModalOpen: (value: boolean) => void, 
+  setEditEventOrganizerId: (id: string) => void 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const actions = [
     {
       label: 'Edit',
       icon: <Pencil className="w-4 h-4" />,
-      onClick: (row: EventOrganizer) => alert(`Edit ${row.name}`),
+      onClick: () => {
+        setEditEventOrganizerId(row._id);
+        setEditModalOpen(true);
+      },
     },
-    {
-      label: row.active ? 'Inactive' : 'Active',
-      icon: <Ban className="w-4 h-4" />,
-      onClick: (row: EventOrganizer) =>
-        alert(`${row.active ? 'Deactivate' : 'Activate'} ${row.name}`),
-    },
-    {
-      label: 'Reset Password',
-      icon: <Lock className="w-4 h-4" />,
-      onClick: (row: EventOrganizer) => alert(`Reset Password for ${row.name}`),
-    },
+    // {
+    //   label: row.active ? 'Inactive' : 'Active',
+    //   icon: <Ban className="w-4 h-4" />,
+    //   onClick: () => alert(`${row.active ? 'Deactivate' : 'Activate'} ${row.name}`),
+    // },
+    // {
+    //   label: 'Reset Password',
+    //   icon: <Lock className="w-4 h-4" />,
+    //   onClick: () => alert(`Reset Password for ${row.name}`),
+    // },
   ];
 
   return (
@@ -69,7 +85,7 @@ const ActionDropdown = ({ row }: { row: EventOrganizer }) => {
                 key={index}
                 onClick={(e) => {
                   e.stopPropagation();
-                  action.onClick(row);
+                  action.onClick();
                   setIsOpen(false);
                 }}
                 className="w-full flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
@@ -94,7 +110,10 @@ function EventOrganizer() {
   const [eventOrganizers, setEventOrganizers] = useState<EventOrganizer[]>([]);
   const [sortField, setSortField] = useState<keyof EventOrganizer>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [addedNew, setAddedNew] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editEventOrganizerId, setEditEventOrganizerId] = useState<string>('');
 
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
 
@@ -110,9 +129,7 @@ function EventOrganizer() {
 
     axios
       .get(
-        `${Urls.getEventManagerList}?page=${page}&limit=${limit}&search=${encodeURIComponent(
-          searchQuery,
-        )}`,
+        `${Urls.getEventOrganizerList}?page=${page}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`,
         {
           headers: {
             Authorization: `Bearer ${currentUser.token}`,
@@ -135,14 +152,16 @@ function EventOrganizer() {
       })
       .catch((error) => {
         console.error('Error fetching event organizers:', error);
-        toast.error('Error fetching event organizers');
+        toast.error(
+          error.response.data.message || 'Error fetching event organizers',
+        );
         setLoading(false);
       });
   };
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      setPage(1); // Reset to page 1 on new search
+      setPage(1);
       fetchEventOrganizers(1, itemsPerPage, searchTerm);
     }, 400);
 
@@ -150,8 +169,19 @@ function EventOrganizer() {
   }, [searchTerm, itemsPerPage]);
 
   useEffect(() => {
+    fetchEventOrganizers(page, itemsPerPage, searchTerm);
+  }, [page]);
+
+  useEffect(() => {
+    if (submitSuccess) {
+      setLoading(true);
       fetchEventOrganizers(page, itemsPerPage, searchTerm);
-  }, [page,addedNew]);
+      setSubmitSuccess(false);
+    }
+    setTimeout(() => {
+      setPageLoading(false);
+    }, 1000);
+  }, [submitSuccess]);
 
   const handleSort = (field: keyof EventOrganizer) => {
     if (field === sortField) {
@@ -229,9 +259,19 @@ function EventOrganizer() {
     {
       key: 'actions',
       label: 'Actions',
-      render: (row) => <ActionDropdown row={row} />,
+      render: (row) => (
+        <ActionDropdown 
+          row={row} 
+          setEditModalOpen={setEditModalOpen} 
+          setEditEventOrganizerId={setEditEventOrganizerId} 
+        />
+      ),
     },
   ];
+
+  if (pageLoading) {
+    return <Loader text="Loading Event Organizers ..." />;
+  }
 
   return (
     <div className="mx-auto max-w-[95%] p-4 md:p-8">
@@ -256,29 +296,56 @@ function EventOrganizer() {
           </div>
         </motion.div>
         <SearchBar
-          placeholder="Search Event Organizers..."
+          placeholder="Search by name, email, phone number ..."
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
         />
-        <AddManagerModal onSubmitSuccess={()=>setAddedNew(true)} role='eventManager' />
+        <AddEventOrganizerModal onSubmitSuccess={() => setSubmitSuccess(true)} />
       </div>
 
-      <DataTable<EventOrganizer>
-        columns={columns}
-        data={sortedData}
-        loading={loading}
-        sortField={sortField}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-        page={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        itemsPerPage={itemsPerPage}
-        onItemsPerPageChange={setItemsPerPage}
-        skeletonRows={5}
-        getRowKey={(row) => row._id}
-        path='/event-organizer-detail/'
-      />
+      {editModalOpen && (
+        <EditEventOrganizer
+          id={editEventOrganizerId}
+          onSubmitSuccess={setSubmitSuccess}
+          isOpen={editModalOpen}
+          setIsOpen={setEditModalOpen}
+        />
+      )}
+
+      {eventOrganizers.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center justify-center p-8 text-center min-h-[30vh]"
+        >
+          <UsersRound size={48} className="text-gray-400 mb-4" />
+          <h2 className="text-lg font-semibold text-gray-700">
+            No Events Found
+          </h2>
+          <p className="text-gray-500 mt-2">
+            This Event Organizer hasn’t hosted any events yet. Stage is empty
+            for now.
+          </p>
+        </motion.div>
+      ) : (
+        <DataTable<EventOrganizer>
+          columns={columns}
+          data={sortedData}
+          loading={loading}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={setItemsPerPage}
+          skeletonRows={5}
+          getRowKey={(row) => row._id}
+          path="/event-organizer-detail/"
+        />
+      )}
     </div>
   );
 }

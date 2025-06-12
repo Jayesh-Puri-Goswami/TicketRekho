@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Theater, MoreVertical, Pencil, Lock, Ban } from 'lucide-react';
+import { Theater, MoreVertical, Pencil, Lock, Ban, MapPin } from 'lucide-react';
 import DataTable, { DataTableColumn } from '../components/Tables/DataTable';
 import SearchBar from '../components/Utils/SearchBar';
 import Urls from '../networking/app_urls';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import AddManagerModal from '../components/Modals/AddManagerModal';
+import AddTheaterOwnerModal from '../components/Modals/AddTheaterOwnrModal';
+import Loader from '../components/Loader/Loader';
+import EditTheaterOwner from '../components/Modals/EditTheaterOwner';
 
 interface TheaterOwner {
   _id: string;
@@ -20,26 +22,32 @@ interface TheaterOwner {
   createdAt: string;
 }
 
-const ActionDropdown = ({ row }: { row: TheaterOwner }) => {
+const ActionDropdown = ({ row, setEditModalOpen, setEditTheaterOwnerId }: { 
+  row: TheaterOwner, 
+  setEditModalOpen: (value: boolean) => void, 
+  setEditTheaterOwnerId: (id: string) => void 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const actions = [
     {
       label: 'Edit',
       icon: <Pencil className="w-4 h-4" />,
-      onClick: (row: TheaterOwner) => alert(`Edit ${row.name}`),
+      onClick: () => {
+        setEditTheaterOwnerId(row._id);
+        setEditModalOpen(true);
+      },
     },
-    {
-      label: row.active ? 'Inactive' : 'Active',
-      icon: <Ban className="w-4 h-4" />,
-      onClick: (row: TheaterOwner) =>
-        alert(`${row.active ? 'Deactivate' : 'Activate'} ${row.name}`),
-    },
-    {
-      label: 'Reset Password',
-      icon: <Lock className="w-4 h-4" />,
-      onClick: (row: TheaterOwner) => alert(`Reset Password for ${row.name}`),
-    },
+    // {
+    //   label: row.active ? 'Inactive' : 'Active',
+    //   icon: <Ban className="w-4 h-4" />,
+    //   onClick: () => alert(`${row.active ? 'Deactivate' : 'Activate'} ${row.name}`),
+    // },
+    // {
+    //   label: 'Reset Password',
+    //   icon: <Lock className="w-4 h-4" />,
+    //   onClick: () => alert(`Reset Password for ${row.name}`),
+    // },
   ];
 
   return (
@@ -69,7 +77,7 @@ const ActionDropdown = ({ row }: { row: TheaterOwner }) => {
                 key={index}
                 onClick={(e) => {
                   e.stopPropagation();
-                  action.onClick(row);
+                  action.onClick();
                   setIsOpen(false);
                 }}
                 className="w-full flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
@@ -94,6 +102,10 @@ function TheaterOwner() {
   const [theaterOwners, setTheaterOwners] = useState<TheaterOwner[]>([]);
   const [sortField, setSortField] = useState<keyof TheaterOwner>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [pageLoading, setPageLoading] = useState(true);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editTheaterOwnerId, setEditTheaterOwnerId] = useState<string>('');
 
   const currentUser = useSelector((state: any) => state.user.currentUser.data);
 
@@ -109,11 +121,7 @@ function TheaterOwner() {
 
     axios
       .get(
-        `${
-          Urls.getTheatreManagerList
-        }?page=${page}&limit=${limit}&search=${encodeURIComponent(
-          searchQuery,
-        )}`,
+        `${Urls.getTheatreOwnerList}?page=${page}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`,
         {
           headers: {
             Authorization: `Bearer ${currentUser.token}`,
@@ -145,7 +153,7 @@ function TheaterOwner() {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      setPage(1); // Reset to page 1 on new search
+      setPage(1);
       fetchTheaterOwners(1, itemsPerPage, searchTerm);
     }, 400);
 
@@ -155,6 +163,17 @@ function TheaterOwner() {
   useEffect(() => {
     fetchTheaterOwners(page, itemsPerPage, searchTerm);
   }, [page]);
+
+  useEffect(() => {
+    if (submitSuccess) {
+      setLoading(true);
+      fetchTheaterOwners(page, itemsPerPage, searchTerm);
+      setSubmitSuccess(false);
+    }
+    setTimeout(() => {
+      setPageLoading(false);
+    }, 1000);
+  }, [submitSuccess]);
 
   const handleSort = (field: keyof TheaterOwner) => {
     if (field === sortField) {
@@ -232,9 +251,19 @@ function TheaterOwner() {
     {
       key: 'actions',
       label: 'Actions',
-      render: (row) => <ActionDropdown row={row} />,
+      render: (row) => (
+        <ActionDropdown 
+          row={row} 
+          setEditModalOpen={setEditModalOpen} 
+          setEditTheaterOwnerId={setEditTheaterOwnerId} 
+        />
+      ),
     },
   ];
+
+  if (pageLoading) {
+    return <Loader text="Loading Theater Owners ..." />;
+  }
 
   return (
     <div className="mx-auto max-w-[95%] p-4 md:p-8">
@@ -259,31 +288,57 @@ function TheaterOwner() {
           </div>
         </motion.div>
         <SearchBar
-          placeholder="Search Theater Owners..."
+          placeholder="Search by name, email , phone number ..."
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
         />
 
-        <AddManagerModal role='theatreManager' />
-
+        <AddTheaterOwnerModal onSubmitSuccess={setSubmitSuccess} />
       </div>
+      
+      {editModalOpen && (
+        <EditTheaterOwner
+          id={editTheaterOwnerId}
+          onSubmitSuccess={setSubmitSuccess}
+          isOpen={editModalOpen}
+          setIsOpen={setEditModalOpen}
+        />
+      )}
 
-      <DataTable<TheaterOwner>
-        columns={columns}
-        data={sortedData}
-        loading={loading}
-        sortField={sortField}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-        page={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        itemsPerPage={itemsPerPage}
-        onItemsPerPageChange={setItemsPerPage}
-        skeletonRows={1}
-        getRowKey={(row) => row._id}
-        path={`/theater-owner-detail/`}
-      />
+      {theaterOwners.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center justify-center  p-8 text-center min-h-[30vh]"
+        >
+          <MapPin size={48} className="text-gray-400 mb-4" />
+          <h2 className="text-lg font-semibold text-gray-700">
+            No Theaters Found
+          </h2>
+          <p className="text-gray-500 mt-2">
+            This Theater Owner hasn’t launched any Theaters yet. Let's roll the
+            reels!
+          </p>
+        </motion.div>
+      ) : (
+        <DataTable<TheaterOwner>
+          columns={columns}
+          data={sortedData}
+          loading={loading}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={setItemsPerPage}
+          skeletonRows={1}
+          getRowKey={(row) => row._id}
+          path={`/theater-owner-detail/`}
+        />
+      )}
     </div>
   );
 }

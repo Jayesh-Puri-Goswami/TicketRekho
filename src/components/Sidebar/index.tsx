@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -74,11 +72,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     ...(currentUser.role === 'admin'
       ? [
           { path: '/dashboard', icon: faGamepad, label: 'Dashboard' },
-          // {
-          //   path: '/roles-permission',
-          //   icon: faKey,
-          //   label: 'Roles & Permissions',
-          // },
+          {
+            path: '/roles-permission',
+            icon: faKey,
+            label: 'Roles & Permissions',
+          },
         ]
       : []),
     ...(['theatreManager', 'theatreEmployee'].includes(currentUser.role)
@@ -86,6 +84,25 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       : []),
     ...(['eventManager', 'eventEmployee'].includes(currentUser.role)
       ? [{ path: '/event-dashboard', icon: faGamepad, label: 'Dashboard' }]
+      : []),
+    ...(['theatreOwner'].includes(currentUser.role)
+      ? [
+          {
+            path: '/theatre-owner-dashboard',
+            icon: faGamepad,
+            label: 'Dashboard',
+          },
+        ]
+      : []),
+
+    ...(['eventOrganizer'].includes(currentUser.role)
+      ? [
+          {
+            path: '/event-organizer-dashboard',
+            icon: faGamepad,
+            label: 'Dashboard',
+          },
+        ]
       : []),
     {
       path: '/location',
