@@ -1,10 +1,10 @@
-// const Bash_url = 'https://testing.ticketrekho.com/api';
-// const Image_url = 'https://testing.ticketrekho.com/api/uploads/';
-// const Socket_url = 'https://testing.ticketrekho.com';
+const Bash_url = 'https://testing.ticketrekho.com/api';
+const Image_url = 'https://testing.ticketrekho.com/api/uploads/';
+const Socket_url = 'https://testing.ticketrekho.com';
 
-const Bash_url = 'http://localhost:4100/api';
-const Image_url = 'http://localhost:4100/api/uploads/';
-const Socket_url = 'http://localhost:4100';
+// const Bash_url = 'http://localhost:4100/api';
+// const Image_url = 'http://localhost:4100/api/uploads/';
+// const Socket_url = 'http://localhost:4100';
 
 // Admin API's
 const loginUrl = `${Bash_url}/admin/adminLogin`;
@@ -97,12 +97,20 @@ const getTheatreOwnerList = `${Bash_url}/admin/getTheatreOwnerList`;
 const getEventOrganizerList = `${Bash_url}/admin/getEventOrganizerList`;
 const getEventManagerList = `${Bash_url}/admin/getEventManagerList`;
 
+const getTheatreOwnerAllEmployee = `${Bash_url}/subUser/getTheatreOwnerAllEmployee`;
+
 const getTheatreDetailByManager = `${Bash_url}/subUser/getTheatreDetailByManager`;
 
 // theatre managers
+// const addTheatre = `${Bash_url}/subUser/addTheatre`;
+
+
 const getTheatreManager = `${Bash_url}/admin/getTheatreManagerList`;
+const getSubUserTheatreManager = `${Bash_url}/subUser/getTheatreManagerList`;
 const CreateTManager = `${Bash_url}/admin/theatreManagerSignup`;
-const createTheatreManager = `${Bash_url}/admin/createTheatreManager`;
+// const createTheatreManager = `${Bash_url}/admin/createTheatreManager`;
+
+const createTheatreManager = `${Bash_url}/subUser/createTheatreManager`;
 
 // event managers
 const getEventManager = `${Bash_url}/admin/getEventManagerList`;
@@ -312,6 +320,7 @@ export default {
   updateClient,
 
   getTheatreManager,
+  getSubUserTheatreManager,
   CreateTManager,
   getEventManager,
   updatePermission,
@@ -321,6 +330,7 @@ export default {
   createMovie,
   updateMovie,
   getTheatreOwnerList,
+  getTheatreOwnerAllEmployee,
   getEventOrganizerList,
   getEventManagerList,
   getTheatreDetailByManager,

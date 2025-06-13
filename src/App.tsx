@@ -70,6 +70,8 @@ import TheaterOwnerDetail from './pages/theaterOwnerDetail';
 import EventOrganizerDetail from './pages/EventOrganizerDetail';
 import TheaterOwnerDashboard from './pages/Dashboard/TheaterOwnerDashboard';
 import EventOrganizerDashboard from './pages/Dashboard/EventOrganizerDashboard';
+import TheatreManager from './pages/theatreManager';
+import TheatreEmployeePage from './pages/TheatreManager/TheatreEmployeePage';
 
 // import assetlinks from './pages/assetlinks'
 
@@ -308,6 +310,24 @@ function App() {
             }
           />
           <Route
+            path="/theater-manager"
+            element={
+              <>
+                <PageTitle title="Add Theater Manager" />
+                <Theatres />
+              </>
+            }
+          />
+          <Route
+            path="/theatre-employee-management"
+            element={
+              <>
+                <PageTitle title="Theater Owner's All Employee" />
+                <TheatreEmployeePage />
+              </>
+            }
+          />
+          <Route
             path="/screens/:id"
             element={
               <>
@@ -505,7 +525,7 @@ function App() {
             path="/event-organizer-detail/:id"
             element={
               <>
-                <PageTitle title="Theater Management" />
+                <PageTitle title="Event Management" />
                 <EventOrganizerDetail  />
               </>
             }

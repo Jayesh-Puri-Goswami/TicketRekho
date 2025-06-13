@@ -24,6 +24,7 @@ import {
   faHandHoldingDollar,
   faChevronRight,
   faKey,
+  faUserCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
 interface SubMenuItem {
@@ -68,176 +69,274 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     );
   };
 
-  const UserMenuList: MenuItem[] = [
-    ...(currentUser.role === 'admin'
-      ? [
+  const getUserMenuList = (role: any) => {
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return [
           { path: '/dashboard', icon: faGamepad, label: 'Dashboard' },
+          // {
+          //   path: '/roles-permission',
+          //   icon: faKey,
+          //   label: 'Roles & Permissions',
+          // },
           {
-            path: '/roles-permission',
-            icon: faKey,
-            label: 'Roles & Permissions',
+            path: '/client-management',
+            icon: faUserTie,
+            label: 'Client Management',
+            permission: 'managers',
+            subItems: [
+              {
+                path: '/theater-owner',
+                subIcon: faTheaterMasks,
+                label: 'Theater Owner',
+              },
+              {
+                path: '/event-organizer',
+                subIcon: faTicketAlt,
+                label: 'Event Organizer',
+              },
+            ],
           },
-        ]
-      : []),
-    ...(['theatreManager', 'theatreEmployee'].includes(currentUser.role)
-      ? [{ path: '/theatre-dashboard', icon: faGamepad, label: 'Dashboard' }]
-      : []),
-    ...(['eventManager', 'eventEmployee'].includes(currentUser.role)
-      ? [{ path: '/event-dashboard', icon: faGamepad, label: 'Dashboard' }]
-      : []),
-    ...(['theatreOwner'].includes(currentUser.role)
-      ? [
+          { path: '/users', icon: faUser, label: 'Users', permission: 'users' },
+          {
+            path: '/location',
+            icon: faMapMarkerAlt,
+            label: 'Location',
+            permission: 'states',
+          },
+          {
+            path: '/movies',
+            icon: faTheaterMasks,
+            label: 'Movie Management',
+            permission: 'movie management',
+          },
+          // {
+          //   path: '/theatres',
+          //   icon: faTheaterMasks,
+          //   label: 'Manage Theatres',
+          //   permission: 'manage theatres',
+          // },
+          // {
+          //   path: '/showtime',
+          //   icon: faClock,
+          //   label: 'Showtimes',
+          //   permission: 'showtimes',
+          // },
+          // {
+          //   path: '/movie-qr-code',
+          //   icon: faQrcode,
+          //   label: 'Movie QR Management',
+          //   permission: 'movie qr management',
+          // },
+          {
+            path: '/theatre-report',
+            icon: faFileAlt,
+            label: 'Manage Theatre Reports',
+            permission: 'manage theatre reports',
+          },
+          {
+            path: '/staff-management',
+            icon: faClipboardList,
+            label: 'Staff Management',
+            permission: 'employee management',
+          },
+          {
+            path: '/employee-management',
+            icon: faClipboardList,
+            label: 'Employee Management',
+            permission: 'employee management',
+          },
+          // {
+          //   path: '/events',
+          //   icon: faClipboardList,
+          //   label: 'Event Management',
+          //   permission: 'event management',
+          // },
+          // {
+          //   path: '/venues',
+          //   icon: faMapMarkerAlt,
+          //   label: 'Manage Venues',
+          //   permission: 'manage venues',
+          // },
+          // {
+          //   path: '/event-qr-code',
+          //   icon: faQrcode,
+          //   label: 'Event QR Management',
+          //   permission: 'event qr management',
+          // },
+          // {
+          //   path: '/event-report',
+          //   icon: faFileInvoice,
+          //   label: 'Manage Event Reports',
+          //   permission: 'manage event reports',
+          // },
+          // {
+          //   path: '/coupon',
+          //   icon: faTicketAlt,
+          //   label: 'Coupon Codes',
+          //   permission: 'coupon codes',
+          // },
+          {
+            path: '/notification',
+            icon: faBell,
+            label: 'Notifications',
+            permission: 'notifications',
+          },
+          {
+            path: '/commission',
+            icon: faChartLine,
+            label: 'Commission Rate',
+            permission: 'commission rate',
+          },
+          {
+            path: '/theater-revenue-admin',
+            icon: faHandHoldingDollar,
+            label: 'Theater Revenue Report',
+            permission: 'theater revenue',
+          },
+          {
+            path: '/enquiry',
+            icon: faQuestionCircle,
+            label: 'Enquiries',
+            permission: 'enquiries',
+          },
+          {
+            path: '/support',
+            icon: faComments,
+            label: 'Support & Feedback',
+            permission: 'support & feedback',
+          },
+          {
+            path: '/terms',
+            icon: faFileContract,
+            label: 'Terms & Conditions',
+            permission: 'terms & conditions',
+          },
+        ];
+
+      case 'theatreowner':
+        return [
           {
             path: '/theatre-owner-dashboard',
             icon: faGamepad,
             label: 'Dashboard',
           },
-        ]
-      : []),
+          {
+            path: '/theater-manager',
+            icon: faTheaterMasks,
+            label: 'Theater Management',
+          },
+          {
+            path: '/theatre-employee-management',
+            icon: faClipboardList,
+            label: 'Employee Management',
+          },
+          // { path: '/theatres', icon: faTheaterMasks, label: 'Add Theatres' },
+          { path: '/movies', icon: faTheaterMasks, label: 'Movie Management' },
+          // { path: '/showtime', icon: faClock, label: 'Showtimes' },
+          // {
+          //   path: '/movie-qr-code',
+          //   icon: faQrcode,
+          //   label: 'Movie QR Management',
+          // },
+          {
+            path: '/theatre-report',
+            icon: faFileAlt,
+            label: 'Manage Theatre Reports',
+          },
 
-    ...(['eventOrganizer'].includes(currentUser.role)
-      ? [
+          // { path: '/support', icon: faComments, label: 'Support & Feedback' },
+        ];
+
+      case 'eventorganizer':
+        return [
           {
             path: '/event-organizer-dashboard',
             icon: faGamepad,
             label: 'Dashboard',
           },
+          { path: '/events', icon: faClipboardList, label: 'Event Management' },
+          { path: '/venues', icon: faMapMarkerAlt, label: 'Manage Venues' },
+          // {
+          //   path: '/event-qr-code',
+          //   icon: faQrcode,
+          //   label: 'Event QR Management',
+          // },
+          {
+            path: '/event-report',
+            icon: faFileInvoice,
+            label: 'Manage Event Reports',
+          },
+          { path: '/coupon', icon: faTicketAlt, label: 'Coupon Codes' },
+          {
+            path: '/employee-management',
+            icon: faClipboardList,
+            label: 'Employee Management',
+          },
+          // { path: '/support', icon: faComments, label: 'Support & Feedback' },
+        ];
+
+      case 'theatremanager':
+        return [
+          { path: '/theatre-dashboard', icon: faGamepad, label: 'Dashboard' },
+          { path: '/theatres', icon: faTheaterMasks, label: 'Manage Theatres' },
+          { path: '/showtime', icon: faClock, label: 'Showtimes' },
+          {
+            path: '/movie-qr-code',
+            icon: faQrcode,
+            label: 'Movie QR Management',
+          },
+          {
+            path: '/theatre-report',
+            icon: faFileAlt,
+            label: 'Manage Theatre Reports',
+          },
         ]
-      : []),
-    {
-      path: '/location',
-      icon: faMapMarkerAlt,
-      label: 'Location',
-      permission: 'states',
-    },
-    {
-      path: '/client-management',
-      icon: faUserTie,
-      label: 'Client Management',
-      permission: 'managers',
-      subItems: [
-        {
-          path: '/theater-owner',
-          subIcon: faTheaterMasks,
-          label: 'Theater Owner',
-        },
-        {
-          path: '/event-organizer',
-          subIcon: faTicketAlt,
-          label: 'Event Organizer',
-        },
-      ],
-    },
-    { path: '/users', icon: faUser, label: 'Users', permission: 'users' },
-    {
-      path: '/movies',
-      icon: faTheaterMasks,
-      label: 'Movie Management',
-      permission: 'movie management',
-    },
-    {
-      path: '/theatres',
-      icon: faTheaterMasks,
-      label: 'Manage Theatres',
-      permission: 'manage theatres',
-    },
-    {
-      path: '/showtime',
-      icon: faClock,
-      label: 'Showtimes',
-      permission: 'showtimes',
-    },
-    {
-      path: '/movie-qr-code',
-      icon: faQrcode,
-      label: 'Movie QR Management',
-      permission: 'movie qr management',
-    },
-    {
-      path: '/theatre-report',
-      icon: faFileAlt,
-      label: 'Manage Theatre Reports',
-      permission: 'manage theatre reports',
-    },
-    {
-      path: '/staff-management',
-      icon: faClipboardList,
-      label: 'Staff Management',
-      permission: 'employee management',
-    },
-    {
-      path: '/employee-management',
-      icon: faClipboardList,
-      label: 'Employee Management',
-      permission: 'employee management',
-    },
-    {
-      path: '/events',
-      icon: faClipboardList,
-      label: 'Event Management',
-      permission: 'event management',
-    },
-    {
-      path: '/venues',
-      icon: faMapMarkerAlt,
-      label: 'Manage Venues',
-      permission: 'manage venues',
-    },
-    {
-      path: '/event-qr-code',
-      icon: faQrcode,
-      label: 'Event QR Management',
-      permission: 'event qr management',
-    },
-    {
-      path: '/event-report',
-      icon: faFileInvoice,
-      label: 'Manage Event Reports',
-      permission: 'manage event reports',
-    },
-    {
-      path: '/coupon',
-      icon: faTicketAlt,
-      label: 'Coupon Codes',
-      permission: 'coupon codes',
-    },
-    {
-      path: '/notification',
-      icon: faBell,
-      label: 'Notifications',
-      permission: 'notifications',
-    },
-    {
-      path: '/commission',
-      icon: faChartLine,
-      label: 'Commission Rate',
-      permission: 'commission rate',
-    },
-    {
-      path: '/theater-revenue-admin',
-      icon: faHandHoldingDollar,
-      label: 'Theater Revenue Report',
-      permission: 'theater revenue',
-    },
-    {
-      path: '/enquiry',
-      icon: faQuestionCircle,
-      label: 'Enquiries',
-      permission: 'enquiries',
-    },
-    {
-      path: '/support',
-      icon: faComments,
-      label: 'Support & Feedback',
-      permission: 'support & feedback',
-    },
-    {
-      path: '/terms',
-      icon: faFileContract,
-      label: 'Terms & Conditions',
-      permission: 'terms & conditions',
-    },
-  ];
+
+      case 'theatreemployee':
+        return [
+          { path: '/theatre-dashboard', icon: faGamepad, label: 'Dashboard' },
+          { path: '/movies', icon: faTheaterMasks, label: 'Movie Management' },
+          { path: '/theatres', icon: faTheaterMasks, label: 'Manage Theatres' },
+          { path: '/showtime', icon: faClock, label: 'Showtimes' },
+          {
+            path: '/movie-qr-code',
+            icon: faQrcode,
+            label: 'Movie QR Management',
+          },
+          {
+            path: '/theatre-report',
+            icon: faFileAlt,
+            label: 'Manage Theatre Reports',
+          },
+          // { path: '/support', icon: faComments, label: 'Support & Feedback' },
+        ];
+
+      case 'eventmanager':
+      case 'eventemployee':
+        return [
+          { path: '/event-dashboard', icon: faGamepad, label: 'Dashboard' },
+          { path: '/events', icon: faClipboardList, label: 'Event Management' },
+          { path: '/venues', icon: faMapMarkerAlt, label: 'Manage Venues' },
+          {
+            path: '/event-qr-code',
+            icon: faQrcode,
+            label: 'Event QR Management',
+          },
+          {
+            path: '/event-report',
+            icon: faFileInvoice,
+            label: 'Manage Event Reports',
+          },
+          // { path: '/support', icon: faComments, label: 'Support & Feedback' },
+        ];
+
+      default:
+        return [];
+    }
+  };
+
+  const UserMenuList: MenuItem[] = getUserMenuList(currentUser.role);
 
   const location = useLocation();
   const { pathname } = location;
@@ -275,6 +374,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     redirectTo = '/event-dashboard';
   else if (currentUser?.role === 'theatreManager')
     redirectTo = '/theatre-dashboard';
+
+  const roleLabels: Record<string, string> = {
+    admin: 'Admin',
+    subAdmin: 'Sub Admin',
+    theatreOwner: 'Theatre Owner',
+    theatreManager: 'Theatre Manager',
+    theatreEmployee: 'Theatre Employee',
+    eventOrganizer: 'Event Organizer',
+    eventManager: 'Event Manager',
+    eventEmployee: 'Event Employee',
+  };
 
   return (
     <>
@@ -503,8 +613,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <p className="text-white font-medium text-sm truncate">
                 {currentUser?.name || 'User'}
               </p>
-              <p className="text-white/70 text-xs capitalize">
-                {currentUser?.role || 'Role'}
+              <p className="text-white/70 text-xs">
+                {roleLabels[currentUser?.role] || 'Role'}
               </p>
             </div>
           </motion.div>

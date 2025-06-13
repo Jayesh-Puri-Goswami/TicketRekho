@@ -4,37 +4,31 @@ import axios from 'axios';
 import urls from '../../networking/app_urls';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X,
-  User,
-  Mail,
-  Phone,
-  Lock,
-  Check,
-  AlertCircleIcon,
-} from 'lucide-react';
-import clsx from 'clsx';
-import toast, { Toaster } from 'react-hot-toast';
+import { X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-interface ManagerFormData {
+interface EmployeeFormData {
   name: string;
-  phoneNumber: string;
   email: string;
+  phoneNumber: string;
   password: string;
-  role: string;
+  confirmPassword: string;
   active: boolean;
 }
 
-interface ModalformProps {
+interface CreateEmployeeModalProps {
   onSubmitSuccess?: (data: any) => void;
+  role: string;
+  buttonText ? : string;
 }
 
-const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({ 
+  onSubmitSuccess, 
+  role ,
+  buttonText
+}) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const currentUser = useSelector((state: any) => state.user.currentUser?.data);
 
@@ -42,39 +36,26 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
-  } = useForm<ManagerFormData>();
+  } = useForm<EmployeeFormData>({
+    defaultValues: {
+      active: true,
+    },
+  });
 
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => {
-    setIsOpen(false);
-    reset();
-    setSelectedImage(null);
-    setError(null);
-    setSuccess(false);
-    setLoading(false);
-  };
+  const password = watch('password');
 
-  const stopPropagation = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
-  const onSubmit = async (data: ManagerFormData) => {
+  const onSubmit = async (data: EmployeeFormData) => {
     setLoading(true);
-    setError(null);
-    setSuccess(false);
 
     const formData = new FormData();
     formData.append('name', data.name);
-    formData.append('phoneNumber', data.phoneNumber);
     formData.append('email', data.email);
+    formData.append('phoneNumber', data.phoneNumber);
     formData.append('password', data.password);
-    formData.append('role', data.role);
+    formData.append('role', role);
     formData.append('active', data.active.toString());
-
-    if (selectedImage) {
-      formData.append('profileImage', selectedImage);
-    }
 
     try {
       const response = await axios.post(urls.createEmployee, formData, {
@@ -83,470 +64,218 @@ const CreateEmployeeModal: React.FC<ModalformProps> = ({ onSubmitSuccess }) => {
           'Content-Type': 'application/json',
         },
       });
-      setSuccess(true);
-      setIsOpen(false);
-      reset();
-      toast.success(
-        'Employee created successfully! The new Employee is now part of your team.',
-        {
-          className: 'z-[99999]',
-        },
-      );
-      setTimeout(() => setSuccess(false), 5000);
-      setSelectedImage(null);
+      
+      toast.success('Employee created successfully!');
+      closeModal();
+      
       if (onSubmitSuccess) {
         onSubmitSuccess(response.data);
       }
-    } catch (err: any) {
-      console.error('API Error:', err.response?.data || err.message);
-      let errorMessage = err.response?.data?.message || err.message;
-      const rawMessage = err.response?.data?.message || err.message || '';
-      let isPhoneDuplicate = false;
-      let isEmailDuplicate = false;
-      const phoneMatch = rawMessage.match(/phoneNumber"\s*:\s*"([^"]+)"/);
-      const emailMatch = rawMessage.match(/email"\s*:\s*"([^"]+)"/);
-      if (rawMessage.includes('E11000 duplicate key error')) {
-        if (err.keyValue) {
-          if (err.keyValue.phoneNumber) {
-            isPhoneDuplicate = true;
-          }
-          if (err.keyValue.email) {
-            isEmailDuplicate = true;
-          }
-        } else {
-          if (phoneMatch) {
-            isPhoneDuplicate = true;
-          }
-          if (emailMatch) {
-            isEmailDuplicate = true;
-          }
-        }
-
-        if (isPhoneDuplicate && isEmailDuplicate) {
-          errorMessage = 'The phone number and email address already exist.';
-        } else if (isPhoneDuplicate) {
-          errorMessage =
-            'The phone number already exists. Please use a different number.';
-        } else if (isEmailDuplicate) {
-          errorMessage =
-            'The email address already exists. Please use a different email.';
-        } else {
-          errorMessage = 'A record with a duplicate value already exists.';
-        }
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      }
-
-      // Set error in UI and show toast
-      setError(errorMessage);
-      toast.error(errorMessage, {
-        className: 'z-[99999]',
-      });
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
+                          'Failed to create employee. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  };
+  const openModal = () => setOpen(true);
 
-  const modalVariants = {
-    hidden: {
-      opacity: 0,
-      y: 20,
-      scale: 0.98,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: 'spring',
-        damping: 25,
-        stiffness: 300,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: 20,
-      scale: 0.98,
-      transition: {
-        duration: 0.2,
-      },
-    },
+  const closeModal = () => {
+    setOpen(false);
+    reset();
   };
 
   return (
     <>
-      {/* <Toaster /> */}
-      <motion.button
-        whileHover={{ scale: 1 }}
-        whileTap={{ scale: 0.98 }}
+      <button
         onClick={openModal}
-        className="relative overflow-hidden rounded-md font-medium text-white px-3 h-[2.7rem] "
-        style={{
-          background: 'linear-gradient(to right, #6366F1, #8B5CF6)',
-        }}
+        className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium hover:opacity-90 transition-opacity"
       >
-        Add
-      </motion.button>
+        {buttonText ? buttonText : 'Create Employee'}
+      </button>
 
       <AnimatePresence>
-        {isOpen && (
+        {open && (
           <motion.div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4"
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={backdropVariants}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[999]"
             onClick={closeModal}
           >
             <motion.div
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
-              onClick={stopPropagation}
-              variants={modalVariants}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             >
-              <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-slate-100">
-                  Create New Employee
-                </h3>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+              <div className="p-6 border-b flex justify-between items-center">
+                <h2 className="text-2xl font-semibold bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent">
+                  Add New Employee
+                </h2>
+                <button
                   onClick={closeModal}
-                  className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <X size={20} />
-                </motion.button>
+                  <X className="w-6 h-6" />
+                </button>
               </div>
 
-              <div className="overflow-y-auto max-h-[calc(90vh-130px)] p-5">
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  <div className="grid gap-x-6">
-                    <div>
-                      <h4 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
-                        Employee Information
-                      </h4>
+              <form onSubmit={handleSubmit(onSubmit)} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      {...register('name', { 
+                        required: 'Name is required',
+                        minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                        maxLength: { value: 30, message: 'Name must be at most 30 characters' },
+                        pattern: { value: /^[A-Za-z\s'-]+$/, message: 'Invalid name format' }
+                      })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      placeholder="Full Name"
+                    />
+                    {errors.name && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.name.message}
+                      </p>
+                    )}
+                  </div>
 
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
-                          Name
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <User className="h-4 w-4 text-slate-400" />
-                          </div>
-                          <input
-                            type="text"
-                            className={clsx(
-                              'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors',
-                              errors.name
-                                ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
-                                : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
-                            )}
-                            placeholder="Full Name"
-                            {...register('name', {
-                              required: 'Name is required',
-                              minLength: {
-                                value: 2,
-                                message: 'Name must be at least 2 characters',
-                              },
-                              maxLength: {
-                                value: 30,
-                                message: 'Name must be at most 30 characters',
-                              },
-                              pattern: {
-                                value: /^[A-Za-z\s'-]+$/,
-                                message: 'Invalid name format',
-                              },
-                            })}
-                          />
-                        </div>
-                        {errors.name && (
-                          <span className="text-red-500 text-sm mt-1">
-                            {errors.name.message}
-                          </span>
-                        )}
-                      </div>
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      {...register('email', {
+                        required: 'Email is required',
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: 'Invalid email address',
+                        },
+                      })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      placeholder="Email Address"
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
 
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
-                          Email
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <Mail className="h-4 w-4 text-slate-400" />
-                          </div>
-                          <input
-                            type="email"
-                            className={clsx(
-                              'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors',
-                              errors.email
-                                ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
-                                : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
-                            )}
-                            placeholder="Email"
-                            {...register('email', {
-                              required: 'Valid email is required',
-                              pattern: {
-                                value: /^\S+@\S+$/i,
-                                message: 'Invalid email format',
-                              },
-                            })}
-                          />
-                        </div>
-                        {errors.email && (
-                          <span className="text-red-500 text-sm mt-1">
-                            {errors.email.message}
-                          </span>
-                        )}
-                      </div>
+                  {/* Phone Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      {...register('phoneNumber', {
+                        required: 'Phone number is required',
+                        minLength: { value: 6, message: 'Minimum 6 digits required' },
+                        maxLength: { value: 12, message: 'Maximum 12 digits allowed' },
+                        pattern: { value: /^[0-9]+$/, message: 'Only numbers are allowed' },
+                      })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      placeholder="Phone Number"
+                    />
+                    {errors.phoneNumber && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.phoneNumber.message}
+                      </p>
+                    )}
+                  </div>
 
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
-                          Phone Number
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <Phone className="h-4 w-4 text-slate-400" />
-                          </div>
-                          <input
-                            type="tel"
-                            className={clsx(
-                              'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors',
-                              errors.phoneNumber
-                                ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
-                                : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
-                            )}
-                            placeholder="Phone Number"
-                            {...register('phoneNumber', {
-                              required: 'Phone number is required',
-                              minLength: {
-                                value: 6,
-                                message: 'Minimum 6 digits required',
-                              },
-                              maxLength: {
-                                value: 12,
-                                message: 'Maximum 12 digits allowed',
-                              },
-                              pattern: {
-                                value: /^[0-9]+$/,
-                                message: 'Only numbers are allowed',
-                              },
-                            })}
-                          />
-                        </div>
-                        {errors.phoneNumber && (
-                          <span className="text-red-500 text-sm mt-1">
-                            {errors.phoneNumber.message}
-                          </span>
-                        )}
-                      </div>
+                  {/* Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      {...register('password', {
+                        required: 'Password is required',
+                        minLength: { value: 7, message: 'Password must be at least 7 characters' },
+                        maxLength: { value: 12, message: 'Password must be at most 12 characters' },
+                      })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      placeholder="Password"
+                    />
+                    {errors.password && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
 
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
-                          Password
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <Lock className="h-4 w-4 text-slate-400" />
-                          </div>
-                          <input
-                            type="password"
-                            className={clsx(
-                              'w-full rounded-md border py-2.5 pl-10 pr-4 text-sm outline-none transition-colors',
-                              errors.password
-                                ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
-                                : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white',
-                            )}
-                            placeholder="Password"
-                            {...register('password', {
-                              required: 'Password is required',
-                              minLength: {
-                                value: 7,
-                                message:
-                                  'Password must be at least 7 characters',
-                              },
-                              maxLength: {
-                                value: 12,
-                                message:
-                                  'Password must be at most 12 characters',
-                              },
-                            })}
-                          />
-                        </div>
-                        {errors.password && (
-                          <span className="text-red-500 text-sm mt-1">
-                            {errors.password.message}
-                          </span>
-                        )}
-                      </div>
+                  {/* Confirm Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      {...register('confirmPassword', {
+                        required: 'Please confirm your password',
+                        validate: (value) => value === password || 'Passwords do not match',
+                      })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      placeholder="Confirm Password"
+                    />
+                    {errors.confirmPassword && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
+                  </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
-                            Role
-                          </label>
-                          <select
-                            className={clsx(
-                              'w-full rounded-md border py-2.5 px-4 text-sm outline-none transition-colors appearance-none bg-white dark:bg-slate-700',
-                              errors.role
-                                ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500 dark:border-red-600 dark:bg-red-900/20'
-                                : 'border-slate-300 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:text-white',
-                            )}
-                            {...register('role', {
-                              required: 'Role is required',
-                            })}
-                          >
-                            <option value="" disabled>
-                              Select a role
-                            </option>
-                            {/* <option value="theatreEmployee">
-                              Theatre Employee
-                            </option>
-                            <option value="eventEmployee">
-                              Event Employee
-                            </option> */}
-                            {/* here */}
-
-                            {currentUser?.role?.toLowerCase() ===
-                            'theatremanager' ? (
-                              <option value="theatreEmployee">
-                                Theatre Employee 
-                              </option>
-                            ) : (
-                              <option value="eventEmployee">
-                                Event Employee 
-                              </option>
-                            )}
-                          </select>
-                          {errors.role && (
-                            <span className="text-red-500 text-sm mt-1">
-                              {errors.role.message}
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
-                            Account Status
-                          </label>
-                          <div className="flex gap-4 mt-2">
-                            <label className="inline-flex items-center">
-                              <input
-                                type="radio"
-                                className="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                                value="true"
-                                {...register('active', {
-                                  required: 'Status is required',
-                                })}
-                              />
-                              <span className="ml-2 text-sm text-slate-700 dark:text-slate-300">
-                                Active
-                              </span>
-                            </label>
-                            <label className="inline-flex items-center">
-                              <input
-                                type="radio"
-                                className="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                                value="false"
-                                {...register('active', {
-                                  required: 'Status is required',
-                                })}
-                              />
-                              <span className="ml-2 text-sm text-slate-700 dark:text-slate-300">
-                                Inactive
-                              </span>
-                            </label>
-                          </div>
-                          {errors.active && (
-                            <span className="text-red-500 text-sm mt-1">
-                              {errors.active.message}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                  {/* Active Status */}
+                  <div className="md:col-span-2">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        {...register('active')}
+                        className="w-5 h-5 rounded text-[#6366F1] focus:ring-[#6366F1]"
+                      />
+                      <label className="text-sm font-medium text-gray-700">
+                        Active Status
+                      </label>
                     </div>
                   </div>
+                </div>
 
-                  <div className="mt-8 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-slate-200 dark:border-slate-700 pt-5">
-                    <motion.button
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      type="button"
-                      onClick={closeModal}
-                      className="w-full sm:w-auto px-5 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                    >
-                      Cancel
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      type="submit"
-                      disabled={loading}
-                      className="w-full sm:w-auto relative overflow-hidden rounded-md py-2.5 px-6 font-medium text-white disabled:opacity-70"
-                      style={{
-                        background:
-                          'linear-gradient(to right, #6366F1, #8B5CF6)',
-                      }}
-                    >
-                      {loading ? (
-                        <span className="flex items-center justify-center">
-                          <svg
-                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                          Creating...
-                        </span>
-                      ) : (
-                        <span className="flex items-center justify-center">
-                          <Check className="mr-1.5 h-4 w-4" />
-                          Create Employee
-                        </span>
-                      )}
-                    </motion.button>
-                  </div>
-                </form>
-              </div>
+                <div className="mt-8 flex justify-end space-x-4">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                  >
+                    {loading ? 'Creating...' : 'Create Employee'}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* <AnimatePresence>
-        {error && (
-          <motion.div
-            className="fixed top-10 right-10 bg-red-600/90 text-white px-4 py-3 rounded-md shadow-lg z-[10000]"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="flex items-center">
-              <AlertCircleIcon className="h-5 w-5 mr-2" />
-              <span>{error}</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence> */}
     </>
   );
 };

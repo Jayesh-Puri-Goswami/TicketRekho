@@ -1,192 +1,129 @@
-"use client"
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import axios from 'axios';
+import urls from '../../networking/app_urls';
+import { useSelector } from 'react-redux';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Building, MapPin, Users, User } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import { useForm, Controller } from "react-hook-form"
-import axios from "axios"
-import { motion, AnimatePresence } from "framer-motion"
-import { Upload, X } from "lucide-react"
-import toast from "react-hot-toast"
-import { useSelector } from "react-redux"
-import Urls from "../../networking/app_urls"
-
-const app_urls = {
-  getStates: `${Urls.getStates}`,
-  getCitiesByState: `${Urls.getCitiesByState}`,
+interface TheatreFormData {
+  name: string;
+  location: string;
+  isOperational: boolean;
+  isGrabABite: boolean;
+  managerId: string;
+  employeeIds: string[];
 }
 
-interface StateType {
-  _id: string
-  name: string
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  role: 'theatreManager' | 'theatreEmployee';
 }
 
-interface CityType {
-  _id: string
-  name: string
+interface AddTheatreModalProps {
+  onSubmitSuccess?: (data: any) => void;
 }
 
-interface TheatreManagerFormData {
-  email: string
-  password: string
-  name: string
-  phoneNumber: string
-  role: "theatreManager"
-  profileImage: File | null
-  stateId: string
-  cityId: string
-  address: string
-  active: boolean
-  bankAccountNumber: string
-  ifscCode: string
-  theatreName: string
-  location: string
-  isActive: boolean
-  isGrabABite: boolean
-}
+const AddTheatreModal: React.FC<AddTheatreModalProps> = ({
+  onSubmitSuccess,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
-const AddTheatreModal = () => {
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
-  const [states, setStates] = useState<StateType[]>([])
-  const [cities, setCities] = useState<CityType[]>([])
-  const [selectedState, setSelectedState] = useState<string>("")
-
-  const currentUser = useSelector((state: any) => state.user.currentUser.data)
+  const currentUser = useSelector((state: any) => state.user.currentUser?.data);
 
   const {
     register,
     handleSubmit,
     reset,
-    control,
-    formState: { errors },
     setValue,
-  } = useForm<TheatreManagerFormData>({
+    watch,
+    formState: { errors },
+  } = useForm<TheatreFormData>({
     defaultValues: {
-      role: "theatreManager",
-      active: true,
-      isActive: true,
+      isOperational: true,
       isGrabABite: false,
-      stateId: "",
-      cityId: "",
+      managerId: '',
+      employeeIds: [],
     },
-  })
+  });
 
-  const fetchStates = async () => {
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
     try {
-      const response = await axios.get(app_urls.getStates, {
+      const response = await axios.get(urls.getEmployeeListBymanagerId, {
         headers: {
           Authorization: `Bearer ${currentUser.token}`,
         },
-      })
-      if (response.data.status && Array.isArray(response.data.data)) {
-        setStates(response.data.data)
+      });
+      if (response.data.status && Array.isArray(response.data.data.userList)) {
+        setUsers(response.data.data.userList);
       } else {
-        console.error("Invalid states response:", response.data)
+        throw new Error('Invalid user data');
       }
     } catch (error) {
-      console.error("Error fetching states:", error)
-      toast.error("Failed to fetch states")
-    }
-  }
-
-  const fetchCities = async (stateId: string) => {
-    if (!stateId) {
-      setCities([])
-      return
-    }
-
-    try {
-      const response = await axios.post(
-        app_urls.getCitiesByState,
-        { state: stateId },
-        {
-          headers: {
-            Authorization: `Bearer ${currentUser.token}`,
-          },
-        },
-      )
-      if (response.data.status && Array.isArray(response.data.data)) {
-        setCities(response.data.data)
-      } else {
-        setCities([])
-        console.error("Invalid cities response:", response.data)
-      }
-    } catch (error) {
-      console.error("Error fetching cities:", error)
-      setCities([])
-      toast.error("Failed to fetch cities")
-    }
-  }
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setValue("profileImage", file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const onSubmit = async (data: TheatreManagerFormData) => {
-    setLoading(true)
-    const formData = new FormData()
-
-    Object.entries(data).forEach(([key, value]) => {
-      const fieldName = key === "isGrabABite" ? "isGrabABite" : key
-      formData.append(fieldName, value as any)
-      console.log(`FormData ${fieldName} Value ${value}`)
-    })
-
-    try {
-      await axios.post(`${Urls.createTheatreManager}`, formData, {
-        headers: {
-          Authorization: `Bearer ${currentUser.token}`,
-          "Content-Type": "multipart/form-data; boundary=<calculated when request is sent>",
-        },
-      })
-      toast.success("Theatre Manager created successfully!")
-      closeModal()
-    } catch (error : any) {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          'Oops! Something went wrong. Please try again later.',
-        {
-          className: 'z-[99999]',
-        },
-      );
+      console.error('Error fetching users:', error);
+      toast.error('Failed to fetch managers and employees');
     } finally {
-      setLoading(false)
+      setLoadingUsers(false);
     }
-  }
+  };
 
-  const openModal = () => setOpen(true)
+  // Separate managers and employees based on role
+  const managers = users.filter((user) => user.role === 'theatreManager');
+  const employees = users.filter((user) => user.role === 'theatreEmployee');
+
+  const onSubmit = async (data: TheatreFormData) => {
+    setLoading(true);
+
+    const payload = {
+      name: data.name,
+      location: data.location,
+      isOperational: data.isOperational,
+      isGrabABite: data.isGrabABite,
+      managerId: data.managerId,
+      employeeIds: data.employeeIds,
+    };
+
+    try {
+      const response = await axios.post(urls.addTheatre, payload, {
+        headers: {
+          Authorization: `Bearer ${currentUser.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      toast.success('Theatre created successfully!');
+      closeModal();
+
+      if (onSubmitSuccess) {
+        onSubmitSuccess(response.data);
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to create theatre. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openModal = () => {
+    setOpen(true);
+    fetchUsers();
+  };
 
   const closeModal = () => {
-    setOpen(false)
-    reset()
-    setPreviewImage(null)
-    setSelectedState("")
-    setCities([])
-  }
-
-  useEffect(() => {
-    if (open) {
-      fetchStates()
-    }
-  }, [open])
-
-  useEffect(() => {
-    if (selectedState) {
-      fetchCities(selectedState)
-    } else {
-      setCities([])
-    }
-  }, [selectedState])
+    setOpen(false);
+    reset();
+  };
 
   return (
     <>
@@ -194,7 +131,7 @@ const AddTheatreModal = () => {
         onClick={openModal}
         className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium hover:opacity-90 transition-opacity"
       >
-        Add Theatre Manager
+        Add Theatre
       </button>
 
       <AnimatePresence>
@@ -211,309 +148,166 @@ const AddTheatreModal = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             >
               <div className="p-6 border-b flex justify-between items-center">
                 <h2 className="text-2xl font-semibold bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent">
-                  Add New Theatre Manager
+                  Add New Theatre
                 </h2>
-                <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <button
+                  onClick={closeModal}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
                   <X className="w-6 h-6" />
                 </button>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Profile Image Upload */}
-                  <div className="md:col-span-2 flex justify-center">
-                    <div className="relative">
-                      <div className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
-                        {previewImage ? (
-                          <img
-                            src={previewImage || '/placeholder.svg'}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Upload className="w-8 h-8 text-gray-400" />
-                        )}
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                      />
-                    </div>
+                  {/* Theatre Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Building className="w-4 h-4 inline mr-1" />
+                      Theatre Name
+                    </label>
+                    <input
+                      type="text"
+                      {...register('name', {
+                        required: 'Theatre name is required',
+                        minLength: {
+                          value: 2,
+                          message: 'Name must be at least 2 characters',
+                        },
+                        maxLength: {
+                          value: 50,
+                          message: 'Name must be at most 50 characters',
+                        },
+                      })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      placeholder="Enter theatre name"
+                    />
+                    {errors.name && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.name.message}
+                      </p>
+                    )}
                   </div>
 
-                  {/* Personal Information */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        {...register('name', { required: 'Name is required' })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                      />
-                      {errors.name && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.name.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        {...register('email', {
-                          required: 'Email is required',
-                          pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: 'Invalid email address',
-                          },
-                        })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                      />
-                      {errors.email && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.email.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Password
-                      </label>
-                      <input
-                        type="password"
-                        {...register('password', {
-                          required: 'Password is required',
-                          minLength: {
-                            value: 6,
-                            message: 'Password must be at least 6 characters',
-                          },
-                        })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                      />
-                      {errors.password && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.password.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        {...register('phoneNumber', {
-                          required: 'Phone number is required',
-                        })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                      />
-                      {errors.phoneNumber && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.phoneNumber.message}
-                        </p>
-                      )}
-                    </div>
+                  {/* Location */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      {...register('location', {
+                        required: 'Location is required',
+                        minLength: {
+                          value: 3,
+                          message: 'Location must be at least 3 characters',
+                        },
+                      })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      placeholder="Enter theatre location"
+                    />
+                    {errors.location && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.location.message}
+                      </p>
+                    )}
                   </div>
 
-                  {/* Theatre Information */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Theatre Name
-                      </label>
-                      <input
-                        type="text"
-                        {...register('theatreName', {
-                          required: 'Theatre name is required',
-                        })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                      />
-                      {errors.theatreName && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.theatreName.message}
-                        </p>
-                      )}
-                    </div>
+                  {/* Manager Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Users className="w-4 h-4 inline mr-1" />
+                      Manager
+                    </label>
+                    <select
+                      {...register('managerId', {
+                        required: 'Manager selection is required',
+                      })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                      disabled={loadingUsers}
+                    >
+                      <option value="">
+                        {loadingUsers
+                          ? 'Loading managers...'
+                          : 'Select Manager'}
+                      </option>
+                      {managers.map((manager) => (
+                        <option key={manager._id} value={manager._id}>
+                          {manager.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.managerId && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.managerId.message}
+                      </p>
+                    )}
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Location
-                      </label>
-                      <input
-                        type="text"
-                        {...register('location', {
-                          required: 'Location is required',
-                        })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                      />
-                      {errors.location && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.location.message}
-                        </p>
-                      )}
-                    </div>
+                  {/* Employee Selection (Multi-select custom) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <User className="w-4 h-4 inline mr-1" />
+                      Employees
+                    </label>
 
-                    {/* State Dropdown with Controller */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        State
-                      </label>
-                      <Controller
-                        name="stateId"
-                        control={control}
-                        rules={{ required: 'State is required' }}
-                        render={({ field }) => (
-                          <select
-                            {...field}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              setSelectedState(e.target.value);
-                            }}
-                            className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                    <div className="border rounded-lg p-2 max-h-48 overflow-y-auto space-y-2">
+                      {employees.map((employee) => {
+                        const isChecked = watch('employeeIds').includes(
+                          employee._id,
+                        );
+                        return (
+                          <label
+                            key={employee._id}
+                            className="flex items-center space-x-3 cursor-pointer"
                           >
-                            <option value="">Select State</option>
-                            {states.map((state) => (
-                              <option key={state._id} value={state._id}>
-                                {state.name}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      />
-                      {errors.stateId && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.stateId.message}
-                        </p>
-                      )}
+                            <input
+                              type="checkbox"
+                              value={employee._id}
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const checked = e.target.checked;
+                                const current = watch('employeeIds') || [];
+                                const updated = checked
+                                  ? [...current, value]
+                                  : current.filter((id) => id !== value);
+                                setValue('employeeIds', updated, {
+                                  shouldValidate: true,
+                                });
+                              }}
+                              className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {employee.name} ({employee.email})
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
 
-                    {/* City Dropdown with Controller */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        City
-                      </label>
-                      <Controller
-                        name="cityId"
-                        control={control}
-                        rules={{ required: 'City is required' }}
-                        render={({ field }) => (
-                          <select
-                            {...field}
-                            className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                            disabled={!selectedState || cities.length === 0}
-                          >
-                            <option value="">
-                              {cities.length === 0 && selectedState
-                                ? 'No cities available'
-                                : 'Select City'}
-                            </option>
-                            {cities.map((city) => (
-                              <option key={city._id} value={city._id}>
-                                {city.name}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      />
-                      {errors.cityId && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.cityId.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bank Details */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Bank Account Number
-                      </label>
-                      <input
-                        type="text"
-                        {...register('bankAccountNumber', {
-                          required: 'Bank account number is required',
-                        })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                      />
-                      {errors.bankAccountNumber && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.bankAccountNumber.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        IFSC Code
-                      </label>
-                      <input
-                        type="text"
-                        {...register('ifscCode', {
-                          required: 'IFSC code is required',
-                        })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                      />
-                      {errors.ifscCode && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.ifscCode.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address
-                      </label>
-                      <textarea
-                        {...register('address', {
-                          required: 'Address is required',
-                        })}
-                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
-                        rows={3}
-                      />
-                      {errors.address && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.address.message}
-                        </p>
-                      )}
-                    </div>
+                    {errors.employeeIds && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.employeeIds.message}
+                      </p>
+                    )}
                   </div>
 
                   {/* Status Toggles */}
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex items-center space-x-3">
                       <input
                         type="checkbox"
-                        {...register('active')}
+                        {...register('isOperational')}
                         className="w-5 h-5 rounded text-[#6366F1] focus:ring-[#6366F1]"
                       />
                       <label className="text-sm font-medium text-gray-700">
-                        Active Status
-                      </label>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        {...register('isActive')}
-                        className="w-5 h-5 rounded text-[#6366F1] focus:ring-[#6366F1]"
-                      />
-                      <label className="text-sm font-medium text-gray-700">
-                        Theatre Active
+                        Theatre is Operational
                       </label>
                     </div>
 
@@ -524,7 +318,7 @@ const AddTheatreModal = () => {
                         className="w-5 h-5 rounded text-[#6366F1] focus:ring-[#6366F1]"
                       />
                       <label className="text-sm font-medium text-gray-700">
-                        Grab A Bite
+                        Grab A Bite Available
                       </label>
                     </div>
                   </div>
@@ -543,7 +337,7 @@ const AddTheatreModal = () => {
                     disabled={loading}
                     className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
                   >
-                    {loading ? 'Creating...' : 'Create Theatre Manager'}
+                    {loading ? 'Creating...' : 'Create Theatre'}
                   </button>
                 </div>
               </form>
@@ -552,7 +346,7 @@ const AddTheatreModal = () => {
         )}
       </AnimatePresence>
     </>
-  )
-}
+  );
+};
 
-export default AddTheatreModal
+export default AddTheatreModal;

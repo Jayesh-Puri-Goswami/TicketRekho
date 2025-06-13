@@ -6,11 +6,12 @@ interface SearchBarProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   placeholder?: string;
+  className ? : string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm, placeholder }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm, placeholder, className }) => {
   return (
-    <div className="relative w-full max-w-md">
+    <div className={`relative w-full max-w-md ${className}`}>
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <Search size={18} className="text-gray-400" />
       </div>
